@@ -3,10 +3,12 @@ const express = require('express')
 const launchRouter = express.Router()
 const {
     httpGetAllLaunches,
-    httpAddNewLaunch
+    httpAddNewLaunch,
+    httpAbortLaunch
 } = require('../controllers/launch.controller')
 
 launchRouter.get('/', httpGetAllLaunches)
 launchRouter.post('/', httpAddNewLaunch)
+launchRouter.delete('/:id', httpAbortLaunch)
 
 module.exports = launchRouter
