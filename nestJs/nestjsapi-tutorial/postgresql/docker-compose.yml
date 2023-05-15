@@ -1,0 +1,16 @@
+version: '3.7'
+
+services:
+  postgresql:
+    build: .
+    container_name: postgresql
+    ports:
+      - "5432:5432"
+    init: true
+    environment:
+      POSTGRESQL_PASS: ${POSTGRESQL_PASS}
+    volumes:
+      - "db:/var/lib/postgresql/15/main"
+
+volumes:
+  db:

@@ -5,11 +5,11 @@ const {
     isLaunchExist
 } = require('../models/launch.model')
 
-function httpGetAllLaunches(req, res) {
-    return res.status(200).json(getLaunches())
+async function httpGetAllLaunches(req, res) {
+    return res.status(200).json(await getLaunches())
 }
 
-function httpAddNewLaunch(req, res) {
+async function httpAddNewLaunch(req, res) {
     let launch = req.body
 
     if (!launch.mission || !launch.rocket || !launch.launchDate || !launch.destination) {
@@ -25,22 +25,25 @@ function httpAddNewLaunch(req, res) {
         })
     }
 
-    addNewLaunch(launch)
-    console.log(launch)
+    await addNewLaunch(launch)
     return res.status(201).json(launch)
 }
 
-function httpAbortLaunch(req, res) {
+async function httpAbortLaunch(req, res) {
     const id = req.params.id
 
     console.log(id)
-    if (!isLaunchExist(id)) {
+    if (!(await isLaunchExist(id))) {
         return (res.status(404).json({
             "Error": "Launch Does Not Exist"
         }))
     }
 
-    const aborted = abortLaunch(id)
+    const aborted = await abortLaunch(id)
+
+    if (!aborted) {
+        return res.status(400).json("Launch not aborted")
+    }
     return (res.status(200).json(aborted))
 }
 
@@ -49,3 +52,4 @@ module.exports = {
     httpAddNewLaunch,
     httpAbortLaunch
 }
+

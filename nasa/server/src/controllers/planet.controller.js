@@ -1,8 +1,8 @@
 const { getPlanet } = require('../models/planet.model')
 
 
-function httpGetAllPlanets(req, res) {
-    return res.status(200).json(getPlanet())
+async function httpGetAllPlanets(req, res) {
+    return res.status(200).json(await getPlanet())
 }
 
 module.exports = {
