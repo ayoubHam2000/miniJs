@@ -16,6 +16,18 @@ function FirstComponenent(props) {
   );
 }
 
+function EventComponent() {
+  const handleInputChange = () => {
+    console.log("Hi!");
+  };
+
+  return (
+    <div>
+      <input onClick={handleInputChange}></input>
+    </div>
+  );
+}
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
-root.render(<FirstComponenent title={"Hi"} />);
+root.render(<EventComponent />);
