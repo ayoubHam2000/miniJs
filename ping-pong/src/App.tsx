@@ -1,7 +1,15 @@
+import { useEffect } from "react";
 import "./App.css";
-import "./ping_pong";
+import { Launcher } from "./three-js-tutorial/main";
+
+
 
 function App() {
+  useEffect(() => {
+  
+    console.log("0s")
+    Launcher()
+  })
   return <></>;
 }
 

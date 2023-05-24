@@ -1,0 +1,21 @@
+{
+  "name": "three_js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "parcel ./src/index.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/three": "^0.152.0",
+    "parcel-bundler": "^1.8.1",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "three": "^0.152.2"
+  }
+}
