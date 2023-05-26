@@ -3,8 +3,10 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import * as CANNON from 'cannon-es'
 //dev
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import * as dat from 'dat.gui'
 
+
+import { MyCamera } from "./MyObjects";
+import { GuiParams } from "./MyObjects";
 
 function setUpRenderer() {
     const renderer = new THREE.WebGLRenderer()
@@ -22,70 +24,21 @@ async function Game() {
     const mousePosition = new THREE.Vector2()
     const renderer = setUpRenderer()
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(
-        45,
-        window.innerWidth / window.innerHeight,
-        0.01,
-        1000
-    )
+    const camera = new MyCamera()
+    const guiParams = new GuiParams()
 
 
-    const cameraPosition = {
-        x: 15,
-        y: 10,
-        z: 9
-      };
-
-    function helpers() {
-        const gui = new dat.GUI()
     
-        const options = {
-            sphereColor: "#00ff00",
-            wireFrame: false,
-            speed: 0.01,
-            penumbra: 0,
-            intensity: 1,
-            angle: 0.2,
-        }
+    const axesHelper = new THREE.AxesHelper(10)
+    scene.add(axesHelper)
     
-       
-
-        const vectorFolder = gui.addFolder('cameraPosition');
-
-        // Add controls for each component (x, y, z)
-        vectorFolder.add(cameraPosition, 'x', -10, 10).step(0.1).name('cameraX')
-        vectorFolder.add(cameraPosition, 'y', -10, 10).step(0.1).name('cameraY')
-        vectorFolder.add(cameraPosition, 'z', -10, 10).step(0.1).name('cameraZ')
-        
-       
-
-        gui.addColor(options, 'sphereColor').onChange((e) => {
-            sphere.material.color.set(e)
-        })
+    const gridHelper = new THREE.GridHelper()
+    scene.add(gridHelper)
     
-        gui.add(options, 'wireFrame').onChange((e) => {
-            sphere.material.wireframe = e
-        })
+    //const orbit = new OrbitControls(camera, renderer.domElement)
+    camera.position.set(guiParams.vectorPos1.x, guiParams.vectorPos1.y, guiParams.vectorPos1.z)
+    //orbit.update()
     
-        gui.add(options, 'speed', 0, 1, 0.01);
-        gui.add(options, 'penumbra', 0, 5, 0.01);
-        gui.add(options, 'intensity', 0, 5, 0.01);
-        gui.add(options, 'angle', 0, 1, 0.01);
-    
-        const orbit = new OrbitControls(camera, renderer.domElement)
-    
-        const axesHelper = new THREE.AxesHelper(10)
-        scene.add(axesHelper)
-    
-        const gridHelper = new THREE.GridHelper()
-        scene.add(gridHelper)
-    
-        camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z)
-        
-        orbit.update()
-        return options
-    }
-    const options = helpers()
 
     function events() {
         window.addEventListener('resize', function() {
@@ -200,7 +153,7 @@ scene.add(sphere);
 //#############################################
 
 const world = new CANNON.World({
-    gravity: new CANNON.Vec3(0, -9.81, 0)
+    gravity: new CANNON.Vec3(0, -9, 0)
 
 })
 
@@ -214,6 +167,7 @@ const groundBody = new CANNON.Body({
 })
 groundBody.quaternion.setFromEuler(-Math.PI / 2, 0 ,0)
 world.addBody(groundBody)
+
 
 const upWallMaterial = new CANNON.Material()
 const upWall = new CANNON.Body({
@@ -366,20 +320,81 @@ world.addContactMaterial(leftWallSphereContactMat)
 
 
   
+const racket2DPosition = new THREE.Vector2(0, 0)
+window.addEventListener('keydown', function(event) {
+    const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
 
-   
+    if (key == 'ArrowRight') {
+        racket2DPosition.x += 0.1
+    }
+    else if (key == 'ArrowLeft') {
+        racket2DPosition.x -= 0.1
+    }
+    if (key == 'ArrowUp') {
+        racket2DPosition.y += 0.1
+    }
+    else if (key == 'ArrowDown') {
+        racket2DPosition.y -= 0.1
+    }
+});
 
 const timeStep = 1 / 30
- 
+let run = true
+
+function dist3D(a, b) {
+    let arr = [
+        (a.x - b.x),
+        (a.y - b.y),
+        (a.z - b.z),
+    ]
+    return arr.map((item) => item ** 2).reduce((res, b) => res + b)
+}
+
+function dist2D(a, b) {
+    let arr = [
+        (a.x - b.x),
+        (a.y - b.y)
+    ]
+    return arr.map((item) => item ** 2).reduce((res, b) => res + b)
+}
+
+
+
+
+
+function lineEquation(p1, p2) {
+    let a = (p1.y - p2.y) / (p1.x - p1.y)
+    let b = p1.y - p1.x * a
+    return {
+        a, b
+    }
+}
+
+function test() {
+    let p1 = new THREE.Vector2(- planeDim.z / 2, - planeDim.x / 2)
+    let p2 = new THREE.Vector2(+ planeDim.z / 2, + planeDim.x / 2)
+    let {a, b} =  lineEquation(p1, p2)
+
+}
+
+sphereBody.addEventListener("collide", function (event) {
+    const collidedBody = event.body; // The body that collided with bodyA
+    if (collidedBody.id == groundBody.id){
+        //console.log("Collision detected between bodyA and", collidedBody);
+        sphereBody.velocity.y = -9
+        console.log(sphereBody.velocity)
+    }
+  });
+
 function animate()
 {
     world.step(timeStep)
     //if (scene?.children[4])
         //   scene.children[4].position.y += 0.1
     //racketModel?.position?.y += 0.01
-    spotLight.penumbra = options.penumbra
-    spotLight.angle = options.angle
-    spotLight.intensity = options.intensity
+    spotLight.penumbra = guiParams.penumbra
+    spotLight.angle = guiParams.angle
+    spotLight.intensity = guiParams.intensity
     sLightHelper.update()
     
 
@@ -398,20 +413,91 @@ function animate()
     rightWallMesh.position.copy(rightWall.position)
     rightWallMesh.quaternion.copy(rightWall.quaternion) //orientation
 
-    racket.position.z = -mousePosition.x * planeDim.x;
-    racket.quaternion.setFromEuler(0, mousePosition.y, 0);
-    racket.position.x = (planeDim.x / 2 - 1) - mousePosition.y / 2;
-
     racketMesh.position.copy(racket.position)
     racketMesh.quaternion.copy(racket.quaternion) //orientation
 
     sphere.position.copy(sphereBody.position)
     sphere.quaternion.copy(sphereBody.quaternion) //orientation
 
-    //camera.rotation.x = cameraPosition.x;
-    //camera.rotation.y = cameraPosition.y;
-    //camera.rotation.z = cameraPosition.z;
+/*
+x
+: 
+27.224015644774738
+y
+: 
+9.5590092365367
+z
+: 
+-0.0030220727265528576
 
+_x
+: 
+-1.5645562237068398
+_y
+: 
+1.193182409961608
+_z
+: 
+1.5640832826035491
+
+*/
+    //console.log(racket2DPosition)
+    //console.log(camera.position)
+
+
+  
+
+
+
+
+    function getSign(x){
+        return x < 0 ? -1 : 1 
+    }
+    //((x + 1) / 2) * (b - a) + a
+    const linePers = ((-mousePosition.x + 1) / 2) * (planeDim.y) + (- planeDim.y / 2)
+    racket.position.z = linePers;
+    //console.log(linePers)
+
+    let sphereVelocity = sphereBody.velocity
+    let sphereVelocitySign = {
+        x: getSign(sphereVelocity.x),
+        y: getSign(sphereVelocity.y),
+        z: getSign(sphereVelocity.z)
+    }
+    let sphereVelocityForce = {
+        x: 8,
+        y: 5,
+        z: 1
+    }
+
+    if (sphereBody.position.y > 5) {
+        sphereVelocitySign.y = -1;
+    }
+
+    sphereBody.velocity.x = sphereVelocitySign.x * sphereVelocityForce.x
+    //sphere.velocity.y = sphereVelocitySign.x * sphereVelocityForce.x
+    //sphereBody.velocity.y = sphereVelocitySign.y * sphereVelocityForce.y
+
+    
+
+
+
+
+    camera.position.x = guiParams.vectorPos1.x;
+    camera.position.y = guiParams.vectorPos1.y;
+    camera.position.z = guiParams.vectorPos1.z;
+    camera.rotation.x = guiParams.vectorRot1.x;
+    camera.rotation.y = guiParams.vectorRot1.y;
+    camera.rotation.z = guiParams.vectorRot1.z;
+    if (run) {
+        camera.rotation.x = -Math.PI / 2;
+        camera.rotation.y = Math.PI / 2 - 0.4;
+        camera.rotation.z = Math.PI / 2;
+        camera.position.x = 40;
+        camera.position.y = 16;
+        camera.position.z = 0;
+        run = !run 
+    }
     renderer.render(scene, camera)
 }
 
