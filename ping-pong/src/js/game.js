@@ -29,10 +29,10 @@ async function Game() {
 
 
     
-    const axesHelper = new THREE.AxesHelper(10)
-    scene.add(axesHelper)
+    // const axesHelper = new THREE.AxesHelper(10)
+    // scene.add(axesHelper)
     
-    const gridHelper = new THREE.GridHelper()
+    const gridHelper = new THREE.GridHelper(30, 30)
     scene.add(gridHelper)
     
     //const orbit = new OrbitControls(camera, renderer.domElement)
@@ -69,7 +69,7 @@ spotLight.castShadow = true
 spotLight.angle = 0.2
 scene.add(spotLight)
 const sLightHelper = new THREE.SpotLightHelper(spotLight)
-scene.add(sLightHelper)
+//scene.add(sLightHelper)
 
 const planeDim = {x: 27.4, y: 15.25}
 const planeGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y)
@@ -86,11 +86,12 @@ const upWallMeshGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y, 50)
 const upWallMeshMaterial = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     side: THREE.DoubleSide,
-    wireframe: true
+    wireframe: true,
+    
 })
 const upWallMesh = new THREE.Mesh(upWallMeshGeometry, upWallMeshMaterial)
 //plane.rotation.x = 0.5 * Math.PI
-scene.add(upWallMesh)
+//scene.add(upWallMesh)
 
 const downWallMeshGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y, 50)
 const downWallMeshMaterial = new THREE.MeshBasicMaterial({
@@ -100,7 +101,7 @@ const downWallMeshMaterial = new THREE.MeshBasicMaterial({
 })
 const downWallMesh = new THREE.Mesh(downWallMeshGeometry, downWallMeshMaterial)
 //plane.rotation.x = 0.5 * Math.PI
-scene.add(downWallMesh)
+//scene.add(downWallMesh)
 
 const leftWallMeshGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y, 50)
 const leftWallMeshMaterial = new THREE.MeshBasicMaterial({
@@ -110,7 +111,7 @@ const leftWallMeshMaterial = new THREE.MeshBasicMaterial({
 })
 const leftWallMesh = new THREE.Mesh(leftWallMeshGeometry, leftWallMeshMaterial)
 //plane.rotation.x = 0.5 * Math.PI
-scene.add(leftWallMesh)
+//scene.add(leftWallMesh)
 
 const rightWallMeshGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y, 50)
 const rightWallMeshMaterial = new THREE.MeshBasicMaterial({
@@ -120,15 +121,15 @@ const rightWallMeshMaterial = new THREE.MeshBasicMaterial({
 })
 const rightWallMesh = new THREE.Mesh(rightWallMeshGeometry, rightWallMeshMaterial)
 //plane.rotation.x = 0.5 * Math.PI
-scene.add(rightWallMesh)
+//scene.add(rightWallMesh)
 
 const racketDim = {
-    x: planeDim.x / 8,
-    y: planeDim.y
+    x: 1.5,
+    y: 1.5
 }
 const racketMeshGeometry = new THREE.PlaneGeometry(racketDim.x, racketDim.y, 1)
 const racketMeshMaterial = new THREE.MeshBasicMaterial({
-    color: 0x00ffff,
+    color: 0xffffff00,
     side: THREE.DoubleSide,
     wireframe: false
 })
@@ -136,7 +137,7 @@ const racketMesh = new THREE.Mesh(racketMeshGeometry, racketMeshMaterial)
 //plane.rotation.x = 0.5 * Math.PI
 scene.add(racketMesh)
 
-const sphereDim = 0.5
+const sphereDim = 0.25
 const sphereGeo = new THREE.SphereGeometry(sphereDim);
 const sphereMat = new THREE.MeshBasicMaterial({ 
 	color: 0xff0000, 
@@ -176,10 +177,11 @@ const upWall = new CANNON.Body({
     //mass: 1,
     type: CANNON.Body.STATIC,
     position: new CANNON.Vec3(planeDim.x / 2, 0, 0),
-    material: upWallMaterial
+    material: upWallMaterial,
+    
 })
 upWall.quaternion.setFromEuler(-Math.PI / 2, -Math.PI / 2 , 0)
-world.addBody(upWall)
+//world.addBody(upWall)
 
 const downWallMaterial = new CANNON.Material()
 const downWall = new CANNON.Body({
@@ -213,7 +215,7 @@ const rightWall = new CANNON.Body({
     shape: new CANNON.Box(new CANNON.Vec3(planeDim.x / 2, planeDim.y / 2, 0.1)),
     //mass: 1,
     type: CANNON.Body.STATIC,
-    position: new CANNON.Vec3(0, 0, -planeDim.y / 2),
+    position: new CANNON.Vec3(0, 0, -racketDim.y / 2),
     material: rightWallMaterial
 })
 rightWall.quaternion.setFromEuler(0, 0 , 0)
@@ -222,10 +224,10 @@ world.addBody(rightWall)
 const racketMaterial = new CANNON.Material()
 const racket = new CANNON.Body({
     //shape: new CANNON.Plane(),
-    shape: new CANNON.Box(new CANNON.Vec3(racketDim.x / 2, racketDim.y / 2, 0.1)),
+    shape: new CANNON.Box(new CANNON.Vec3(racketDim.x / 2, racketDim.y / 2, 1)),
     //mass: 1,
     type: CANNON.Body.STATIC,
-    position: new CANNON.Vec3(planeDim.x / 2 - 1, 0, 0),
+    position: new CANNON.Vec3(planeDim.x / 2 , 0, 0),
     material: racketMaterial
 })
 racket.quaternion.setFromEuler(0, -Math.PI / 2 , 0)
@@ -381,8 +383,8 @@ sphereBody.addEventListener("collide", function (event) {
     const collidedBody = event.body; // The body that collided with bodyA
     if (collidedBody.id == groundBody.id){
         //console.log("Collision detected between bodyA and", collidedBody);
-        sphereBody.velocity.y = -9
-        console.log(sphereBody.velocity)
+        sphereBody.velocity.y = -4
+        //console.log(sphereBody.velocity)
     }
   });
 
@@ -444,7 +446,7 @@ _z
     //console.log(racket2DPosition)
     //console.log(camera.position)
 
-
+    //console.log(racket.position)
   
 
 
@@ -455,7 +457,10 @@ _z
     }
     //((x + 1) / 2) * (b - a) + a
     const linePers = ((-mousePosition.x + 1) / 2) * (planeDim.y) + (- planeDim.y / 2)
-    racket.position.z = linePers;
+    const theDimX = 35;
+    const intheX = ((-mousePosition.y + 1) / 2) * (theDimX) + (- theDimX / 2) + 10
+    //racket.position.z = linePers;
+    //racket.position.x = intheX
     //console.log(linePers)
 
     let sphereVelocity = sphereBody.velocity
@@ -480,15 +485,21 @@ _z
 
     
 
+    if (sphereBody.position.y <= -20) {
+        sphereBody.position = new CANNON.Vec3(-12, 5, 0)
+        sphereBody.velocity = new CANNON.Vec3(0, 0, 0)
+    }
 
 
+    if (false) {
+        camera.position.x = guiParams.vectorPos1.x;
+        camera.position.y = guiParams.vectorPos1.y;
+        camera.position.z = guiParams.vectorPos1.z;
+        camera.rotation.x = guiParams.vectorRot1.x;
+        camera.rotation.y = guiParams.vectorRot1.y;
+        camera.rotation.z = guiParams.vectorRot1.z;
+    }
 
-    camera.position.x = guiParams.vectorPos1.x;
-    camera.position.y = guiParams.vectorPos1.y;
-    camera.position.z = guiParams.vectorPos1.z;
-    camera.rotation.x = guiParams.vectorRot1.x;
-    camera.rotation.y = guiParams.vectorRot1.y;
-    camera.rotation.z = guiParams.vectorRot1.z;
     if (run) {
         camera.rotation.x = -Math.PI / 2;
         camera.rotation.y = Math.PI / 2 - 0.4;

@@ -12,8 +12,8 @@ export class GuiParams {
         this.angle = 0.2,
         this.x = 0;
         this.vectorPos1 = {
-            x: 40,
-            y: 16,
+            x: 35,
+            y: 12,
             z: 0,
         };
         this.vectorRot1 = {
