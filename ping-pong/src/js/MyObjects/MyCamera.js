@@ -3,11 +3,13 @@ import * as THREE from "three";
 
 export class MyCamera extends THREE.PerspectiveCamera {
     
-    constructor() {
+    constructor(x = 0, y = 0, z = 0) {
         super(45,
             window.innerWidth / window.innerHeight,
             0.01,
             1000)
+
+        this.position.set(x, y, z)
     }
 
 

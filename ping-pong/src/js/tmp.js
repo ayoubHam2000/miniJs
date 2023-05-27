@@ -306,13 +306,13 @@ function animateChangingVertices() {
 
 ************************************************/
 
-const monkeyUrl = new URL('../assets/tennis_racket_wilson_blade.glb', import.meta.url)
+const monkeyUrl = new URL('../assets/tennis_ball.glb', import.meta.url)
 const assetLoader = new GLTFLoader()
 assetLoader.load(monkeyUrl.href, (gltf) => {
     const model = gltf.scene
     scene.add(model)
-    model.position.set(0, 0, 0)
-    model.scale.set(1, 1, 1)
+    model.position.set(0, 10, 0)
+    model.scale.set(10, 10, 10)
 }, undefined, (errors) => {
     console.log(errors)
 })
