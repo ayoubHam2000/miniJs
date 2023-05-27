@@ -69,6 +69,10 @@ async function startGame() {
         }
     }
 
+    function get3DPerspective() {
+
+    }
+
     function racketPhy() {
         let camera = game.camera
         let object = game.scene.racketObj
@@ -80,6 +84,24 @@ async function startGame() {
         //console.log(p)
         //console.log(b.position)
 
+        let ballWd = game.worldObj.ballBody
+
+        let areaPoints = [
+            new THREE.Vector3(params.planeDim.x / 2, 0, +params.planeDim.y / 2),
+            new THREE.Vector3(params.planeDim.x / 2, 0, -params.planeDim.y / 2),
+            new THREE.Vector3(1, 0, +params.planeDim.y / 2),
+            new THREE.Vector3(1, 0, -params.planeDim.y / 2),
+        ]
+      
+        let perspectivePoints = [
+            areaPoints[0].clone().applyMatrix4(camera.matrixWorldInverse).z,
+            areaPoints[1].clone().applyMatrix4(camera.matrixWorldInverse).z,
+            areaPoints[2].clone().applyMatrix4(camera.matrixWorldInverse).z,
+            areaPoints[3].clone().applyMatrix4(camera.matrixWorldInverse).z,
+        ]
+
+        console.log(perspectivePoints)
+
         let x1 = params.planeDim.x / 2 - 1
         let x2 = 1
         let aspect = window.innerWidth / window.innerHeight
@@ -87,10 +109,11 @@ async function startGame() {
         let tmpObj = new THREE.Object3D();
         tmpObj.position = new THREE.Vector3(params.planeDim.x / 2 , 0, 0);
         let objectPosition = new THREE.Vector3();
-        objectPosition.setFromMatrixPosition(object.matrixWorld);
+        objectPosition.setFromMatrixPosition(tmpObj.matrixWorld);
         let objectPositionCamera = objectPosition.clone().applyMatrix4(camera.matrixWorldInverse);
         let distanceToCameraPlane = Math.abs(objectPositionCamera.z);
-        objectWrd.position.z = -params.mousePosition.x * distanceToCameraPlane / 2
+        let distanceToCameraPlane2 = camera.position.x - objectWrd.position.x
+        objectWrd.position.z = -params.mousePosition.x * distanceToCameraPlane2
         
         
         
@@ -99,11 +122,12 @@ async function startGame() {
             objectWrd.position.x = 1
         else if (objectWrd.position.x >= params.planeDim.x / 2 + 1)
             objectWrd.position.x = params.planeDim.x / 2 + 1*/
-        console.log(distanceToCameraPlane)
+        //console.log()
+        //console.log()
 
         let mx1 = x1 * (aspect / distanceToCameraPlane)
         let mx2 = x2 * (aspect / distanceToCameraPlane)
-        objectWrd.position.x = -params.mousePosition.y * distanceToCameraPlane / aspect
+        //objectWrd.position.x = -params.mousePosition.y * distanceToCameraPlane / aspect
     }
 
     function gameLoop()
