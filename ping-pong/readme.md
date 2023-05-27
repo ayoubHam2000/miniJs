@@ -7,3 +7,7 @@ deps:
 run:
 npm install
 npm run dev
+
+
+info:
+NDC coordinates

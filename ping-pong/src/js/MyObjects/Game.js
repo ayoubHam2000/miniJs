@@ -28,7 +28,7 @@ export class Game {
             const collidedBody = event.body; // The body that collided with bodyA
             if (collidedBody.id == this.worldObj.groundBody.id){
                 //console.log("Collision detected between bodyA and", collidedBody);
-                this.worldObj.sphereBody.velocity.y = -4
+                this.worldObj.sphereBody.velocity.y = -2
                 //console.log(sphereBody.velocity)
             }
           });

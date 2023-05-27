@@ -2,6 +2,8 @@ import { Game } from "./MyObjects";
 import {params} from './Utils/Params'
 import { getSign } from "./MyMath/Utils";
 import * as CANNON from 'cannon-es'
+import * as MyMath from './MyMath'
+import * as THREE from "three";
 
 async function startGame() {
     const game = new Game()
@@ -37,11 +39,7 @@ async function startGame() {
 
     }
 
-    function gameLoop()
-    {
-
-        hiddenCode()
-
+    function ballPhy() {
         const sphereBody = game.worldObj.ballBody
         let sphereVelocity = sphereBody.velocity
         let sphereVelocitySign = {
@@ -51,7 +49,7 @@ async function startGame() {
         }
         let sphereVelocityForce = {
             x: 8,
-            y: 5,
+            y: 3,
             z: 1
         }
 
@@ -69,9 +67,50 @@ async function startGame() {
             sphereBody.position = new CANNON.Vec3(-12, 5, 0)
             sphereBody.velocity = new CANNON.Vec3(0, 0, 0)
         }
+    }
 
+    function racketPhy() {
+        let camera = game.camera
+        let object = game.scene.racketObj
+        let objectWrd = game.worldObj.racketBody
+        // let p = new THREE.Vector3()
+        // p.setFromMatrixPosition(b.matrixWorld)
+        // let ndcCoordinates = p.project(a);
+        //let dist = MyMath.dist3D(a, b)
+        //console.log(p)
+        //console.log(b.position)
 
+        let x1 = params.planeDim.x / 2 - 1
+        let x2 = 1
+        let aspect = window.innerWidth / window.innerHeight
 
+        let tmpObj = new THREE.Object3D();
+        tmpObj.position = new THREE.Vector3(params.planeDim.x / 2 , 0, 0);
+        let objectPosition = new THREE.Vector3();
+        objectPosition.setFromMatrixPosition(object.matrixWorld);
+        let objectPositionCamera = objectPosition.clone().applyMatrix4(camera.matrixWorldInverse);
+        let distanceToCameraPlane = Math.abs(objectPositionCamera.z);
+        objectWrd.position.z = -params.mousePosition.x * distanceToCameraPlane / 2
+        
+        
+        
+        //objectWrd.position.x = params.planeDim.x / 2 - params.mousePosition.y * (distanceToCameraPlane / 2)
+        /*if (objectWrd.position.x <= 1)
+            objectWrd.position.x = 1
+        else if (objectWrd.position.x >= params.planeDim.x / 2 + 1)
+            objectWrd.position.x = params.planeDim.x / 2 + 1*/
+        console.log(distanceToCameraPlane)
+
+        let mx1 = x1 * (aspect / distanceToCameraPlane)
+        let mx2 = x2 * (aspect / distanceToCameraPlane)
+        objectWrd.position.x = -params.mousePosition.y * distanceToCameraPlane / aspect
+    }
+
+    function gameLoop()
+    {
+        hiddenCode()
+        ballPhy()
+        racketPhy()
         game.renderer.render(game.scene, game.camera)
     }
 

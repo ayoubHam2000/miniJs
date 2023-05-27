@@ -23,7 +23,7 @@ export const params = {
 
     ballPosition : {
         x : -12,
-        y : 5,
+        y : 3,
         z : 0,
     },
 
@@ -33,8 +33,8 @@ export const params = {
     },
 
     racketDim : {
-        x: 1.5,
-        y: 1.5
+        x: 3.5,
+        y: 6.5
     },
 
     sphereDim : 0.25,
