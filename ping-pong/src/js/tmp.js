@@ -306,13 +306,13 @@ function animateChangingVertices() {
 
 ************************************************/
 
-const monkeyUrl = new URL('../assets/tennis_ball.glb', import.meta.url)
+const monkeyUrl = new URL('../assets/table_tennis_table.glb', import.meta.url)
 const assetLoader = new GLTFLoader()
 assetLoader.load(monkeyUrl.href, (gltf) => {
     const model = gltf.scene
     scene.add(model)
     model.position.set(0, 10, 0)
-    model.scale.set(10, 10, 10)
+    model.scale.set(1, 1, 1)
 }, undefined, (errors) => {
     console.log(errors)
 })
@@ -571,7 +571,6 @@ const groundSphereContactMat = new CANNON.ContactMaterial(
     }
 )
 world.addContactMaterial(groundSphereContactMat)
-
 /***********************************************
 
 #################################################
@@ -584,6 +583,7 @@ const timeStep = 1 / 60
 
 function animate()
 {
+
     world.step(timeStep)
 
     groundMesh.position.copy(groundBody.position)

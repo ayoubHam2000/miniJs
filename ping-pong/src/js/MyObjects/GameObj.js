@@ -1,8 +1,10 @@
-import { Scene } from "three";
+import * as THREE from "three";
+import {params} from '../Utils/Params'
 
-export class MyScene extends Scene {
+export class MyScene extends THREE.Scene {
    
     constructor () {
+        super()
         const wallsObj = this.#wallsObj()
     
         this.lightObj = this.#lightObj()
@@ -19,14 +21,14 @@ export class MyScene extends Scene {
     }
 
     #addToScene() {
-        this.add(lightObj)
-        this.add(planeObj)
-        this.add(racketObj)
-        this.add(ballObj)
-        this.add(upWallObj)
-        this.add(downWallObj)
-        this.add(leftWallObj)
-        this.add(rightWallObj)
+        this.add(this.lightObj)
+        this.add(this.planeObj)
+        this.add(this.racketObj)
+        this.add(this.ballObj)
+        //this.add(this.upWallObj)
+        //this.add(this.downWallObj)
+        //this.add(this.leftWallObj)
+        //this.add(this.rightWallObj)
     }
 
     #lightObj() {
@@ -38,13 +40,12 @@ export class MyScene extends Scene {
     }
 
     #lightHelper() {
-        const sLightHelper = new THREE.SpotLightHelper(this.#lightObj)
+        const sLightHelper = new THREE.SpotLightHelper(this.lightObj)
         return (sLightHelper)
     }
 
     #planeObj() {
-        const planeDim = {x: 27.4, y: 15.25}
-        const planeGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y)
+        const planeGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y)
         const planeMaterial = new THREE.MeshStandardMaterial({
             color: 0xffffff,
             side: THREE.DoubleSide,
@@ -56,7 +57,7 @@ export class MyScene extends Scene {
     }
 
     #wallsObj() {
-        const upWallMeshGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y, 50)
+        const upWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 50)
         const upWallMeshMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             side: THREE.DoubleSide,
@@ -67,7 +68,7 @@ export class MyScene extends Scene {
         //plane.rotation.x = 0.5 * Math.PI
         //this.scene.add(upWallMesh)
 
-        const downWallMeshGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y, 50)
+        const downWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 50)
         const downWallMeshMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             side: THREE.DoubleSide,
@@ -77,7 +78,7 @@ export class MyScene extends Scene {
         //plane.rotation.x = 0.5 * Math.PI
         //this.scene.add(downWallMesh)
 
-        const leftWallMeshGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y, 50)
+        const leftWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 50)
         const leftWallMeshMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             side: THREE.DoubleSide,
@@ -87,7 +88,7 @@ export class MyScene extends Scene {
         //plane.rotation.x = 0.5 * Math.PI
         //this.scene.add(leftWallMesh)
 
-        const rightWallMeshGeometry = new THREE.PlaneGeometry(planeDim.x, planeDim.y, 50)
+        const rightWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 50)
         const rightWallMeshMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             side: THREE.DoubleSide,
@@ -105,11 +106,8 @@ export class MyScene extends Scene {
     }
 
     #racketObj() {
-        const racketDim = {
-            x: 1.5,
-            y: 1.5
-        }
-        const racketMeshGeometry = new THREE.PlaneGeometry(racketDim.x, racketDim.y, 1)
+
+        const racketMeshGeometry = new THREE.PlaneGeometry(params.racketDim.x, params.racketDim.y, 1)
         const racketMeshMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff00,
             side: THREE.DoubleSide,
@@ -121,13 +119,12 @@ export class MyScene extends Scene {
     }
 
     #ballObj() {
-        const sphereDim = 0.25
-        const sphereGeo = new THREE.SphereGeometry(sphereDim);
+        const sphereGeo = new THREE.SphereGeometry(params.sphereDim);
         const sphereMat = new THREE.MeshBasicMaterial({ 
             color: 0xff0000, 
             wireframe: true,
         });
-        const sphereObj = new THREE.Mesh( sphereGeo, sphereMat);
+        const sphereObj = new THREE.Mesh(sphereGeo, sphereMat);
         return (sphereObj)
     }
 }
