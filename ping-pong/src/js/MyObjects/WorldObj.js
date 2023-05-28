@@ -4,7 +4,7 @@ import {params} from '../Utils/Params'
 export class WorldObj {
     constructor () {
         this.world = new CANNON.World({
-            gravity: new CANNON.Vec3(0, -9, 0)
+            gravity: new CANNON.Vec3(0, -18, 0)
         })
 
 
@@ -35,7 +35,7 @@ export class WorldObj {
         this.world.addBody(this.downWallBody)
         this.world.addBody(this.leftWallBody)
         this.world.addBody(this.rightWallBody)
-        this.world.addBody(this.racketBody)
+        //this.world.addBody(this.racketBody)
         this.world.addBody(this.ballBody)
     }
 
@@ -74,7 +74,7 @@ export class WorldObj {
         const upWallMaterial = new CANNON.Material()
         const upWallBody = new CANNON.Body({
             //shape: new CANNON.Plane(),
-            shape: new CANNON.Box(new CANNON.Vec3(params.planeDim.x / 2, params.planeDim.y / 2, 0.1)),
+            shape: new CANNON.Box(new CANNON.Vec3(50, 50, 1)),
             //mass: 1,
             type: CANNON.Body.STATIC,
             position: new CANNON.Vec3(params.planeDim.x / 2, 0, 0),
@@ -86,7 +86,7 @@ export class WorldObj {
         const downWallMaterial = new CANNON.Material()
         const downWallBody = new CANNON.Body({
             //shape: new CANNON.Plane(),
-            shape: new CANNON.Box(new CANNON.Vec3(params.planeDim.x / 2, params.planeDim.y / 2, 0.1)),
+            shape: new CANNON.Box(new CANNON.Vec3(50, 50, 1)),
             //mass: 1,
             type: CANNON.Body.STATIC,
             position: new CANNON.Vec3(-params.planeDim.x / 2, 0, 0),
@@ -99,7 +99,7 @@ export class WorldObj {
         const leftWallMaterial = new CANNON.Material()
         const leftWallBody = new CANNON.Body({
             //shape: new CANNON.Plane(),
-            shape: new CANNON.Box(new CANNON.Vec3(params.planeDim.x / 2, params.planeDim.y / 2, 0.1)),
+            shape: new CANNON.Box(new CANNON.Vec3(50, 50, 1)),
             //mass: 1,
             type: CANNON.Body.STATIC,
             position: new CANNON.Vec3(0, 0, params.planeDim.y / 2),
@@ -110,7 +110,7 @@ export class WorldObj {
         const rightWallMaterial = new CANNON.Material()
         const rightWallBody = new CANNON.Body({
             //shape: new CANNON.Plane(),
-            shape: new CANNON.Box(new CANNON.Vec3(params.planeDim.x / 2, params.planeDim.y / 2, 0.1)),
+            shape: new CANNON.Box(new CANNON.Vec3(50, 50, 1)),
             //mass: 1,
             type: CANNON.Body.STATIC,
             position: new CANNON.Vec3(0, 0, -params.racketDim.y / 2),

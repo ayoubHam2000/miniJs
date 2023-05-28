@@ -26,6 +26,7 @@ export class GuiParams {
         this.gui.add(params, 'penumbra', 0, 5, 0.01);
         this.gui.add(params, 'intensity', 0, 5, 0.01);
         this.gui.add(params, 'angle', 0, 1, 0.01);
+        this.gui.add(params, 'enableOrbit');
     }
 
 }

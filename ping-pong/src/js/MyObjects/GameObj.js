@@ -10,6 +10,7 @@ export class MyScene extends THREE.Scene {
         this.lightObj = this.#lightObj()
         this.lightObjHelper = this.#lightHelper()
         this.planeObj = this.#planeObj()
+        this.infinitePLaneObj = this.#infinitePlane()
         this.racketObj = this.#racketObj()
         this.ballObj = this.#ballObj()
         this.upWallObj = wallsObj.upWallObj
@@ -23,6 +24,7 @@ export class MyScene extends THREE.Scene {
     #addToScene() {
         this.add(this.lightObj)
         this.add(this.planeObj)
+        this.add(this.infinitePLaneObj)
         this.add(this.racketObj)
         this.add(this.ballObj)
         //this.add(this.upWallObj)
@@ -44,9 +46,21 @@ export class MyScene extends THREE.Scene {
         return (sLightHelper)
     }
 
+    #infinitePlane() {
+        const infinitePlaneGeometry = new THREE.PlaneGeometry(50, 50)
+        const infinitePlaneMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0000ff,
+            side: THREE.DoubleSide,
+            wireframe: true
+        })
+        const infinitePlaneObj = new THREE.Mesh(infinitePlaneGeometry, infinitePlaneMaterial)
+        infinitePlaneObj.rotation.x = 0.5 * Math.PI
+        return (infinitePlaneObj)
+    }
+
     #planeObj() {
         const planeGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y)
-        const planeMaterial = new THREE.MeshStandardMaterial({
+        const planeMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             side: THREE.DoubleSide,
             wireframe: false

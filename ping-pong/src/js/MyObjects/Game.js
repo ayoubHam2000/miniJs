@@ -11,14 +11,15 @@ export class Game {
     constructor() {
         this.worldObj = new WorldObj()
         this.renderer = this.#setUpRenderer()
+        this.rayCaster = new THREE.Raycaster()
         
         this.scene = new MyScene()
         this.world = this.worldObj.world
         this.camera = new MyCamera(params.vectorPos1.x, params.vectorPos1.y, params.vectorPos1.z)
 
         new GuiParams()
-        this.#events()
         this.#helpers()
+        this.#events()
         //this.gameSetUp()
         
     }
@@ -58,8 +59,9 @@ export class Game {
         const gridHelper = new THREE.GridHelper(30, 30)
         this.scene.add(gridHelper)
         
-        const orbit = new OrbitControls(this.camera, this.renderer.domElement)
-        orbit.update()
+        this.orbit = new OrbitControls(this.camera, this.renderer.domElement)
+        
+        
     }
 
     #setUpRenderer() {
@@ -83,9 +85,25 @@ export class Game {
         });
 
         window.addEventListener('mousemove', function(e) {
+            params.mousePosition.oldX = params.mousePosition.x;
+            params.mousePosition.oldY = params.mousePosition.y;
             params.mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
             params.mousePosition.y = - (e.clientY / window.innerHeight) * 2 + 1;
-            //console.log(mousePosition.x, mousePosition.y)
+            params.mouseVelocity.x = params.mousePosition.x - params.mousePosition.oldX;
+            params.mouseVelocity.y = params.mousePosition.y - params.mousePosition.oldY; 
+            // console.log(params.mouseVelocity)
+        })
+
+        window.addEventListener('mousedown', function(e) {
+            params.mouseClickPos.x = (e.clientX / window.innerWidth) * 2 - 1;
+            params.mouseClickPos.y = - (e.clientY / window.innerHeight) * 2 + 1;
+            params.isClicked = true
+            //console.log("onmousedown", params.mouseClickPos)
+        })
+
+        window.addEventListener('mouseup', function(e) {
+            params.isClicked = false
+            //console.log("onmouseup", params.mouseClickPos)
         })
     }
 //#endregion

@@ -18,6 +18,7 @@ export const params = {
         z: Math.PI / 2,
     },
 
+    enableOrbit : false,
 
     //Not used
 
@@ -41,10 +42,24 @@ export const params = {
 
     mousePosition : {
         x: 0,
-        y: 0
+        y: 0,
+        oldX: 0,
+        oldY: 0,
     },
 
-    timeStep: 1/30,
+    mouseVelocity : {
+        x: -1,
+        y: -1
+    },
+
+    mouseClickPos : {
+        x: -1,
+        y: -1
+    },
+
+    isClicked : false,
+
+    timeStep: 1/100,
 
     frame: 0,
 }
