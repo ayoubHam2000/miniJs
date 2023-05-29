@@ -28,7 +28,7 @@ export class MyScene extends THREE.Scene {
         this.add(this.racketObj)
         this.add(this.ballObj)
         //this.add(this.upWallObj)
-        //this.add(this.downWallObj)
+        this.add(this.downWallObj)
         //this.add(this.leftWallObj)
         //this.add(this.rightWallObj)
     }
@@ -82,7 +82,7 @@ export class MyScene extends THREE.Scene {
         //plane.rotation.x = 0.5 * Math.PI
         //this.scene.add(upWallMesh)
 
-        const downWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 50)
+        const downWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 10)
         const downWallMeshMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             side: THREE.DoubleSide,

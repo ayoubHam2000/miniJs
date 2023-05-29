@@ -19,18 +19,20 @@ export class Game {
 
         new GuiParams()
         this.#helpers()
-        this.#events()
-        //this.gameSetUp()
+        this.#events(this)
+        this.gameSetUp(this)
         
     }
 
-    gameSetUp() {
-        this.worldObj.ballBody.addEventListener("collide", function (event) {
+    gameSetUp(obj) {
+        obj.worldObj.ballBody.addEventListener("collide", function (event) {
             const collidedBody = event.body; // The body that collided with bodyA
-            if (collidedBody.id == this.worldObj.groundBody.id){
+            if (collidedBody.id == obj.worldObj.groundBody.id){
                 //console.log("Collision detected between bodyA and", collidedBody);
-                this.worldObj.sphereBody.velocity.y = -2
+                obj.worldObj.ballBody.velocity.y = -4
                 //console.log(sphereBody.velocity)
+                //params.time = new Date().getTime() - params.time
+                //console.log(obj.worldObj.ballBody.position.x + params.planeDim.x / 2, params.time)
             }
           });
     }
@@ -77,11 +79,11 @@ export class Game {
     }
 
 
-    #events() {
+    #events(obj) {
         window.addEventListener('resize', function() {
-            this.camera.aspect = window.innerWidth / window.innerHeight;
-            this.camera.updateProjectionMatrix();
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            obj.camera.aspect = window.innerWidth / window.innerHeight;
+            obj.camera.updateProjectionMatrix();
+            obj.renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
         window.addEventListener('mousemove', function(e) {

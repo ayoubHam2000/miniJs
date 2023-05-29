@@ -10,7 +10,10 @@ async function startGame() {
     const game = new Game()
 
     function hiddenCodeStart() {
+        let a = game.worldObj.ballBody.position.x
         game.world.step(params.timeStep)
+        let b = game.worldObj.ballBody.position.x
+        //console.log((b - a), game.worldObj.ballBody.velocity.x, game.worldObj.ballBody.velocity.x / (b-a))
 
 
         game.scene.lightObj.penumbra = params.penumbra
@@ -42,40 +45,80 @@ async function startGame() {
         game.renderer.render(game.scene, game.camera)
     }
 
+
+    function limitVelocityZ(ballBody, newVelocityZ) {
+        let zPos = ballBody.position.z
+        let t = params.planeDim.x / ballBody.velocity.x
+        let dist = params.planeDim.y / 2 - Math.abs(zPos)
+        let maxV = Math.abs(dist / t)
+        return Math.min(maxV, newVelocityZ)
+    }
+
+    function randomVelocityZ(ballBody) {
+        let range = params.planeDim.y / 2
+        return limitVelocityZ(ballBody, Math.random() * range)
+    }
+
+    const rayCaster = new THREE.Raycaster()
+    let time = new Date().getMilliseconds()
     function ballPhy() {
         const sphereBody = game.worldObj.ballBody
-        let sphereVelocity = sphereBody.velocity
-        let sphereVelocitySign = {
-            x: getSign(sphereVelocity.x),
-            y: getSign(sphereVelocity.y),
-            z: getSign(sphereVelocity.z)
+        const ballObj = game.scene.ballObj
+        
+        
+
+        //we consider the ball to fall to the ground in 1s
+        //the ball is 2 unit height
+        // => g = -4
+        // => |V.y| = 4
+        // => 13.7 < V.x < 27.4
+        // => 0 < V.z < 7.625
+        if (params.frame  === 0) {
+            sphereBody.velocity.x = -12
         }
-        let sphereVelocityForce = {
-            x: 8,
-            y: 3,
-            z: 1
+        if (sphereBody.position.y <= -10) {
+            sphereBody.position = new CANNON.Vec3(12, 2, 0)
+            sphereBody.velocity = new CANNON.Vec3(-22, 0, 0)
         }
 
-        if (sphereBody.position.y > 5) {
-            sphereVelocitySign.y = -1;
+        let pos = new THREE.Vector3().copy(sphereBody.position)
+        let velocity = new THREE.Vector3().copy(sphereBody.velocity.clone().unit())
+        rayCaster.set(pos, velocity)
+        rayCaster.far = (sphereBody.velocity.length() * params.timeStep) + params.sphereDim
+        
+
+ 
+       
+        const arr = rayCaster.intersectObjects([game.scene.downWallObj, game.scene.planeObj])
+        if (arr.length) {
+            const nomilizedVelocity = sphereBody.velocity.clone().unit()
+            const newPos = arr[0].point
+            newPos.x -= nomilizedVelocity.x * params.sphereDim
+            newPos.y -= nomilizedVelocity.y * params.sphereDim
+            newPos.z -= nomilizedVelocity.z * params.sphereDim
+            sphereBody.position.copy(newPos)
+            //console.log(arr)
+            if (arr[0].object.id === game.scene.downWallObj.id) {
+                //arr[0].point.x += 0.1
+                //console.log(arr[0])
+                sphereBody.velocity.x = 20
+                sphereBody.velocity.y = - sphereBody.position.y + 0.25 + 2 //time to fall 1; 0.25 dim of the ball
+                sphereBody.velocity.z = randomVelocityZ(sphereBody)
+                // console.log(arr, sphereBody.velocity, sphereBody.position.y)
+            } else {
+                
+                //console.log(sphereBody.position)
+                
+                //arr[0].point.y += 0.1
+                sphereBody.velocity.y = -4
+            }
+            
+            //sphereBody.applyImpulse()
         }
-
-        //sphereBody.velocity.x = sphereVelocitySign.x * sphereVelocityForce.x
-        //sphere.velocity.y = sphereVelocitySign.x * sphereVelocityForce.x
-        //sphereBody.velocity.y = sphereVelocitySign.y * sphereVelocityForce.y
-
         
        
 
-        if (params.frame  === 0) {
-            console.log("s")
-            sphereBody.velocity.x = 12
-        }
-
-        if (sphereBody.position.y <= -10) {
-            sphereBody.position = new CANNON.Vec3(-12, 5, 0)
-            sphereBody.velocity = new CANNON.Vec3(12, 2, 0)
-        }
+        
     }
 
  
@@ -293,10 +336,10 @@ async function startGame() {
                 
                 let newV = ballBody.velocity.clone()
                 newV.normalize()
-                ballBody.velocity = newV.scale(40)
+                ballBody.velocity = newV.scale(50)
                 ballBody.velocity.y = 2
 
-                console.log(params.mouseVelocity, horizontalDist, depthDist, ballBody.velocity, ballBody.velocity.clone().normalize())
+                // console.log(params.mouseVelocity, horizontalDist, depthDist, ballBody.velocity, ballBody.velocity.clone().normalize())
                 params.isClicked = false
             }
         }

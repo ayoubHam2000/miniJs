@@ -29,8 +29,8 @@ export const params = {
     },
 
     planeDim: {
-        x: 27.4,
-        y: 15.25
+        x: 27.4, //13.7
+        y: 15.25 //7.625
     },
 
     racketDim : {
@@ -39,6 +39,9 @@ export const params = {
     },
 
     sphereDim : 0.25,
+    gravity : -4,
+    timeToFall : 1,
+    time : 0,
 
     mousePosition : {
         x: 0,
@@ -59,7 +62,7 @@ export const params = {
 
     isClicked : false,
 
-    timeStep: 1/100,
+    timeStep: 1/30,
 
     frame: 0,
 }
