@@ -95,12 +95,16 @@ async function startGame() {
             ballBody.position.copy(newPos)
             if (arr[0].object.id === game.scene.downWallObj.id) {
                 ballBody.velocity.x = 20
-                ballBody.velocity.y = - ballBody.position.y + 0.25 + 2
+                ballBody.velocity.y = + ballBody.position.y / params.timeToFall + 0.5 * params.gravityForce * params.timeToFall + 0.25
                 ballBody.velocity.z = randomVelocityZ(ballBody)
                 //console.log(arr, ballBody.velocity, ballBody.position.y)
             } else {
-                ballBody.velocity.y = -4
+                ballBody.velocity.y = - params.groundVelocity
             }
+        }
+
+        if (Math.abs(ballBody.velocity.y) <= 0.4) {
+            console.log(ballBody.position, params.groundVelocity)
         }
     }
 

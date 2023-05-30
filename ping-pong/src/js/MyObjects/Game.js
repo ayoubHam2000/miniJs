@@ -10,11 +10,11 @@ import { GameConst } from "./gameConst";
 
 export class Game {
     constructor() {
+        this.gameConst = new GameConst()
         this.worldObj = new WorldObj()
         this.renderer = this.#setUpRenderer()
         this.rayMouseCamera = new THREE.Raycaster()
         this.rayBall = new THREE.Raycaster()
-        this.gameConst = new GameConst()
         
         this.scene = new MyScene()
         this.world = this.worldObj.world

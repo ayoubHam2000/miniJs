@@ -41,7 +41,7 @@ export const params = {
     },
 
     ballPosition : {
-        x : 12,
+        x : 20,
         y : 2,
         z : 0,
     },
@@ -53,15 +53,17 @@ export const params = {
     // v_f ^ 2 = v_s ^ 2 + 2.g.h
     // => `minVx` < V.x < `maxVx`
     // => `minVz` < V.z < `maxVz`
-    maxHeight : 2,
-    gravityForce : 4,
+    maxHeight : 5,
     timeToFall : 0.75,
-    time : 0,
+    //changed
+    gravityForce : 4,
+    groundVelocity: 4,
     minVx: 13.7,
     maxVx: 27.4,
     minVz: 0,
     maxVz: 7.625,
-
+    
+    time : 0,
     mousePosition : {
         x: 0,
         y: 0,

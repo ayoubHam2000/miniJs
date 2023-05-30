@@ -6,6 +6,10 @@ export class GameConst {
 
     constructor() {
         this.player = this.#playerInfo()
+
+        //params
+        params.gravityForce = this.#getGravity()
+        params.groundVelocity = this.#getVelocityAfterHitGround()
     }
 
     #playerInfo () {
@@ -61,5 +65,12 @@ export class GameConst {
             matrix, invMatrix
         }
     }
+
+    #getGravity() {
+        return (2 * params.maxHeight) / (params.timeToFall ** 2)
+    }
     
+    #getVelocityAfterHitGround() {
+        return ((params.maxHeight - params.ballDim * 2) / params.timeToFall + 0.5 * params.gravityForce * params.timeToFall)
+    }
 }
