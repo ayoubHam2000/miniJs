@@ -30,11 +30,11 @@ export class WorldObj {
     }
 
     #addToWorld() {
-        this.world.addBody(this.groundBody)
+        //this.world.addBody(this.groundBody)
         //this.world.addBody(this.upWallBody)
-        this.world.addBody(this.downWallBody)
-        this.world.addBody(this.leftWallBody)
-        this.world.addBody(this.rightWallBody)
+        //this.world.addBody(this.downWallBody)
+        //this.world.addBody(this.leftWallBody)
+        //this.world.addBody(this.rightWallBody)
         //this.world.addBody(this.racketBody)
         this.world.addBody(this.ballBody)
     }

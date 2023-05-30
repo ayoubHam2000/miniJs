@@ -48,15 +48,19 @@ async function startGame() {
 
     function limitVelocityZ(ballBody, newVelocityZ) {
         let zPos = ballBody.position.z
-        let t = params.planeDim.x / ballBody.velocity.x
+        let t = params.planeDim.x / Math.abs(ballBody.velocity.x)
         let dist = params.planeDim.y / 2 - Math.abs(zPos)
-        let maxV = Math.abs(dist / t)
-        return Math.min(maxV, newVelocityZ)
+        let maxV = dist / t
+        let vz = Math.min(maxV, Math.abs(newVelocityZ))
+        return (vz)
     }
 
     function randomVelocityZ(ballBody) {
         let range = params.planeDim.y / 2
-        return limitVelocityZ(ballBody, Math.random() * range)
+        let r = Math.random()
+        let sign = (parseInt(Math.random() * 2) * 2 - 1)
+        let vz = sign * limitVelocityZ(ballBody, r * range)
+        return vz
     }
 
     const rayCaster = new THREE.Raycaster()
@@ -73,18 +77,18 @@ async function startGame() {
         // => |V.y| = 4
         // => 13.7 < V.x < 27.4
         // => 0 < V.z < 7.625
-        if (params.frame  === 0) {
-            sphereBody.velocity.x = -12
+        if (params.frame  === 1) {
+            sphereBody.velocity.x = -22
         }
-        if (sphereBody.position.y <= -10) {
+        if (sphereBody.position.y <= -1) {
             sphereBody.position = new CANNON.Vec3(12, 2, 0)
-            sphereBody.velocity = new CANNON.Vec3(-22, 0, 0)
+            sphereBody.velocity = new CANNON.Vec3(-60, 0, 0)
         }
 
         let pos = new THREE.Vector3().copy(sphereBody.position)
         let velocity = new THREE.Vector3().copy(sphereBody.velocity.clone().unit())
         rayCaster.set(pos, velocity)
-        rayCaster.far = (sphereBody.velocity.length() * params.timeStep) + params.sphereDim
+        rayCaster.far = (sphereBody.velocity.length() * params.timeStep) + params.sphereDim * 1.1
         
 
  
@@ -104,7 +108,7 @@ async function startGame() {
                 sphereBody.velocity.x = 20
                 sphereBody.velocity.y = - sphereBody.position.y + 0.25 + 2 //time to fall 1; 0.25 dim of the ball
                 sphereBody.velocity.z = randomVelocityZ(sphereBody)
-                // console.log(arr, sphereBody.velocity, sphereBody.position.y)
+                console.log(arr, sphereBody.velocity, sphereBody.position.y)
             } else {
                 
                 //console.log(sphereBody.position)
@@ -332,6 +336,7 @@ async function startGame() {
             if (params.mouseVelocity.x !== 0 && params.mouseVelocity.y !== 0 && params.mouseVelocity.y > 0){
                 ballBody.velocity.x = getForceInX(params.mouseVelocity.y) * getSign(params.mouseVelocity.y) * -2
                 ballBody.velocity.z = getForceInZ(params.mouseVelocity.x);
+                ballBody.velocity.z = getSign(ballBody.velocity.z) * limitVelocityZ(ballBody, ballBody.velocity.z)
                 
                 
                 let newV = ballBody.velocity.clone()
