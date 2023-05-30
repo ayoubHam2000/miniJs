@@ -148,7 +148,7 @@ export class WorldObj {
         spherePhysMat.name = "ball"
         const sphereBody = new CANNON.Body({
             mass: 1,
-            shape: new CANNON.Sphere(params.sphereDim), //same
+            shape: new CANNON.Sphere(params.ballDim), //same
             position: new CANNON.Vec3(params.ballPosition.x, params.ballPosition.y, params.ballPosition.z),
             material: spherePhysMat
         })

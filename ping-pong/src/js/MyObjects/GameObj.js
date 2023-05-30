@@ -133,7 +133,7 @@ export class MyScene extends THREE.Scene {
     }
 
     #ballObj() {
-        const sphereGeo = new THREE.SphereGeometry(params.sphereDim);
+        const sphereGeo = new THREE.SphereGeometry(params.ballDim);
         const sphereMat = new THREE.MeshBasicMaterial({ 
             color: 0xff0000, 
             wireframe: true,

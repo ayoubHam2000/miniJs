@@ -21,13 +21,15 @@ export const params = {
     enableOrbit : false,
 
     //Not used
+    //Window
+    winWidth : window.innerWidth,
+    winHeight : window.innerHeight,
+    aspect : window.innerWidth /  window.innerHeight,
 
-    ballPosition : {
-        x : -12,
-        y : 3,
-        z : 0,
-    },
 
+
+    //Other
+    PLAYER_ID: 1,
     planeDim: {
         x: 27.4, //13.7
         y: 15.25 //7.625
@@ -38,10 +40,27 @@ export const params = {
         y: 6.5
     },
 
-    sphereDim : 0.25,
-    gravity : -4,
-    timeToFall : 1,
+    ballPosition : {
+        x : 12,
+        y : 2,
+        z : 0,
+    },
+    ballDim : 0.25,
+    //We assume that the ball falls to the ground within a time frame of `timeToFall` second."
+    //We assume that the ball max height is `maxHeight` unit
+    //We assume that the gravitational force is `gravityForce`
+    // x_f = - 0.5 g.t^2 + v_0.t + x_0
+    // v_f ^ 2 = v_s ^ 2 + 2.g.h
+    // => `minVx` < V.x < `maxVx`
+    // => `minVz` < V.z < `maxVz`
+    maxHeight : 2,
+    gravityForce : 4,
+    timeToFall : 0.75,
     time : 0,
+    minVx: 13.7,
+    maxVx: 27.4,
+    minVz: 0,
+    maxVz: 7.625,
 
     mousePosition : {
         x: 0,
@@ -62,7 +81,7 @@ export const params = {
 
     isClicked : false,
 
-    timeStep: 1/60,
+    timeStep: 1/40,
 
     frame: 0,
 }

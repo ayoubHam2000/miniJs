@@ -6,12 +6,15 @@ import { MyCamera } from './MyCamera'
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import { WorldObj } from "./WorldObj";
 import {params} from '../Utils/Params'
+import { GameConst } from "./gameConst";
 
 export class Game {
     constructor() {
         this.worldObj = new WorldObj()
         this.renderer = this.#setUpRenderer()
-        this.rayCaster = new THREE.Raycaster()
+        this.rayMouseCamera = new THREE.Raycaster()
+        this.rayBall = new THREE.Raycaster()
+        this.gameConst = new GameConst()
         
         this.scene = new MyScene()
         this.world = this.worldObj.world
@@ -20,22 +23,13 @@ export class Game {
         new GuiParams()
         this.#helpers()
         this.#events(this)
-        this.gameSetUp(this)
+        //this.gameSetUp(this)
         
     }
 
-    gameSetUp(obj) {
-        obj.worldObj.ballBody.addEventListener("collide", function (event) {
-            const collidedBody = event.body; // The body that collided with bodyA
-            if (collidedBody.id == obj.worldObj.groundBody.id){
-                //console.log("Collision detected between bodyA and", collidedBody);
-                obj.worldObj.ballBody.velocity.y = -4
-                //console.log(sphereBody.velocity)
-                //params.time = new Date().getTime() - params.time
-                //console.log(obj.worldObj.ballBody.position.x + params.planeDim.x / 2, params.time)
-            }
-          });
-    }
+    // gameSetUp(obj) {
+        
+    // }
 
 
 

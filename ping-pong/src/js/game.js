@@ -8,6 +8,12 @@ import * as THREE from "three";
 
 async function startGame() {
     const game = new Game()
+    const gameConst = game.gameConst
+    const camera = game.camera
+    const ballBody = game.worldObj.ballBody
+    const ballObj = game.scene.ballObj
+    const racketBody = game.worldObj.racketBody
+    const racketObj = game.scene.racketObj
 
     function hiddenCodeStart() {
         let a = game.worldObj.ballBody.position.x
@@ -63,254 +69,111 @@ async function startGame() {
         return vz
     }
 
-    const rayCaster = new THREE.Raycaster()
-    let time = new Date().getMilliseconds()
+
     function ballPhy() {
-        const sphereBody = game.worldObj.ballBody
-        const ballObj = game.scene.ballObj
-        
-        
-
-        //we consider the ball to fall to the ground in 1s
-        //the ball is 2 unit height
-        // => g = -4
-        // => |V.y| = 4
-        // => 13.7 < V.x < 27.4
-        // => 0 < V.z < 7.625
+        const rayCaster = game.rayBall
         if (params.frame  === 1) {
-            sphereBody.velocity.x = -22
+            ballBody.velocity.x = -22
         }
-        if (sphereBody.position.y <= -1) {
-            sphereBody.position = new CANNON.Vec3(12, 2, 0)
-            sphereBody.velocity = new CANNON.Vec3(-60, 0, 0)
+        if (ballBody.position.y <= -1) {
+            ballBody.position = new CANNON.Vec3(params.ballPosition.x, params.ballPosition.y, params.ballPosition.z)
+            ballBody.velocity = new CANNON.Vec3(-22, 0, 0)
         }
 
-        let pos = new THREE.Vector3().copy(sphereBody.position)
-        let velocity = new THREE.Vector3().copy(sphereBody.velocity.clone().unit())
+        let pos = new THREE.Vector3().copy(ballBody.position)
+        let velocity = new THREE.Vector3().copy(ballBody.velocity.clone().unit())
         rayCaster.set(pos, velocity)
-        rayCaster.far = (sphereBody.velocity.length() * params.timeStep) + params.sphereDim * 1.1
+        rayCaster.far = (ballBody.velocity.length() * params.timeStep) + params.ballDim
         
-
- 
-       
         const arr = rayCaster.intersectObjects([game.scene.downWallObj, game.scene.planeObj])
         if (arr.length) {
-            const nomilizedVelocity = sphereBody.velocity.clone().unit()
+            const normalizedVelocity = ballBody.velocity.clone().unit()
             const newPos = arr[0].point
-            newPos.x -= nomilizedVelocity.x * params.sphereDim
-            newPos.y -= nomilizedVelocity.y * params.sphereDim
-            newPos.z -= nomilizedVelocity.z * params.sphereDim
-            sphereBody.position.copy(newPos)
-            //console.log(arr)
+            newPos.x -= normalizedVelocity.x * params.ballDim
+            newPos.y -= normalizedVelocity.y * params.ballDim
+            newPos.z -= normalizedVelocity.z * params.ballDim
+            ballBody.position.copy(newPos)
             if (arr[0].object.id === game.scene.downWallObj.id) {
-                //arr[0].point.x += 0.1
-                //console.log(arr[0])
-                sphereBody.velocity.x = 20
-                sphereBody.velocity.y = - sphereBody.position.y + 0.25 + 2 //time to fall 1; 0.25 dim of the ball
-                sphereBody.velocity.z = randomVelocityZ(sphereBody)
-                console.log(arr, sphereBody.velocity, sphereBody.position.y)
+                ballBody.velocity.x = 20
+                ballBody.velocity.y = - ballBody.position.y + 0.25 + 2
+                ballBody.velocity.z = randomVelocityZ(ballBody)
+                //console.log(arr, ballBody.velocity, ballBody.position.y)
             } else {
-                
-                //console.log(sphereBody.position)
-                
-                //arr[0].point.y += 0.1
-                sphereBody.velocity.y = -4
+                ballBody.velocity.y = -4
             }
-            
-            //sphereBody.applyImpulse()
         }
-        
-       
-
-        
     }
 
  
 
-    let areaPoints = [
-        new THREE.Vector3(params.planeDim.x / 2, 0, +params.planeDim.y / 2),
-        new THREE.Vector3(params.planeDim.x / 2, 0, -params.planeDim.y / 2),
-        new THREE.Vector3(1, 0, +params.planeDim.y / 2),
-        new THREE.Vector3(1, 0, -params.planeDim.y / 2),
-    ]
+   
 
 
    
 
     function racketPhy() {
-
-        function planeInvMatrix() {
-            //p1, p2, p3 are 2d point
-            let p1 = {
-                x: 7.625,
-                y: 13.7
-            }
-            let p2 = {
-                x: -7.625,
-                y: 13.7
-            }
-            let p3 = {
-                x: 7.625,
-                y: 0
-            }
-            //console.log(p1, p2, p3)
-            let vector1 = {
-                x: p3.y - p1.y,
-                y: p3.x - p1.x
-    
-            }
-            let vector2 = {
-                x: p2.y - p1.y,
-                y: p2.x - p1.x
-            }
-            //console.log(vector1, vector2)
-            let matrix = {
-                a: vector1.x, b: vector2.x,
-                c: vector1.y, d: vector2.y
-            }
-            let det = 1 / (matrix.a * matrix.d - matrix.b * matrix.c)
-            let invMatrix = {
-                a: matrix.d * det, b: - matrix.b * det,
-                c: - matrix.c * det, d: matrix.a * det
-            }
-            return invMatrix
-        }
-        invMatrix = planeInvMatrix()
-    
-        function getCoefficient(p) {
-            let a = p.x * invMatrix.a + p.y * invMatrix.c
-            let b = p.x * invMatrix.b + p.y * invMatrix.d
-            return {
-                x: a,
-                y: b
-            }
-        }
-
-        let camera = game.camera
-        let object = game.scene.racketObj
-        let objectWrd = game.worldObj.racketBody
-        // let p = new THREE.Vector3()
-        // p.setFromMatrixPosition(b.matrixWorld)
-        // let ndcCoordinates = p.project(a);
-        //let dist = MyMath.dist3D(a, b)
-        //console.log(p)
-        //console.log(b.position)
-
-        let ballWd = game.worldObj.ballBody
-        let aspect = window.innerWidth / window.innerHeight
-
-
-        let iq = params.frame % 3
-        //ballWd.position.set(areaPoints[iq].x, areaPoints[iq].y, areaPoints[iq].z)
-        
-
-        let perspectivePoints = [
-            areaPoints[0].clone().applyMatrix4(camera.matrixWorldInverse),
-            areaPoints[1].clone().applyMatrix4(camera.matrixWorldInverse),
-            areaPoints[2].clone().applyMatrix4(camera.matrixWorldInverse),
-            areaPoints[3].clone().applyMatrix4(camera.matrixWorldInverse),
-        ]
-
-        let a = [
-            perspectivePoints[0].x / Math.abs(perspectivePoints[0].z),
-            perspectivePoints[0].y / Math.abs(perspectivePoints[0].z),
-            params.mousePosition.x,
-            params.mousePosition.y
-        ]
-        a[0] = a[0] * 2
-        a[1] = a[1] * 2
-        a[1] = a[1] * (aspect)
-        //console.log(a)
-
+        //Get mouse intersection with the plane coordinate
         const mousePosition = new THREE.Vector2(params.mousePosition.x, params.mousePosition.y)
-        game.rayCaster.setFromCamera(mousePosition, game.camera)
-        const intersects = game.rayCaster.intersectObject(game.scene.infinitePLaneObj)
-        if (intersects[0]) {
+        game.rayMouseCamera.setFromCamera(mousePosition, game.camera)
+        const intersects = game.rayMouseCamera.intersectObject(game.scene.infinitePLaneObj)
+
+        //If there is an intersection
+        if (intersects.length) {
             intersects[0].point.y = 0
-            let thePoint = {
-                x: intersects[0].point.x - areaPoints[0].x,
-                y: intersects[0].point.z - areaPoints[0].z
+
+            // translating the plan so that p1 becomes the origin.
+            const p = {
+                x: intersects[0].point.x - gameConst.player.p1.x,
+                y: intersects[0].point.z - gameConst.player.p1.y
             }
-            let p = getCoefficient(thePoint)
-            //console.log(intersects[0].point, p)
-            if (p.y >= 0 && p.y <= 1)
-                objectWrd.position.z = intersects[0].point.z
-            else if (p.y < 0)
-                objectWrd.position.z = 7.625
-            else if (p.y > 1)
-                objectWrd.position.z = -7.625
             
-            /*p.y = objectWrd.position.z
-            if (p.y <= 7.625 && p.y >= -7.625)
-                objectWrd.position.z = intersects[0].point.z
-            else if (p.y > 7.625)
-                objectWrd.position.z = 7.625
-            else if (p.y < -7.625)
-                objectWrd.position.z = -7.625*/
+            //getCoefficient a, b of vec1 and vec2 of the plane
+            const invMatrix = gameConst.player.invMatrix
+            const a = p.x * invMatrix.a + p.y * invMatrix.c
+            const b = p.x * invMatrix.b + p.y * invMatrix.d
 
-            if (p.x >= 0 && p.x <= 1)
-                objectWrd.position.x = intersects[0].point.x
-            else if (p.x < 0)
-                objectWrd.position.x = 13.7
-            else if (p.x > 1)
-                objectWrd.position.x = 0
-            // else if (p.x >= 0)
-            //     objectWrd.position.x = areaPoints[1].x
-            // else if (p.x <= 1)
-            //     objectWrd.position.x = areaPoints[0].x
-            //objectWrd.position.y = intersects[0].point.y
-            //objectWrd.position.z = intersects[0].point.z
+            //move the racket my the position of the mouse
+            racketBody.position.z = intersects[0].point.z
+            racketBody.position.x = intersects[0].point.x
+
+            //limit the racket in the plane
+            if (b < 0)
+                racketBody.position.z = gameConst.player.p1.y
+            else if (b > 1)
+                racketBody.position.z = gameConst.player.p2.y
+        
+            if (a < 0)
+                racketBody.position.x = gameConst.player.p1.x
+            else if (a > 1)
+                racketBody.position.x = gameConst.player.p3.x
+           
         }
-
-        let x1 = params.planeDim.x / 2 - 1
-        let x2 = 1
         
-
-        let tmpObj = new THREE.Object3D();
-        tmpObj.position = new THREE.Vector3(params.planeDim.x / 2 , 0, 0);
-        let objectPosition = new THREE.Vector3();
-        objectPosition.setFromMatrixPosition(tmpObj.matrixWorld);
-        let objectPositionCamera = objectPosition.clone().applyMatrix4(camera.matrixWorldInverse);
-        let distanceToCameraPlane = Math.abs(objectPositionCamera.z);
-        let distanceToCameraPlane2 = camera.position.x - objectWrd.position.x
-        //objectWrd.position.z = -params.mousePosition.x * distanceToCameraPlane2
-        
-        
-        
-        //objectWrd.position.x = params.planeDim.x / 2 - params.mousePosition.y * (distanceToCameraPlane / 2)
-        /*if (objectWrd.position.x <= 1)
-            objectWrd.position.x = 1
-        else if (objectWrd.position.x >= params.planeDim.x / 2 + 1)
-            objectWrd.position.x = params.planeDim.x / 2 + 1*/
-        //console.log()
-        //console.log()
-
-        let mx1 = x1 * (aspect / distanceToCameraPlane)
-        let mx2 = x2 * (aspect / distanceToCameraPlane)
-        //objectWrd.position.x = -params.mousePosition.y * distanceToCameraPlane / aspect
     }
 
 
-    function getForceInX(mouseVelocityY) {
-        mouseVelocityY = Math.abs(mouseVelocityY)
-        if (mouseVelocityY > 0 && mouseVelocityY < 6)
-            return (9)
-        else if (mouseVelocityY < 18)
-            return (12)
-        return (15)
-    } 
 
-    function getForceInZ(mouseVelocityX) {
-       
-        return -(mouseVelocityX)
-        if (mouseVelocityX > 0 && mouseVelocityX < 1.5)
-            return (1)
-        else if (mouseVelocityX < 6)
-            return (2)
-        return (3)       
-    }
 
     function racketBallHit() {
+        function getForceInX(mouseVelocityY) {
+            mouseVelocityY = Math.abs(mouseVelocityY)
+            if (mouseVelocityY > 0 && mouseVelocityY < 6)
+                return (9)
+            else if (mouseVelocityY < 18)
+                return (12)
+            return (15)
+        } 
+    
+        function getForceInZ(mouseVelocityX) {
+           
+            return -(mouseVelocityX)
+            if (mouseVelocityX > 0 && mouseVelocityX < 1.5)
+                return (1)
+            else if (mouseVelocityX < 6)
+                return (2)
+            return (3)       
+        }
+
         if (params.isClicked === false)
             return
         let circleDim = 1.75
