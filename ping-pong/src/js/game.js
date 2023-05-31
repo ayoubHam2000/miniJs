@@ -8,6 +8,7 @@ import * as THREE from "three";
 
 async function startGame() {
     const game = new Game()
+    await game.load3dObjects()
     const gameConst = game.gameConst
     const camera = game.camera
     const ballBody = game.worldObj.ballBody
@@ -99,6 +100,7 @@ async function startGame() {
                 ballBody.velocity.z = randomVelocityZ(ballBody)
             } else {
                 ballBody.velocity.y = params.groundVelocity
+                game.gameConst.setTimeToFall(0.75, game.worldObj.world)
             }
         }
     }
@@ -140,7 +142,21 @@ async function startGame() {
                 racketBody.position.x = gameConst.player.p1.x
             else if (a > 1)
                 racketBody.position.x = gameConst.player.p3.x
-            racketBody.position.y = intersects[0].point.y
+
+            let distBall = racketBody.position.x - ballBody.position.x
+            let distBallY = racketBody.position.y - ballBody.position.y
+            let distInter = racketBody.position.y - intersects[0].point.y
+
+            let m = 4
+            let rr = (Math.abs(distBall) < m ? 1 : 0)
+            let dist = (Math.abs(distBall) < m ? distBallY : distInter)
+            let to = (Math.abs(distBall) < m ? ballBody.position.y : intersects[0].point.y)
+            //console.log(rr)
+            if (Math.abs(dist) > 0.1)
+                racketBody.position.y -= 0.1 * Math.sign(dist)
+            else
+                racketBody.position.y = to
+            //console.log(dist, to)
            
         }
 
@@ -153,25 +169,44 @@ async function startGame() {
 
 
 
+    let maxMV = {
+        x : 0,
+        y : 0
+    }
+
+    let maxTest = {
+        x: 0,
+        y: 0,
+        minX: 0,
+        minY: 0
+    }
+
     function racketBallHit() {
 
         function getForceInX(mouseVelocityY) {
-            mouseVelocityY = Math.abs(mouseVelocityY) * 55
-            if (mouseVelocityY > 1)
-                mouseVelocityY = 1 
-           let x = racketBody.position.x + mouseVelocityY * (params.planeDim.x / 2)
-           console.log(mouseVelocityY)
-           return (x)
+            let tmp = Math.min(0.04, Math.max(0.02, Math.abs(mouseVelocityY)))
+            tmp = tmp / 0.04
+            if (tmp > 0.5) {
+                console.log(tmp)
+                game.gameConst.setTimeToFall(0.5, game.worldObj.world)
+            }
+            let speed = (Math.sign(mouseVelocityY) * tmp * params.planeDim.x * -0.5 - params.planeDim.x * 0.5)
+            return (speed / params.timeToFall)
         } 
     
         function getForceInZ(mouseVelocityX) {
-           
-            return -(mouseVelocityX)
-            if (mouseVelocityX > 0 && mouseVelocityX < 1.5)
-                return (1)
-            else if (mouseVelocityX < 6)
-                return (2)
-            return (3)       
+            let tmp = Math.min(0.04, Math.max(0, Math.abs(mouseVelocityX)))
+            tmp = tmp / 0.04
+
+            let sign = Math.sign(mouseVelocityX)
+            let r = params.planeDim.y
+            let pos = - ballBody.position.z + r / 2
+            let hoz = racketBody.position.z - ballBody.position.z
+            let scale = (sign < 0 ? pos : r - pos)
+            // console.log(scale)
+            let speed = (sign * scale * -1 * tmp)
+            return speed / params.timeToFall
+
         }
 
         //if (params.isClicked === false)
@@ -191,6 +226,21 @@ async function startGame() {
         //console.log(horizontalDist < circleDim, horizontalDist, verticalDist < circleDim)
         //console.log(ballBody.position, racketBody.position)
         // racketBody.position.y = ballBody.position.y * 0.25 + params.racketHeight
+       
+        
+        
+        if (params.isClicked) {
+            maxMV.x += params.mouseVelocity.x * 10
+            maxMV.y += params.mouseVelocity.y
+            maxTest.x += 1
+            //maxMV.x = Math.max(maxMV.x, params.mouseVelocity.x)
+            //maxMV.y = Math.max(maxMV.y, params.mouseVelocity.y)
+        } else {
+            maxTest.x = 0
+            maxMV.x = 0
+            maxMV.y = 0
+        }
+        //console.log(maxMV.x, maxMV.y)
         if (horizontalDist < circleDim  && depthDist <= hitDepthDim && depthDist > - params.ballDim * 1.5 && params.isClicked) {
             const endMousePos = params.mousePosition
             const startMousePos = params.mouseClickPos
@@ -198,9 +248,10 @@ async function startGame() {
                 x: endMousePos.x - startMousePos.x,
                 y: endMousePos.y - startMousePos.y
             }
-            console.log(diff)
+            //console.log(diff)
             params.mouseVelocity.x *= -0
             params.mouseVelocity.y *= 40
+            console.log(maxMV.y / maxTest.x, maxMV.x / maxTest.x)
             //if (params.mouseVelocity.y > 0){
                 //console.log(ballBody.velocity, params.mouseVelocity, horizontalDist, depthDist)
                 let newPosZ = racketBody.position.z + params.mouseVelocity.x
@@ -215,8 +266,9 @@ async function startGame() {
                 let zVel = force * scale / params.timeToFall
                 // console.log("hoz", hoz, pos, zVel, "Pos", pos, "Scale ", scale)
                 // console.log(params.mouseVelocity.x)
-                ballBody.velocity.x = - getForceInX(diff.y)
-                ballBody.velocity.z = - diff.x * 30 * params.planeDim.y / 2;
+                ballBody.velocity.x = getForceInX(maxMV.y / maxTest.x)
+                ballBody.velocity.z = getForceInZ(maxMV.x / maxTest.x)
+                //ballBody.velocity.z = - diff.x * 30 * params.planeDim.y / 2;
                 //ballBody.velocity.z = getSign(ballBody.velocity.z) * limitVelocityZ(ballBody, ballBody.velocity.z)
                 
                 

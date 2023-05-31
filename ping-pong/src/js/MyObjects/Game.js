@@ -52,8 +52,8 @@ export class Game {
         //const axesHelper = new THREE.AxesHelper(10)
         //this.scene.add(axesHelper)
         
-        const gridHelper = new THREE.GridHelper(30, 30)
-        this.scene.add(gridHelper)
+        //const gridHelper = new THREE.GridHelper(30, 30)
+        //this.scene.add(gridHelper)
         
         this.orbit = new OrbitControls(this.camera, this.renderer.domElement)
         
@@ -72,6 +72,10 @@ export class Game {
         return renderer
     }
 
+    async load3dObjects() {
+        await this.scene.load3dObjects()
+    }
+   
 
     #events(obj) {
         window.addEventListener('resize', function() {
@@ -111,20 +115,5 @@ export class Game {
 
 
 
-/*
-async function load3dObjects() {
-    const assetLoader = new GLTFLoader()
-    const tableUrl = new URL('../assets/table_tennis_table.glb', import.meta.url)
-    const racketUrl = new URL('../assets/tennis_racket_wilson_blade.glb', import.meta.url)
-    const ballUrl = new URL('../assets/tennis_ball.glb', import.meta.url)
-    const table = await assetLoader.loadAsync(tableUrl.href)
-    const racket = await assetLoader.loadAsync(racketUrl.href)
-    const ball = await assetLoader.loadAsync(ballUrl.href)
-    return [table, racket, ball]
-   }
-   //[table, racket, ball] = await load3dObjects()
-    //const model = table.scene
-    //scene.add(model)
-    //model.position.set(0, 0, 0)
-    //model.scale.set(1, 1, 1)
-*/
+
+

@@ -6,6 +6,7 @@ export class WorldObj {
         this.world = new CANNON.World({
             gravity: new CANNON.Vec3(0, - params.gravityForce, 0) //h=0.5 * g * t^2
         })
+       
 
 
         const walls = this.#wallsBody()

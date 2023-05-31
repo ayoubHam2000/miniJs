@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import {params} from '../Utils/Params'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export class MyScene extends THREE.Scene {
    
@@ -17,8 +18,51 @@ export class MyScene extends THREE.Scene {
         this.downWallObj = wallsObj.downWallObj
         this.leftWallObj = wallsObj.leftWallObj
         this.rightWallObj = wallsObj.rightWallObj
+        this.tableModel = undefined
+        this.ballModel = undefined
+        this.racketModel = undefined
 
         this.#addToScene()
+    }
+
+    async load3dObjects() {
+        const assetLoader = new GLTFLoader()
+        const tableUrl = new URL('../../assets/table_tennis_table.glb', import.meta.url)
+        const racketUrl = new URL('../../assets/tennis_racket_wilson_blade.glb', import.meta.url)
+        const ballUrl = new URL('../../assets/tennis_ball.glb', import.meta.url)
+        const table = await assetLoader.loadAsync(tableUrl.href)
+        //const racket = await assetLoader.loadAsync(racketUrl.href)
+        //const ball = await assetLoader.loadAsync(ballUrl.href)
+        console.log("Done")
+        this.tableModel = table.scene
+        //this.racketModel = racket.scene
+        //this.ballModel = ball.scene
+        
+        const light = new THREE.AmbientLight(0xffffffff, 1)
+        this.add(light)
+        //const directionLight = new THREE.DirectionalLight(0xffffff, 9.8)
+        //directionLight.position.set(-50, 10, 30)
+        //directionLight.castShadow = true
+        //this.add(directionLight)
+
+        // const bbox = new THREE.Box3().setFromObject(this.tableModel);
+
+        // // Calculate the dimensions
+        // const height = bbox.max.y - bbox.min.y;
+        // const width = bbox.max.x - bbox.min.x;
+        // const depth = bbox.max.z - bbox.min.z;
+
+        this.tableModel.position.y = -7.2
+        this.tableModel.rotation.y = 0.5 * Math.PI
+        //console.log(width, height, depth)
+        this.tableModel.scale.set(5, 5, 5)
+        this.add(this.tableModel)
+        //return [table, racket, ball]
+        //[table, racket, ball] = await load3dObjects()
+        //const model = table.scene
+        //scene.add(model)
+        //model.position.set(0, 0, 0)
+        //model.scale.set(1, 1, 1)
     }
 
     #addToScene() {
@@ -56,6 +100,7 @@ export class MyScene extends THREE.Scene {
         const infinitePlaneObj = new THREE.Mesh(infinitePlaneGeometry, infinitePlaneMaterial)
         infinitePlaneObj.rotation.x = 0.5 * Math.PI
         infinitePlaneObj.position.y = params.racketHeight
+        infinitePlaneObj.visible = false
         return (infinitePlaneObj)
     }
 
@@ -89,6 +134,7 @@ export class MyScene extends THREE.Scene {
             side: THREE.DoubleSide,
             wireframe: true
         })
+        downWallMeshMaterial.visible = false
         const downWallObj = new THREE.Mesh(downWallMeshGeometry, downWallMeshMaterial)
         //plane.rotation.x = 0.5 * Math.PI
         //this.scene.add(downWallMesh)

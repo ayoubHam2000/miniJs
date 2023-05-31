@@ -1,5 +1,6 @@
 import { params } from "../Utils/Params"
 import { Vector2D } from "../MyMath"
+import { Vec3 } from "cannon-es"
 
 
 export class GameConst {
@@ -74,5 +75,11 @@ export class GameConst {
     
     #getVelocityAfterHitGround() {
         return (Math.sqrt(2 * params.gravityForce * params.maxHeight))
+    }
+
+    setTimeToFall(newValue, world) {
+        params.timeToFall = newValue
+        params.gravityForce = this.#getGravity()
+        world.gravity = new Vec3(0, - params.gravityForce, 0)
     }
 }
