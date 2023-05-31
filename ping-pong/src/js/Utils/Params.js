@@ -40,12 +40,15 @@ export const params = {
         y: 6.5
     },
 
+    racketCircleDim: 1.5,
+    racketHeight : 2.5,
+
     ballPosition : {
-        x : 20,
-        y : 2,
+        x : 0,
+        y : 5,
         z : 0,
     },
-    ballDim : 0.25,
+    ballDim : 0.2,
     //We assume that the ball falls to the ground within a time frame of `timeToFall` second."
     //We assume that the ball max height is `maxHeight` unit
     //We assume that the gravitational force is `gravityForce`
@@ -53,7 +56,7 @@ export const params = {
     // v_f ^ 2 = v_s ^ 2 + 2.g.h
     // => `minVx` < V.x < `maxVx`
     // => `minVz` < V.z < `maxVz`
-    maxHeight : 5,
+    maxHeight : 4,
     timeToFall : 0.75,
     //changed
     gravityForce : 4,
@@ -83,7 +86,7 @@ export const params = {
 
     isClicked : false,
 
-    timeStep: 1/40,
+    timeStep: 1/60,
 
     frame: 0,
 }

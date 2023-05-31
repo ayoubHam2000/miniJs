@@ -21,9 +21,6 @@ export class WorldObj {
         this.ballBody = this.#ballBody()
         
 
-        this.world.addBody(this.ballBody)
-        this.world.addBody(this.groundBody)
-
 
         this.#addToWorld()
         this.#setContactMaterial()
@@ -45,12 +42,12 @@ export class WorldObj {
     }
 
     #setContactMaterial() {
-        this.#addContactMaterial(this.groundBody, this.ballBody,  {restitution: 1, friction: 0})
-        this.#addContactMaterial(this.upWallBody, this.ballBody,  {restitution: 1, friction: 0})
-        this.#addContactMaterial(this.downWallBody, this.ballBody,  {restitution: 1, friction: 0})
-        this.#addContactMaterial(this.leftWallBody, this.ballBody,  {restitution: 1, friction: 0})
-        this.#addContactMaterial(this.rightWallBody, this.ballBody,  {restitution: 1, friction: 0})
-        this.#addContactMaterial(this.racketBody, this.ballBody,  {restitution: 1, friction: 0})
+        //this.#addContactMaterial(this.groundBody, this.ballBody,  {restitution: 1, friction: 0})
+        //this.#addContactMaterial(this.upWallBody, this.ballBody,  {restitution: 1, friction: 0})
+        //this.#addContactMaterial(this.downWallBody, this.ballBody,  {restitution: 1, friction: 0})
+        //this.#addContactMaterial(this.leftWallBody, this.ballBody,  {restitution: 1, friction: 0})
+        //this.#addContactMaterial(this.rightWallBody, this.ballBody,  {restitution: 1, friction: 0})
+        //this.#addContactMaterial(this.racketBody, this.ballBody,  {restitution: 1, friction: 0})
     }
 
 
@@ -113,7 +110,7 @@ export class WorldObj {
             shape: new CANNON.Box(new CANNON.Vec3(50, 50, 1)),
             //mass: 1,
             type: CANNON.Body.STATIC,
-            position: new CANNON.Vec3(0, 0, -params.racketDim.y / 2),
+            position: new CANNON.Vec3(0, params.racketHeight, -params.racketDim.y / 2),
             material: rightWallMaterial
         })
         rightWallBody.quaternion.setFromEuler(0, 0 , 0)

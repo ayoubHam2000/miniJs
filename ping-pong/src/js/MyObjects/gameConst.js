@@ -13,10 +13,12 @@ export class GameConst {
     }
 
     #playerInfo () {
+        const hOffset = 6
+        const wOffset = 3
         const planePoints = {
-            p1 : new Vector2D(params.planeDim.x / 2, +params.planeDim.y / 2),
-            p2 : new Vector2D(params.planeDim.x / 2, -params.planeDim.y / 2),
-            p3 : new Vector2D(1, +params.planeDim.y / 2),
+            p1 : new Vector2D(params.planeDim.x / 2 + hOffset, +params.planeDim.y / 2 + wOffset),
+            p2 : new Vector2D(params.planeDim.x / 2 + hOffset, -params.planeDim.y / 2 - wOffset),
+            p3 : new Vector2D(1, +params.planeDim.y / 2 + wOffset),
         }
 
         if (params.PLAYER_ID === 2) {
@@ -71,6 +73,6 @@ export class GameConst {
     }
     
     #getVelocityAfterHitGround() {
-        return ((params.maxHeight - params.ballDim * 2) / params.timeToFall + 0.5 * params.gravityForce * params.timeToFall)
+        return (Math.sqrt(2 * params.gravityForce * params.maxHeight))
     }
 }

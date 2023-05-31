@@ -55,6 +55,7 @@ export class MyScene extends THREE.Scene {
         })
         const infinitePlaneObj = new THREE.Mesh(infinitePlaneGeometry, infinitePlaneMaterial)
         infinitePlaneObj.rotation.x = 0.5 * Math.PI
+        infinitePlaneObj.position.y = params.racketHeight
         return (infinitePlaneObj)
     }
 
@@ -121,7 +122,7 @@ export class MyScene extends THREE.Scene {
 
     #racketObj() {
 
-        const racketMeshGeometry = new THREE.PlaneGeometry(params.racketDim.x, params.racketDim.y, 1)
+        const racketMeshGeometry = new THREE.CircleGeometry(params.racketCircleDim, 50)
         const racketMeshMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff00,
             side: THREE.DoubleSide,

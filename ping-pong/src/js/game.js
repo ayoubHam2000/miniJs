@@ -53,31 +53,29 @@ async function startGame() {
 
 
     function limitVelocityZ(ballBody, newVelocityZ) {
-        let zPos = ballBody.position.z
-        let t = params.planeDim.x / Math.abs(ballBody.velocity.x)
-        let dist = params.planeDim.y / 2 - Math.abs(zPos)
-        let maxV = dist / t
+        let dist = params.planeDim.y / 2 - Math.abs(ballBody.position.z)
+        let maxV = dist / params.timeToFall
         let vz = Math.min(maxV, Math.abs(newVelocityZ))
         return (vz)
     }
 
-    function randomVelocityZ(ballBody) {
-        let range = params.planeDim.y / 2
-        let r = Math.random()
-        let sign = (parseInt(Math.random() * 2) * 2 - 1)
-        let vz = sign * limitVelocityZ(ballBody, r * range)
-        return vz
-    }
-
 
     function ballPhy() {
+        function randomVelocityZ(ballBody) {
+            let range = params.planeDim.y / 2
+            let r = Math.random()
+            let sign = (parseInt(Math.random() * 2) * 2 - 1)
+            let vz = sign * limitVelocityZ(ballBody, r * range)
+            return vz
+        }
+
         const rayCaster = game.rayBall
         if (params.frame  === 1) {
-            ballBody.velocity.x = -22
+            ballBody.velocity.x = -20
         }
         if (ballBody.position.y <= -1) {
             ballBody.position = new CANNON.Vec3(params.ballPosition.x, params.ballPosition.y, params.ballPosition.z)
-            ballBody.velocity = new CANNON.Vec3(-22, 0, 0)
+            ballBody.velocity = new CANNON.Vec3(-30, 0, 0)
         }
 
         let pos = new THREE.Vector3().copy(ballBody.position)
@@ -87,6 +85,7 @@ async function startGame() {
         
         const arr = rayCaster.intersectObjects([game.scene.downWallObj, game.scene.planeObj])
         if (arr.length) {
+           
             const normalizedVelocity = ballBody.velocity.clone().unit()
             const newPos = arr[0].point
             newPos.x -= normalizedVelocity.x * params.ballDim
@@ -94,27 +93,18 @@ async function startGame() {
             newPos.z -= normalizedVelocity.z * params.ballDim
             ballBody.position.copy(newPos)
             if (arr[0].object.id === game.scene.downWallObj.id) {
-                ballBody.velocity.x = 20
-                ballBody.velocity.y = + ballBody.position.y / params.timeToFall + 0.5 * params.gravityForce * params.timeToFall + 0.25
+                ballBody.velocity.x = (Math.random() * (params.planeDim.x / 2) + params.planeDim.x * 0.5) / params.timeToFall
+                //move upword and down in time = fallTime
+                ballBody.velocity.y = 0.5 * params.gravityForce * params.timeToFall - ballBody.position.y / params.timeToFall
                 ballBody.velocity.z = randomVelocityZ(ballBody)
-                //console.log(arr, ballBody.velocity, ballBody.position.y)
             } else {
-                ballBody.velocity.y = - params.groundVelocity
+                ballBody.velocity.y = params.groundVelocity
             }
-        }
-
-        if (Math.abs(ballBody.velocity.y) <= 0.4) {
-            console.log(ballBody.position, params.groundVelocity)
         }
     }
 
+    
  
-
-   
-
-
-   
-
     function racketPhy() {
         //Get mouse intersection with the plane coordinate
         const mousePosition = new THREE.Vector2(params.mousePosition.x, params.mousePosition.y)
@@ -123,7 +113,7 @@ async function startGame() {
 
         //If there is an intersection
         if (intersects.length) {
-            intersects[0].point.y = 0
+            //intersects[0].point.y = 0
 
             // translating the plan so that p1 becomes the origin.
             const p = {
@@ -150,11 +140,11 @@ async function startGame() {
                 racketBody.position.x = gameConst.player.p1.x
             else if (a > 1)
                 racketBody.position.x = gameConst.player.p3.x
+            racketBody.position.y = intersects[0].point.y
            
         }
         
     }
-
 
 
 
@@ -178,29 +168,32 @@ async function startGame() {
             return (3)       
         }
 
-        if (params.isClicked === false)
-            return
-        let circleDim = 1.75
-        let hitDepthDim = 0.3
-        let racketBody = game.worldObj.racketBody
-        let ballBody = game.worldObj.ballBody
+        //if (params.isClicked === false)
+          //  return
+        let circleDim = params.racketCircleDim
+        let hitDepthDim = 0.6
+        let verticalDist = Math.abs(racketBody.position.y - ballBody.position.y)
         let horizontalDist = Math.abs(racketBody.position.z - ballBody.position.z)
         // ballBody.position.x = 12
         // ballBody.position.z = 0
         // ballBody.position.y = 2
         let depthDist = racketBody.position.x - ballBody.position.x
+        //console.log(depthDist)
         //console.log(horizontalDist, depthDist)
         //console.log(ballBody.velocity.x)
-        if (horizontalDist < circleDim && depthDist < hitDepthDim) {
+        //console.log(horizontalDist < circleDim, horizontalDist, verticalDist < circleDim)
+        if (horizontalDist < circleDim * 2.5  && depthDist <= hitDepthDim && depthDist > - hitDepthDim) {
             const endMousePos = params.mousePosition
             const startMousePos = params.mouseClickPos
             const diff = {
                 x: endMousePos.x - startMousePos.x,
                 y: endMousePos.y - startMousePos.y
             }
+            console.log(horizontalDist)
             params.mouseVelocity.x *= 1000
             params.mouseVelocity.y *= 1000
             if (params.mouseVelocity.x !== 0 && params.mouseVelocity.y !== 0 && params.mouseVelocity.y > 0){
+                console.log(ballBody.velocity, depthDist)
                 ballBody.velocity.x = getForceInX(params.mouseVelocity.y) * getSign(params.mouseVelocity.y) * -2
                 ballBody.velocity.z = getForceInZ(params.mouseVelocity.x);
                 ballBody.velocity.z = getSign(ballBody.velocity.z) * limitVelocityZ(ballBody, ballBody.velocity.z)
@@ -209,9 +202,9 @@ async function startGame() {
                 let newV = ballBody.velocity.clone()
                 newV.normalize()
                 ballBody.velocity = newV.scale(50)
-                ballBody.velocity.y = 2
+                ballBody.velocity.y = 0.5 * params.gravityForce * params.timeToFall - ballBody.position.y / params.timeToFall
 
-                // console.log(params.mouseVelocity, horizontalDist, depthDist, ballBody.velocity, ballBody.velocity.clone().normalize())
+                //console.log(params.mouseVelocity, horizontalDist, depthDist, ballBody.velocity)
                 params.isClicked = false
             }
         }
