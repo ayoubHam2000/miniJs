@@ -143,19 +143,25 @@ async function startGame() {
             racketBody.position.y = intersects[0].point.y
            
         }
+
+
+        // let racketRange = (params.planeDim.y + 6)
+        // let pos = - racketBody.position.z + racketRange / 2
+        // console.log(pos, racketRange - pos)
         
     }
 
 
 
     function racketBallHit() {
+
         function getForceInX(mouseVelocityY) {
-            mouseVelocityY = Math.abs(mouseVelocityY)
-            if (mouseVelocityY > 0 && mouseVelocityY < 6)
-                return (9)
-            else if (mouseVelocityY < 18)
-                return (12)
-            return (15)
+            mouseVelocityY = Math.abs(mouseVelocityY) * 55
+            if (mouseVelocityY > 1)
+                mouseVelocityY = 1 
+           let x = racketBody.position.x + mouseVelocityY * (params.planeDim.x / 2)
+           console.log(mouseVelocityY)
+           return (x)
         } 
     
         function getForceInZ(mouseVelocityX) {
@@ -170,44 +176,60 @@ async function startGame() {
 
         //if (params.isClicked === false)
           //  return
-        let circleDim = params.racketCircleDim
-        let hitDepthDim = 0.6
+        // ballBody.position.x = 12
+        // ballBody.position.z = racketBody.position.z - (params.racketCircleDim * 1)
+        // ballBody.position.y = 2
+        let circleDim = params.racketCircleDim * 1 + params.ballDim
+        let hitDepthDim = 2.5
         let verticalDist = Math.abs(racketBody.position.y - ballBody.position.y)
         let horizontalDist = Math.abs(racketBody.position.z - ballBody.position.z)
-        // ballBody.position.x = 12
-        // ballBody.position.z = 0
-        // ballBody.position.y = 2
+  
         let depthDist = racketBody.position.x - ballBody.position.x
         //console.log(depthDist)
         //console.log(horizontalDist, depthDist)
         //console.log(ballBody.velocity.x)
         //console.log(horizontalDist < circleDim, horizontalDist, verticalDist < circleDim)
-        if (horizontalDist < circleDim * 2.5  && depthDist <= hitDepthDim && depthDist > - hitDepthDim) {
+        //console.log(ballBody.position, racketBody.position)
+        // racketBody.position.y = ballBody.position.y * 0.25 + params.racketHeight
+        if (horizontalDist < circleDim  && depthDist <= hitDepthDim && depthDist > - params.ballDim * 1.5 && params.isClicked) {
             const endMousePos = params.mousePosition
             const startMousePos = params.mouseClickPos
             const diff = {
                 x: endMousePos.x - startMousePos.x,
                 y: endMousePos.y - startMousePos.y
             }
-            console.log(horizontalDist)
-            params.mouseVelocity.x *= 1000
-            params.mouseVelocity.y *= 1000
-            if (params.mouseVelocity.x !== 0 && params.mouseVelocity.y !== 0 && params.mouseVelocity.y > 0){
-                console.log(ballBody.velocity, depthDist)
-                ballBody.velocity.x = getForceInX(params.mouseVelocity.y) * getSign(params.mouseVelocity.y) * -2
-                ballBody.velocity.z = getForceInZ(params.mouseVelocity.x);
-                ballBody.velocity.z = getSign(ballBody.velocity.z) * limitVelocityZ(ballBody, ballBody.velocity.z)
+            console.log(diff)
+            params.mouseVelocity.x *= -0
+            params.mouseVelocity.y *= 40
+            //if (params.mouseVelocity.y > 0){
+                //console.log(ballBody.velocity, params.mouseVelocity, horizontalDist, depthDist)
+                let newPosZ = racketBody.position.z + params.mouseVelocity.x
+                let hoz = newPosZ - ballBody.position.z
+                let maxHoz = circleDim
+                let force = hoz / maxHoz
+
+                let racketRange = (params.planeDim.y + 6)
+                let pos = - newPosZ + racketRange / 2
+                let scale = (hoz > 0 ? pos : racketRange - pos) / racketRange
+                scale = scale * (params.planeDim.y)
+                let zVel = force * scale / params.timeToFall
+                // console.log("hoz", hoz, pos, zVel, "Pos", pos, "Scale ", scale)
+                // console.log(params.mouseVelocity.x)
+                ballBody.velocity.x = - getForceInX(diff.y)
+                ballBody.velocity.z = - diff.x * 30 * params.planeDim.y / 2;
+                //ballBody.velocity.z = getSign(ballBody.velocity.z) * limitVelocityZ(ballBody, ballBody.velocity.z)
                 
                 
-                let newV = ballBody.velocity.clone()
-                newV.normalize()
-                ballBody.velocity = newV.scale(50)
+                //let newV = ballBody.velocity.clone()
+                //newV.normalize()
+                //ballBody.velocity = newV.scale(50)
                 ballBody.velocity.y = 0.5 * params.gravityForce * params.timeToFall - ballBody.position.y / params.timeToFall
 
                 //console.log(params.mouseVelocity, horizontalDist, depthDist, ballBody.velocity)
                 params.isClicked = false
-            }
+            //}
         }
+       
     }
 
     function gameLoop()

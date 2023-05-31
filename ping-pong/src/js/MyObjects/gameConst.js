@@ -13,7 +13,7 @@ export class GameConst {
     }
 
     #playerInfo () {
-        const hOffset = 6
+        const hOffset = 12
         const wOffset = 3
         const planePoints = {
             p1 : new Vector2D(params.planeDim.x / 2 + hOffset, +params.planeDim.y / 2 + wOffset),
