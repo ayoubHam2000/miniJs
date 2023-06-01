@@ -23,9 +23,9 @@ export class GuiParams {
         this.gui.addColor(params, 'sphereColor')
         this.gui.add(params, 'wireFrame')
         this.gui.add(params, 'speed', 0, 1, 0.01);
-        this.gui.add(params, 'penumbra', 0, 5, 0.01);
+        this.gui.add(params, 'penumbra', 0, 1, 0.01);
         this.gui.add(params, 'intensity', 0, 5, 0.01);
-        this.gui.add(params, 'angle', 0, 1, 0.01);
+        this.gui.add(params, 'angle', 0, 1.6, 0.01);
         this.gui.add(params, 'enableOrbit');
 
         this.gui.add(params, 'width', 0, 400);
@@ -36,6 +36,7 @@ export class GuiParams {
         this.gui.add(params, 'table_width', 0, 400);
         this.gui.add(params, 'table_height', 0, 400);
         this.gui.add(params, 'table_depth', 0, 400);
+        this.gui.add(params, 'ambientLightIntensity', 0, 3, 0.01);
     }
 
 }

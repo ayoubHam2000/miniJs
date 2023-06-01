@@ -28,15 +28,23 @@ export class MyScene extends THREE.Scene {
     async load3dObjects() {
         const assetLoader = new GLTFLoader()
         const tableUrl = new URL('../../assets/table_tennis_table.glb', import.meta.url)
-        const racketUrl = new URL('../../assets/tennis_racket_wilson_blade.glb', import.meta.url)
+        const racketUrl = new URL('../../assets/raqueta_de_ping_pong.glb', import.meta.url)
         const ballUrl = new URL('../../assets/tennis_ball.glb', import.meta.url)
         const table = await assetLoader.loadAsync(tableUrl.href)
-        //const racket = await assetLoader.loadAsync(racketUrl.href)
+        const racket = await assetLoader.loadAsync(racketUrl.href)
         //const ball = await assetLoader.loadAsync(ballUrl.href)
         console.log("Done")
         this.tableModel = table.scene
-        //this.racketModel = racket.scene
+
+        this.tableModel.traverse((node) => {
+            if (node.isMesh) {
+              node.receiveShadow = true;
+            }
+          });
+
+        this.racketModel = racket.scene
         //this.ballModel = ball.scene
+        //this.ballObj.material.map = (this.ballModel)
         
        
         //const directionLight = new THREE.DirectionalLight(0xffffff, 9.8)
@@ -56,6 +64,11 @@ export class MyScene extends THREE.Scene {
         //console.log(width, height, depth)
         this.tableModel.scale.set(5, 5, 5)
         this.add(this.tableModel)
+        
+        this.racketModel.scale.set(0.2, 0.2, 0.2)
+        this.racketModel.rotation.y = Math.PI / 2
+        this.racketModel.position.y = 5
+        this.add(this.racketModel)
         //return [table, racket, ball]
         //[table, racket, ball] = await load3dObjects()
         //const model = table.scene
@@ -174,17 +187,19 @@ export class MyScene extends THREE.Scene {
             wireframe: false
         })
         const racketObj = new THREE.Mesh(racketMeshGeometry, racketMeshMaterial)
+        racketObj.visible = false
         //plane.rotation.x = 0.5 * Math.PI
         return (racketObj)
     }
 
     #ballObj() {
         const sphereGeo = new THREE.SphereGeometry(params.ballDim);
-        const sphereMat = new THREE.MeshBasicMaterial({ 
+        const sphereMat = new THREE.MeshStandardMaterial({ 
             color: 0xff0000, 
-            wireframe: true,
+            wireframe: false,
         });
         const sphereObj = new THREE.Mesh(sphereGeo, sphereMat);
+        
         return (sphereObj)
     }
 }

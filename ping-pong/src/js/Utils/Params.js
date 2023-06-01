@@ -3,9 +3,9 @@ export const params = {
     sphereColor : "#00ff00",
     wireFrame : false,
     speed : 0.01,
-    penumbra : 0,
-    intensity : 1,
-    angle : 0.5,
+    penumbra : 0.45,
+    intensity : 1.6,
+    angle : 1.1,
     x : 0,
     vectorPos1 : {
         x: 35,
@@ -26,6 +26,7 @@ export const params = {
     table_width: 5,
     table_height: 5,
     table_depth: 6.6,
+    ambientLightIntensity: 0.38,
 
     //Not used
     //Window

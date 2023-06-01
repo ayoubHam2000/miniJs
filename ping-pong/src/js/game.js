@@ -5,8 +5,13 @@ import * as CANNON from 'cannon-es'
 import * as MyMath from './MyMath'
 import * as THREE from "three";
 
-import garage_walls from '../assets/Garage/TX_ENV_RGB_garage_walls/TX_ENV_RGB_garage_walls_UL.jpg'
-import garage_floor from '../assets/Garage/TX_ENV_RGB_garage_floor/TX_ENV_RGB_garage_floor_UL.jpg'
+//import garage_walls from '../assets/Garage/TX_ENV_RGB_garage_walls/TX_ENV_RGB_garage_walls_UL.jpg'
+import nMap from '../assets/DTTC/TX_ENV_RGB_dttc_walls/NormalMap2.png'
+import floorNMap from '../assets/DTTC/TX_ENV_RGB_dttc_floor/NormalMap2.png'
+import garage_walls from '../assets/DTTC/TX_ENV_RGB_dttc_walls/TX_ENV_RGB_dttc_walls_HI.jpg'
+import garage_floor from '../assets/DTTC/TX_ENV_RGB_dttc_floor/TX_ENV_RGB_dttc_floor_UL.jpg'
+//import garage_floor from '../assets/Garage/TX_ENV_RGB_garage_floor/TX_ENV_RGB_garage_floor_UL.jpg'
+//import garage_ceiling from '../assets/Garage/TX_ENV_RGB_garage_floor/TX_ENV_RGB_garage_floor_UL.jpg'
 import stars  from '../img/stars.jpg'
 
 async function startGame() {
@@ -57,17 +62,18 @@ async function startGame() {
         
         const boxMaterial = new THREE.MeshLambertMaterial({
             //color: 0xff00ff,
-            side: THREE.DoubleSide,
+            side: THREE.BackSide,
             map: t
         })
         const bexWithTexMultiMaterial = [
-            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_walls, (texture) => tex(texture, 0))}),//back
-            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_walls, (texture) => tex(texture, 2))}),//front
-            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_floor, floorText)}),//up
-            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_floor, floorText)}),//down
-            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_walls, (texture) => tex(texture, 3))}),//left
-            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_walls, (texture) => tex(texture, 1))}),//right
-        ]
+            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(nMap), map: textureLoader.load(garage_walls, (texture) => tex(texture, 0))}),//back
+            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(nMap), map: textureLoader.load(garage_walls, (texture) => tex(texture, 2))}),//front
+            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(floorNMap), map: textureLoader.load(garage_floor, floorText)}),//up
+            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(floorNMap), map: textureLoader.load(garage_floor, floorText)}),//down
+            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(nMap), map: textureLoader.load(garage_walls, (texture) => tex(texture, 3))}),//left
+            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(nMap), map: textureLoader.load(garage_walls, (texture) => tex(texture, 1))}),//right
+        ]   
+        //console.log(bexWithTexMultiMaterial[0])
         const boxObj = new THREE.Mesh(boxGeometry, bexWithTexMultiMaterial)
         boxObj.scale.x = params.width
         boxObj.scale.y = params.height
@@ -76,8 +82,10 @@ async function startGame() {
         game.scene.add(boxObj)
 
 
-        const light = new THREE.AmbientLight(0xffffffff, 1)
-        //game.scene.add(light)
+
+
+        const light = new THREE.AmbientLight(0xcccccc, params.ambientLightIntensity)
+        game.scene.add(light)
         return ({boxObj, light})
     }
     let {boxObj, light} = testWallAndFloor()
@@ -91,9 +99,13 @@ async function startGame() {
         //console.log((b - a), game.worldObj.ballBody.velocity.x, game.worldObj.ballBody.velocity.x / (b-a))
 
 
+        game.scene.lightObj.position.set(3, 15, 0)
+        light.intensity = params.ambientLightIntensity
         game.scene.lightObj.penumbra = params.penumbra
         game.scene.lightObj.angle = params.angle
         game.scene.lightObj.intensity = params.intensity
+        game.scene.lightObj.castShadow = true
+        game.scene.ballObj.castShadow = true
         game.scene.lightObjHelper.update()
         game.orbit.enabled = params.enableOrbit
 
@@ -101,6 +113,11 @@ async function startGame() {
         //console.log(params.width)
         //console.log(boxObj.scale)
         //console.log(camera.position, camera.rotation)
+        boxObj.scale.x = params.width
+        boxObj.scale.y = params.height
+        boxObj.scale.z = params.depth
+        boxObj.position.y = params.posY
+
         game.scene.tableModel.scale.x = params.table_width
         game.scene.tableModel.scale.y = params.table_height
         game.scene.tableModel.scale.z = params.table_depth
@@ -116,6 +133,7 @@ async function startGame() {
         game.tie(game.scene.rightWallObj, game.worldObj.rightWallBody)
         game.tie(game.scene.racketObj, game.worldObj.racketBody)
         game.tie(game.scene.ballObj, game.worldObj.ballBody)
+   
 
         if (params.frame === 0) {
             game.camera.position.x = params.vectorPos1.x;
@@ -181,6 +199,10 @@ async function startGame() {
                 game.gameConst.setTimeToFall(0.75, game.worldObj.world)
             }
         }
+
+
+        
+      
     }
 
     
@@ -369,6 +391,8 @@ async function startGame() {
         racketPhy()
         racketBallHit()
         hiddenCodeEnd()
+
+        game.scene.racketModel.position.copy(racketBody.position)
     }
 
 
