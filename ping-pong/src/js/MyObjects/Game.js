@@ -61,7 +61,9 @@ export class Game {
     }
 
     #setUpRenderer() {
+        //THREE.ColorManagement.enabled = true;
         const renderer = new THREE.WebGLRenderer()
+        //renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.shadowMap.enabled = true; // Enable shadow map rendering
         renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Type of shadow map
         

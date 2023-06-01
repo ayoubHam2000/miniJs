@@ -38,8 +38,7 @@ export class MyScene extends THREE.Scene {
         //this.racketModel = racket.scene
         //this.ballModel = ball.scene
         
-        const light = new THREE.AmbientLight(0xffffffff, 1)
-        this.add(light)
+       
         //const directionLight = new THREE.DirectionalLight(0xffffff, 9.8)
         //directionLight.position.set(-50, 10, 30)
         //directionLight.castShadow = true

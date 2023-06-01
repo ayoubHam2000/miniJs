@@ -27,6 +27,15 @@ export class GuiParams {
         this.gui.add(params, 'intensity', 0, 5, 0.01);
         this.gui.add(params, 'angle', 0, 1, 0.01);
         this.gui.add(params, 'enableOrbit');
+
+        this.gui.add(params, 'width', 0, 400);
+        this.gui.add(params, 'height', 0, 400);
+        this.gui.add(params, 'depth', 0, 400);
+        this.gui.add(params, 'posY', -100, 100);
+
+        this.gui.add(params, 'table_width', 0, 400);
+        this.gui.add(params, 'table_height', 0, 400);
+        this.gui.add(params, 'table_depth', 0, 400);
     }
 
 }

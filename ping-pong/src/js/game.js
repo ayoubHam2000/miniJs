@@ -5,6 +5,9 @@ import * as CANNON from 'cannon-es'
 import * as MyMath from './MyMath'
 import * as THREE from "three";
 
+import garage_walls from '../assets/Garage/TX_ENV_RGB_garage_walls/TX_ENV_RGB_garage_walls_UL.jpg'
+import garage_floor from '../assets/Garage/TX_ENV_RGB_garage_floor/TX_ENV_RGB_garage_floor_UL.jpg'
+import stars  from '../img/stars.jpg'
 
 async function startGame() {
     const game = new Game()
@@ -15,6 +18,71 @@ async function startGame() {
     const ballObj = game.scene.ballObj
     const racketBody = game.worldObj.racketBody
     const racketObj = game.scene.racketObj
+
+
+    function testWallAndFloor() {
+
+
+        function tex(texture, index) {
+            console.log(texture.image.width)
+            const spriteSize = new THREE.Vector2(texture.image.width, texture.image.width / 4); // Size of each sprite
+
+            // Calculate the sprite's UV coordinates based on its index
+            const spriteIndex = index; // Index of the sprite you want to load
+            const rowSize = texture.image.width / spriteSize.x;
+            const column = Math.floor(spriteIndex / rowSize);
+            const row = spriteIndex % rowSize;
+        
+            const spriteWidth = 1 / rowSize;
+            const spriteHeight = 1 / (texture.image.height / spriteSize.y);
+        
+            // Create a texture region for the specific sprite
+            texture.offset.set(row * spriteWidth, column * spriteHeight);
+            texture.repeat.set(spriteWidth, spriteHeight);
+            texture.encoding = THREE.sRGBEncoding;
+        }
+
+        function floorText(texture) {
+            texture.encoding = THREE.sRGBEncoding;
+        }
+
+        const textureLoader = new THREE.TextureLoader()
+        const w = 2048
+        const h = 510
+        const aspect = w / h
+        const width = 50
+        const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
+        const t = textureLoader.load(garage_walls, (texture) => tex(texture, 0))
+        //t.offset.set(0.5, 0.4)
+        
+        const boxMaterial = new THREE.MeshLambertMaterial({
+            //color: 0xff00ff,
+            side: THREE.DoubleSide,
+            map: t
+        })
+        const bexWithTexMultiMaterial = [
+            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_walls, (texture) => tex(texture, 0))}),//back
+            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_walls, (texture) => tex(texture, 2))}),//front
+            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_floor, floorText)}),//up
+            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_floor, floorText)}),//down
+            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_walls, (texture) => tex(texture, 3))}),//left
+            new THREE.MeshBasicMaterial({side: THREE.DoubleSide, map: textureLoader.load(garage_walls, (texture) => tex(texture, 1))}),//right
+        ]
+        const boxObj = new THREE.Mesh(boxGeometry, bexWithTexMultiMaterial)
+        boxObj.scale.x = params.width
+        boxObj.scale.y = params.height
+        boxObj.scale.z = params.depth
+        boxObj.position.y = params.posY
+        game.scene.add(boxObj)
+
+
+        const light = new THREE.AmbientLight(0xffffffff, 1)
+        //game.scene.add(light)
+        return ({boxObj, light})
+    }
+    let {boxObj, light} = testWallAndFloor()
+
+
 
     function hiddenCodeStart() {
         let a = game.worldObj.ballBody.position.x
@@ -28,6 +96,16 @@ async function startGame() {
         game.scene.lightObj.intensity = params.intensity
         game.scene.lightObjHelper.update()
         game.orbit.enabled = params.enableOrbit
+
+
+        //console.log(params.width)
+        //console.log(boxObj.scale)
+        //console.log(camera.position, camera.rotation)
+        game.scene.tableModel.scale.x = params.table_width
+        game.scene.tableModel.scale.y = params.table_height
+        game.scene.tableModel.scale.z = params.table_depth
+        //boxObj.position.y = params.posY
+    
     }
 
     function hiddenCodeEnd() {

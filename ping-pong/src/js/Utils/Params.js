@@ -5,11 +5,11 @@ export const params = {
     speed : 0.01,
     penumbra : 0,
     intensity : 1,
-    angle : 0.2,
+    angle : 0.5,
     x : 0,
     vectorPos1 : {
-        x: 40,
-        y: 16,
+        x: 35,
+        y: 11,
         z: 0,
     },
     vectorRot1 : {
@@ -18,7 +18,14 @@ export const params = {
         z: Math.PI / 2,
     },
 
-    enableOrbit : false,
+    enableOrbit : true,
+    width: 160,
+    height: 35,
+    depth: 95,
+    posY: 9.6,
+    table_width: 5,
+    table_height: 5,
+    table_depth: 6.6,
 
     //Not used
     //Window
