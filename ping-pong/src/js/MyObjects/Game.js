@@ -20,7 +20,7 @@ export class Game {
         this.world = this.worldObj.world
         this.camera = new MyCamera(params.vectorPos1.x, params.vectorPos1.y, params.vectorPos1.z)
 
-        new GuiParams()
+        this.guiParams = new GuiParams()
         this.#helpers()
         this.#events(this)
         //this.gameSetUp(this)

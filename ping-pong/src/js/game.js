@@ -4,19 +4,13 @@ import { getSign } from "./MyMath/Utils";
 import * as CANNON from 'cannon-es'
 import * as MyMath from './MyMath'
 import * as THREE from "three";
-
-//import garage_walls from '../assets/Garage/TX_ENV_RGB_garage_walls/TX_ENV_RGB_garage_walls_UL.jpg'
-import nMap from '../assets/DTTC/TX_ENV_RGB_dttc_walls/NormalMap2.png'
-import floorNMap from '../assets/DTTC/TX_ENV_RGB_dttc_floor/NormalMap2.png'
-import garage_walls from '../assets/DTTC/TX_ENV_RGB_dttc_walls/TX_ENV_RGB_dttc_walls_HI.jpg'
-import garage_floor from '../assets/DTTC/TX_ENV_RGB_dttc_floor/TX_ENV_RGB_dttc_floor_UL.jpg'
-//import garage_floor from '../assets/Garage/TX_ENV_RGB_garage_floor/TX_ENV_RGB_garage_floor_UL.jpg'
-//import garage_ceiling from '../assets/Garage/TX_ENV_RGB_garage_floor/TX_ENV_RGB_garage_floor_UL.jpg'
-import stars  from '../img/stars.jpg'
+import {load, loaderResult} from './Utils/Loader'
+import  {TrailRenderer}  from "./Utils/Trail";
 
 async function startGame() {
+    await load()
+    console.log(loaderResult)
     const game = new Game()
-    await game.load3dObjects()
     const gameConst = game.gameConst
     const camera = game.camera
     const ballBody = game.worldObj.ballBody
@@ -24,81 +18,15 @@ async function startGame() {
     const racketBody = game.worldObj.racketBody
     const racketObj = game.scene.racketObj
 
+  
+    const trail = new TrailRenderer(game.scene, game.scene.ballObj)
 
-    function testWallAndFloor() {
 
-
-        function tex(texture, index) {
-            console.log(texture.image.width)
-            const spriteSize = new THREE.Vector2(texture.image.width, texture.image.width / 4); // Size of each sprite
-
-            // Calculate the sprite's UV coordinates based on its index
-            const spriteIndex = index; // Index of the sprite you want to load
-            const rowSize = texture.image.width / spriteSize.x;
-            const column = Math.floor(spriteIndex / rowSize);
-            const row = spriteIndex % rowSize;
+    
+    function changing1() {
+        // const boxObj = game.scene.environmentSceneObj
+        const light = game.scene.ambientLightObj
         
-            const spriteWidth = 1 / rowSize;
-            const spriteHeight = 1 / (texture.image.height / spriteSize.y);
-        
-            // Create a texture region for the specific sprite
-            texture.offset.set(row * spriteWidth, column * spriteHeight);
-            texture.repeat.set(spriteWidth, spriteHeight);
-            texture.encoding = THREE.sRGBEncoding;
-        }
-
-        function floorText(texture) {
-            texture.encoding = THREE.sRGBEncoding;
-        }
-
-        const textureLoader = new THREE.TextureLoader()
-        const w = 2048
-        const h = 510
-        const aspect = w / h
-        const width = 50
-        const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
-        const t = textureLoader.load(garage_walls, (texture) => tex(texture, 0))
-        //t.offset.set(0.5, 0.4)
-        
-        const boxMaterial = new THREE.MeshLambertMaterial({
-            //color: 0xff00ff,
-            side: THREE.BackSide,
-            map: t
-        })
-        const bexWithTexMultiMaterial = [
-            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(nMap), map: textureLoader.load(garage_walls, (texture) => tex(texture, 0))}),//back
-            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(nMap), map: textureLoader.load(garage_walls, (texture) => tex(texture, 2))}),//front
-            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(floorNMap), map: textureLoader.load(garage_floor, floorText)}),//up
-            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(floorNMap), map: textureLoader.load(garage_floor, floorText)}),//down
-            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(nMap), map: textureLoader.load(garage_walls, (texture) => tex(texture, 3))}),//left
-            new THREE.MeshStandardMaterial({side: THREE.BackSide, normalMap: textureLoader.load(nMap), map: textureLoader.load(garage_walls, (texture) => tex(texture, 1))}),//right
-        ]   
-        //console.log(bexWithTexMultiMaterial[0])
-        const boxObj = new THREE.Mesh(boxGeometry, bexWithTexMultiMaterial)
-        boxObj.scale.x = params.width
-        boxObj.scale.y = params.height
-        boxObj.scale.z = params.depth
-        boxObj.position.y = params.posY
-        game.scene.add(boxObj)
-
-
-
-
-        const light = new THREE.AmbientLight(0xcccccc, params.ambientLightIntensity)
-        game.scene.add(light)
-        return ({boxObj, light})
-    }
-    let {boxObj, light} = testWallAndFloor()
-
-
-
-    function hiddenCodeStart() {
-        let a = game.worldObj.ballBody.position.x
-        game.world.step(params.timeStep)
-        let b = game.worldObj.ballBody.position.x
-        //console.log((b - a), game.worldObj.ballBody.velocity.x, game.worldObj.ballBody.velocity.x / (b-a))
-
-
         game.scene.lightObj.position.set(3, 15, 0)
         light.intensity = params.ambientLightIntensity
         game.scene.lightObj.penumbra = params.penumbra
@@ -113,15 +41,31 @@ async function startGame() {
         //console.log(params.width)
         //console.log(boxObj.scale)
         //console.log(camera.position, camera.rotation)
-        boxObj.scale.x = params.width
-        boxObj.scale.y = params.height
-        boxObj.scale.z = params.depth
-        boxObj.position.y = params.posY
+        // boxObj.scale.x = params.width
+        // boxObj.scale.y = params.height
+        // boxObj.scale.z = params.depth
+        // boxObj.position.y = params.posY
+
+
+        racketValues = game.guiParams.getVal("racketPosY", {posY: -2, posX: 0, posZ : 0}, -5, 5, 0.1)
+        game.scene.racketModel.position.x = racketValues.posX
+        game.scene.racketModel.position.y = racketValues.posY
+        game.scene.racketModel.position.z = racketValues.posZ
 
         game.scene.tableModel.scale.x = params.table_width
         game.scene.tableModel.scale.y = params.table_height
         game.scene.tableModel.scale.z = params.table_depth
         //boxObj.position.y = params.posY
+    }
+
+
+    function hiddenCodeStart() {
+    
+        game.world.step(params.timeStep)
+  
+        changing1()
+
+       
     
     }
 
@@ -245,12 +189,12 @@ async function startGame() {
 
             let distBall = racketBody.position.x - ballBody.position.x
             let distBallY = racketBody.position.y - ballBody.position.y
-            let distInter = racketBody.position.y - intersects[0].point.y
+            let distInter = racketBody.position.y - (intersects[0].point.y + 1)
 
             let m = 4
             let rr = (Math.abs(distBall) < m ? 1 : 0)
             let dist = (Math.abs(distBall) < m ? distBallY : distInter)
-            let to = (Math.abs(distBall) < m ? ballBody.position.y  : intersects[0].point.y)
+            let to = (Math.abs(distBall) < m ? ballBody.position.y  : (intersects[0].point.y + 1))
             //console.log(rr)
             if (Math.abs(dist) > 0.1)
                 racketBody.position.y -= 0.1 * Math.sign(dist)
@@ -260,7 +204,7 @@ async function startGame() {
 
             const newAngle = - Math.PI * 1.5 * (b * 2 - 1)
             if (newAngle > - Math.PI / 2 && newAngle < Math.PI / 2){
-                game.scene.racketModel.rotation.x = newAngle
+                game.scene.racketParent.rotation.x = newAngle
             }
             /*
             1 -> posY
@@ -408,8 +352,9 @@ async function startGame() {
         racketPhy()
         racketBallHit()
         hiddenCodeEnd()
+        trail.update()
 
-        game.scene.racketModel.position.copy(racketBody.position)
+        game.scene.racketParent.position.copy(racketBody.position)
       
     }
 

@@ -44,7 +44,7 @@ export const params = {
     //Other
     PLAYER_ID: 1,
     planeDim: {
-        x: 27.4, //13.7
+        x: 36.17, //13.7
         y: 15.25 //7.625
     },
 
@@ -99,7 +99,7 @@ export const params = {
 
     isClicked : false,
 
-    timeStep: 1/60,
+    timeStep: 1/120,
 
     frame: 0,
 }
