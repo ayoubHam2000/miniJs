@@ -17,6 +17,11 @@ export const params = {
         y: Math.PI / 2 - 0.4,
         z: Math.PI / 2,
     },
+    racketRot : {
+        x: 0,
+        y: 0,
+        z: 0
+    },
 
     enableOrbit : true,
     width: 160,

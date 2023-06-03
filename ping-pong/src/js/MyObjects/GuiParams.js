@@ -9,16 +9,23 @@ export class GuiParams {
 
     setUp() {
         const vectorFolder = this.gui.addFolder('cameraPosition');
-        vectorFolder.open()
+        //vectorFolder.open()
         vectorFolder.add(params.vectorPos1, 'x', -50, 70).step(0.5).name('X')
         vectorFolder.add(params.vectorPos1, 'y', -50, 50).step(0.5).name('Y')
         vectorFolder.add(params.vectorPos1, 'z', -50, 50).step(0.5).name('Z')
         
         const cameraRotationFolder = this.gui.addFolder('cameraRotation');
-        cameraRotationFolder.open()
+        //cameraRotationFolder.open()
         cameraRotationFolder.add(params.vectorRot1, 'x', -3.14, 3.14).step(0.01).name('X')
         cameraRotationFolder.add(params.vectorRot1, 'y', -3.14, 3.14).step(0.01).name('Y')
         cameraRotationFolder.add(params.vectorRot1, 'z', -3.14, 3.14).step(0.01).name('Z')
+
+        const racketRotationFolder = this.gui.addFolder('racketRotation');
+        racketRotationFolder.open()
+        racketRotationFolder.add(params.racketRot, 'x', -3.14, 3.14).step(0.01).name('X')
+        racketRotationFolder.add(params.racketRot, 'y', -3.14, 3.14).step(0.01).name('Y')
+        racketRotationFolder.add(params.racketRot, 'z', -3.14, 3.14).step(0.01).name('Z')
+
 
         this.gui.addColor(params, 'sphereColor')
         this.gui.add(params, 'wireFrame')

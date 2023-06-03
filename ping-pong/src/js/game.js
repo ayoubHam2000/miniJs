@@ -250,16 +250,33 @@ async function startGame() {
             let m = 4
             let rr = (Math.abs(distBall) < m ? 1 : 0)
             let dist = (Math.abs(distBall) < m ? distBallY : distInter)
-            let to = (Math.abs(distBall) < m ? ballBody.position.y : intersects[0].point.y)
+            let to = (Math.abs(distBall) < m ? ballBody.position.y  : intersects[0].point.y)
             //console.log(rr)
             if (Math.abs(dist) > 0.1)
                 racketBody.position.y -= 0.1 * Math.sign(dist)
             else
                 racketBody.position.y = to
             //console.log(dist, to)
-           
-        }
 
+            const newAngle = - Math.PI * 1.5 * (b * 2 - 1)
+            if (newAngle > - Math.PI / 2 && newAngle < Math.PI / 2){
+                game.scene.racketModel.rotation.x = newAngle
+            }
+            /*
+            1 -> posY
+            x 0 -> p/2 // 1/p/2
+            x 0 -> 1 
+            x 0 -> posY + 1 // (posY + 1) / (p /2)
+            x 1 -> posY // (posY + 1) / (p /2) - 1
+            
+            */
+            
+        }
+        
+        // console.log(params.racketRot)
+        game.scene.racketModel.rotation.z = params.racketRot.z
+        
+        //game.scene.racketModel.rotation.y = params.racketRot.y
 
         // let racketRange = (params.planeDim.y + 6)
         // let pos = - racketBody.position.z + racketRange / 2
@@ -393,6 +410,7 @@ async function startGame() {
         hiddenCodeEnd()
 
         game.scene.racketModel.position.copy(racketBody.position)
+      
     }
 
 
