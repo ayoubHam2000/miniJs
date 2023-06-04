@@ -1,13 +1,13 @@
 import * as THREE from "three";
-import { params } from "./Params";
+import { params } from '../Utils/Params'
 import { Vector3D, dist3D } from "../MyMath"
 
 
 export class TrailRenderer {
 
-    constructor(game, scene, obj) {
+    constructor(game, obj) {
         this.game = game
-        this.scene = scene
+        this.scene = game.scene
         this.obj = obj
         this.timeToDisappear = 300
         this.arr = []
