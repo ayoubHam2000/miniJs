@@ -19,7 +19,7 @@ async function startGame() {
     const racketObj = game.scene.racketObj
 
   
-    const trail = new TrailRenderer(game.scene, game.scene.ballObj)
+    const trail = new TrailRenderer(game, game.scene, game.scene.ballObj)
 
 
     
@@ -114,7 +114,7 @@ async function startGame() {
         if (params.frame  === 1) {
             ballBody.velocity.x = -20
         }
-        if (ballBody.position.y <= -1) {
+        if (ballBody.position.y <= -1 || ballBody.position.x < -10) {
             ballBody.position = new CANNON.Vec3(params.ballPosition.x, params.ballPosition.y, params.ballPosition.z)
             ballBody.velocity = new CANNON.Vec3(-30, 0, 0)
         }

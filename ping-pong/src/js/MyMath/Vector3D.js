@@ -4,4 +4,6 @@ export class Vector3D {
         this.y = y
         this.z = z
     }
+
+    
 }

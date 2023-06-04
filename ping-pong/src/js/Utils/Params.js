@@ -99,7 +99,7 @@ export const params = {
 
     isClicked : false,
 
-    timeStep: 1/120,
+    timeStep: 1/60,
 
     frame: 0,
 }
