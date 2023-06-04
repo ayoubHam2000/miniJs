@@ -6,6 +6,7 @@ import * as MyMath from './MyMath'
 import * as THREE from "three";
 import {load, loaderResult} from './Utils/Loader'
 import  {TrailRenderer}  from "./Utils/Trail";
+import { Spot } from "./Utils/Spot";
 
 async function startGame() {
     await load()
@@ -20,8 +21,11 @@ async function startGame() {
 
   
     const trail = new TrailRenderer(game, game.scene, game.scene.ballObj)
+    const spot = new Spot()
+    game.scene.add(spot)
 
 
+    
     
     function changing1() {
         // const boxObj = game.scene.environmentSceneObj
@@ -55,6 +59,9 @@ async function startGame() {
         game.scene.tableModel.scale.x = params.table_width
         game.scene.tableModel.scale.y = params.table_height
         game.scene.tableModel.scale.z = params.table_depth
+
+
+        game.worldObj.groundBody.position.y = game.guiParams.getVal("ground", {y: 0.2}, 0, 10, 0.1).y
         //boxObj.position.y = params.posY
     }
 
@@ -89,6 +96,8 @@ async function startGame() {
         }
 
         params.frame++
+        trail.update()
+        spot.update()
         game.renderer.render(game.scene, game.camera)
     }
 
@@ -114,7 +123,7 @@ async function startGame() {
         if (params.frame  === 1) {
             ballBody.velocity.x = -20
         }
-        if (ballBody.position.y <= -1 || ballBody.position.x < -10) {
+        if (ballBody.position.y <= -1) {
             ballBody.position = new CANNON.Vec3(params.ballPosition.x, params.ballPosition.y, params.ballPosition.z)
             ballBody.velocity = new CANNON.Vec3(-30, 0, 0)
         }
@@ -141,6 +150,8 @@ async function startGame() {
             } else {
                 ballBody.velocity.y = params.groundVelocity
                 game.gameConst.setTimeToFall(0.75, game.worldObj.world)
+                spot.hit(newPos)
+                console.log(spot.position)
             }
         }
 
@@ -352,7 +363,7 @@ async function startGame() {
         racketPhy()
         racketBallHit()
         hiddenCodeEnd()
-        trail.update()
+      
 
         game.scene.racketParent.position.copy(racketBody.position)
       

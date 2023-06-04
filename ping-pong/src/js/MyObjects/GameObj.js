@@ -25,7 +25,7 @@ export class MyScene extends THREE.Scene {
         this.leftWallObj = wallsObj.leftWallObj
         this.rightWallObj = wallsObj.rightWallObj
 
-        //this.environmentSceneObj = this.#environmentScene()
+        this.environmentSceneObj = this.#environmentScene()
 
         this.tableModel = models.tableModel
         this.racketModel = models.racketObj.model
@@ -47,7 +47,7 @@ export class MyScene extends THREE.Scene {
         //this.add(this.leftWallObj)
         //this.add(this.rightWallObj)
 
-        //this.add(this.environmentSceneObj)
+        this.add(this.environmentSceneObj)
 
         this.add(this.tableModel)
         this.add(this.racketParent)

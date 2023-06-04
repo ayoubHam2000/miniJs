@@ -15,11 +15,12 @@ NDC coordinates
 
 
 
-trail
-spot
-score and name
-table y position
+trail -
+spot -
+table y position -
+score and name -
 fix hit ball
-enemy racket and ai
+enemy racket and ai + score
 loading
+sound
 socket
