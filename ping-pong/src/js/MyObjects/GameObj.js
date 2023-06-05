@@ -25,7 +25,8 @@ export class MyScene extends THREE.Scene {
         this.leftWallObj = wallsObj.leftWallObj
         this.rightWallObj = wallsObj.rightWallObj
 
-        this.environmentSceneObj = this.#environmentScene()
+        // this.environmentSceneObj = this.#environmentScene()
+        // this.add(this.environmentSceneObj)
 
         this.tableModel = models.tableModel
         this.racketModel = models.racketObj.model
@@ -41,13 +42,13 @@ export class MyScene extends THREE.Scene {
         this.add(this.planeObj)
         this.add(this.infinitePLaneObj)
         this.add(this.racketObj)
-        this.add(this.ballObj)
+        //this.add(this.ballObj)
         //this.add(this.upWallObj)
         this.add(this.downWallObj)
         //this.add(this.leftWallObj)
         //this.add(this.rightWallObj)
 
-        this.add(this.environmentSceneObj)
+         
 
         this.add(this.tableModel)
         this.add(this.racketParent)
@@ -119,7 +120,7 @@ export class MyScene extends THREE.Scene {
                 node.receiveShadow = true;
             }
         });
-        tableModel.position.y = -7.2
+        tableModel.position.y = -7.4
         tableModel.rotation.y = 0.5 * Math.PI
         tableModel.scale.set(5, 5, 5)
     

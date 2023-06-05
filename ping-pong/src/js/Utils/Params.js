@@ -27,7 +27,7 @@ export const params = {
     width: 160,
     height: 35,
     depth: 95,
-    posY: 9.6,
+    posY: 9.4,
     table_width: 5,
     table_height: 5,
     table_depth: 6.6,

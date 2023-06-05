@@ -78,7 +78,7 @@ async function loadTextures() {
 
 async function load() {
     await load3dObjects()
-    await loadTextures()
+     //await loadTextures()
     console.log("Loading textures and models complete")
 }
 

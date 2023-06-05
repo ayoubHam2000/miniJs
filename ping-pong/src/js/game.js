@@ -23,7 +23,33 @@ async function startGame() {
     const ball = new Ball(game)
     
 
+    function test() {
+       class R extends THREE.Object3D {
+            constructor() {
+                super()
+                this.add(this.getObject(new THREE.Vector3(0, 5, 0)))
+                this.add(this.getObject(new THREE.Vector3(0, 2, 0)))
+            }
 
+            getObject(pos) {
+                const sphereGeo = new THREE.SphereGeometry(10);
+                const sphereMat = new THREE.MeshBasicMaterial({ 
+                    color: 0xff0000, 
+                    wireframe: false,
+                });
+                const sphereObj = new THREE.Mesh(sphereGeo, sphereMat);
+                sphereObj.position.set(pos.x, pos.y, pos.z)
+                return (sphereObj)
+            }
+        }
+
+        const r = new R()
+        game.scene.add(r)
+
+       
+
+    }
+    //test()
     
     
     function changing1() {
@@ -60,7 +86,7 @@ async function startGame() {
         game.scene.tableModel.scale.z = params.table_depth
 
 
-        game.worldObj.groundBody.position.y = game.guiParams.getVal("ground", {y: 0.2}, 0, 10, 0.1).y
+        //game.worldObj.groundBody.position.y = game.guiParams.getVal("ground", {y: 0.2}, 0, 10, 0.1).y
         //boxObj.position.y = params.posY
     }
 
@@ -82,7 +108,7 @@ async function startGame() {
         game.tie(game.scene.leftWallObj, game.worldObj.leftWallBody)
         game.tie(game.scene.rightWallObj, game.worldObj.rightWallBody)
         game.tie(game.scene.racketObj, game.worldObj.racketBody)
-        game.tie(game.scene.ballObj, game.worldObj.ballBody)
+        // game.tie(game.scene.ballObj, game.worldObj.ballBody)
    
 
         if (params.frame === 0) {
@@ -95,8 +121,7 @@ async function startGame() {
         }
 
         params.frame++
-        trail.update()
-        spot.update()
+       
         ball.update()
         game.renderer.render(game.scene, game.camera)
     }
@@ -310,7 +335,7 @@ async function startGame() {
     function gameLoop()
     {
         hiddenCodeStart()
-        ballPhy()
+       
         racketPhy()
         racketBallHit()
         hiddenCodeEnd()
