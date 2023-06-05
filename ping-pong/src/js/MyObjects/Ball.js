@@ -51,7 +51,7 @@ export class Ball extends THREE.Object3D{
     }
 
     reset() {
-        if (this.position.y <= -1 || params.frame === 1) {
+        if (this.position.y <= -1 || this.position.y > 30 || params.frame === 1) {
            this.init()
         }
     }
@@ -72,7 +72,7 @@ export class Ball extends THREE.Object3D{
         let p = this.game.guiParams.getVal("spotPos", {x: 0.75, y : 0.5, speed : 0}, 0, 1, 0.001)
         let x = ((p.x * 2) - 1) * (params.planeDim.x / 2)
         let y = ((p.y * 2) - 1) * (params.planeDim.y / 2)
-        let speed = p.speed * 20 + 5
+        let speed = p.speed * 20 + 0.5
 
         this.spotTarget.p = p
         this.spotTarget.x = x
@@ -85,7 +85,7 @@ export class Ball extends THREE.Object3D{
         this.setVelocity(this.spotTarget.x, this.spotTarget.y, this.spotTarget.speed)
     }
 
-    setVelocity(posX, posZ, speed) {
+    setVelocity(posX, posZ, timeToFall) {
         //speed < 0 => distance.x < 0 => time > 0
         //speed > 0 => distance.x > 0 => time > 0
         //distance.y < 0 => zVelocity < 0 ...
@@ -94,11 +94,11 @@ export class Ball extends THREE.Object3D{
             y: posZ - this.position.z,
             z: this.position.y
         }
-        let time = distance.x / speed
-        let zVelocity = distance.y / time
-        let yVelocity = 0.5 * this.gravityForce * time - distance.z / time
+        let xVelocity = distance.x / timeToFall
+        let zVelocity = distance.y / timeToFall
+        let yVelocity = 0.5 * this.gravityForce * timeToFall - distance.z / timeToFall
 
-        this.velocity.x = speed
+        this.velocity.x = xVelocity
         this.velocity.z = zVelocity
         this.velocity.y = yVelocity
     }
