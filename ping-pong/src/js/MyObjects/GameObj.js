@@ -28,7 +28,7 @@ export class MyScene extends THREE.Scene {
         this.add(this.infinitePLaneObj)
         
         this.downWallObj = wallsObj.downWallObj
-        // this.add(this.downWallObj)
+        this.add(this.downWallObj)
 
         // this.environmentSceneObj = this.#environmentScene()
         // this.add(this.environmentSceneObj)
@@ -136,7 +136,7 @@ export class MyScene extends THREE.Scene {
         const infinitePlaneObj = new THREE.Mesh(infinitePlaneGeometry, infinitePlaneMaterial)
         infinitePlaneObj.rotation.x = 0.5 * Math.PI
         infinitePlaneObj.position.y = params.racketHeight
-        infinitePlaneObj.visible = true
+        infinitePlaneObj.visible = false
         return (infinitePlaneObj)
     }
 
@@ -159,7 +159,7 @@ export class MyScene extends THREE.Scene {
         const downWallMeshMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             side: THREE.DoubleSide,
-            wireframe: true
+            wireframe: false
         })
         downWallMeshMaterial.visible = false
         const downWallObj = new THREE.Mesh(downWallMeshGeometry, downWallMeshMaterial)

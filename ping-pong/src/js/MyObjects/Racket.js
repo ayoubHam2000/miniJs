@@ -12,19 +12,12 @@ export class Racket extends THREE.Object3D {
         this.ballObj = game.scene.ballObj
         this.rayMouseCamera = new THREE.Raycaster()
 
-        this.maxMV = {
-            x : 0,
-            y : 0
+        this.clickInfo = {
+            startX: -1,
+            startY: -1,
+            startTime: 0,
+            counter: 0
         }
-    
-        this.maxTest = {
-            x: 0,
-            y: 0,
-            minX: 0,
-            minY: 0
-        }
-
-        
 
         const racket =  this.getObject()
         this.racketModel = racket.racketModel
@@ -63,6 +56,8 @@ export class Racket extends THREE.Object3D {
             const invMatrix = this.gameConst.player.invMatrix
             const a = p.x * invMatrix.a + p.y * invMatrix.c
             const b = p.x * invMatrix.b + p.y * invMatrix.d
+            // this.a = a
+            // this.b = b
 
             //move the racket my the position of the mouse
             this.position.z = intersects[0].point.z
@@ -89,113 +84,72 @@ export class Racket extends THREE.Object3D {
     }
 
    
-  
+    isInRange() {
+        let xRange = 4
+        let zRange = 2
+        let xDist = this.position.x - this.ballObj.position.x
+        let zDist = this.position.z - this.ballObj.position.z
+        let value = false
+        if (params.isClicked && Math.abs(xDist) < xRange && Math.abs(zDist) < zRange && xDist >= -0.1)
+            value = true
+        return {
+            value,
+            xDist,
+            zDist
+        }
+    }
+
+    hit(mouseVelocity) {
+        mouseVelocity.y = Math.min(Math.abs(mouseVelocity.y) * 1.5, 1) * Math.sign(mouseVelocity.y)
+        mouseVelocity.x = Math.min(Math.abs(mouseVelocity.x) * 0.5, 1) * Math.sign(mouseVelocity.x)
+
+        let x = 0.5 + Math.abs(mouseVelocity.x / 2)
+        let y = 0.5 + mouseVelocity.y / 2
+        let dist = Math.sqrt(mouseVelocity.x ** 2 + mouseVelocity.y ** 2) / 2
+        let v = (dist / mouseVelocity.diffTime) * 100
+        console.log("d", dist, v)
+        let speed = v * (params.planeDim.x * 1.1)
+
+        let posX = params.planeDim.x * (0.5 - x)
+        let posY = ((y * 2) - 1) * (params.planeDim.y / 2)
+        this.ballObj.setVelocity(posX, posY, speed)
+    }
 
     racketBallHit() {
+        const rangeInfo = this.isInRange()
+        //changing clickInfo
+        if (!params.isClicked || (params.isClicked && performance.now() - this.clickInfo.startTime > 500)) {
+            this.clickInfo.startX = rangeInfo.xDist
+            this.clickInfo.startY = rangeInfo.zDist
+            this.clickInfo.startTime = performance.now()
+        }
 
-        // function getForceInX(mouseVelocityY) {
-        //     let tmp = Math.min(0.04, Math.max(0.02, Math.abs(mouseVelocityY)))
-        //     tmp = tmp / 0.04
-        //     if (tmp > 0.5) {
-        //         console.log(tmp)
-        //         game.gameConst.setTimeToFall(0.5, game.worldObj.world)
-        //     }
-        //     let speed = (Math.sign(mouseVelocityY) * tmp * params.planeDim.x * -0.5 - params.planeDim.x * 0.5)
-        //     return (speed / params.timeToFall)
-        // } 
-    
-        // function getForceInZ(mouseVelocityX) {
-        //     let tmp = Math.min(0.04, Math.max(0, Math.abs(mouseVelocityX)))
-        //     tmp = tmp / 0.04
-
-        //     let sign = Math.sign(mouseVelocityX)
-        //     let r = params.planeDim.y
-        //     let pos = - ballBody.position.z + r / 2
-        //     let hoz = racketBody.position.z - ballBody.position.z
-        //     let scale = (sign < 0 ? pos : r - pos)
-        //     // console.log(scale)
-        //     let speed = (sign * scale * -1 * tmp)
-        //     return speed / params.timeToFall
-
-        // }
-
-        // //if (params.isClicked === false)
-        //   //  return
-        // // ballBody.position.x = 12
-        // // ballBody.position.z = racketBody.position.z - (params.racketCircleDim * 1)
-        // // ballBody.position.y = 2
-        // let circleDim = params.racketCircleDim * 1 + params.ballDim
-        // let hitDepthDim = 2.5
-        // let verticalDist = Math.abs(racketBody.position.y - ballBody.position.y)
-        // let horizontalDist = Math.abs(racketBody.position.z - ballBody.position.z)
-  
-        // let depthDist = racketBody.position.x - ballBody.position.x
-        // //console.log(depthDist)
-        // //console.log(horizontalDist, depthDist)
-        // //console.log(ballBody.velocity.x)
-        // //console.log(horizontalDist < circleDim, horizontalDist, verticalDist < circleDim)
-        // //console.log(ballBody.position, racketBody.position)
-        // // racketBody.position.y = ballBody.position.y * 0.25 + params.racketHeight
-       
-        
-        
-        // if (params.isClicked) {
-        //     maxMV.x += params.mouseVelocity.x * 10
-        //     maxMV.y += params.mouseVelocity.y
-        //     maxTest.x += 1
-        //     //maxMV.x = Math.max(maxMV.x, params.mouseVelocity.x)
-        //     //maxMV.y = Math.max(maxMV.y, params.mouseVelocity.y)
-        // } else {
-        //     maxTest.x = 0
-        //     maxMV.x = 0
-        //     maxMV.y = 0
-        // }
-        // //console.log(maxMV.x, maxMV.y)
-        // if (horizontalDist < circleDim  && depthDist <= hitDepthDim && depthDist > - params.ballDim * 1.5 && params.isClicked) {
-        //     const endMousePos = params.mousePosition
-        //     const startMousePos = params.mouseClickPos
-        //     const diff = {
-        //         x: endMousePos.x - startMousePos.x,
-        //         y: endMousePos.y - startMousePos.y
-        //     }
-        //     //console.log(diff)
-        //     params.mouseVelocity.x *= -0
-        //     params.mouseVelocity.y *= 40
-        //     console.log(maxMV.y / maxTest.x, maxMV.x / maxTest.x)
-        //     //if (params.mouseVelocity.y > 0){
-        //         //console.log(ballBody.velocity, params.mouseVelocity, horizontalDist, depthDist)
-        //         let newPosZ = racketBody.position.z + params.mouseVelocity.x
-        //         let hoz = newPosZ - ballBody.position.z
-        //         let maxHoz = circleDim
-        //         let force = hoz / maxHoz
-
-        //         let racketRange = (params.planeDim.y + 6)
-        //         let pos = - newPosZ + racketRange / 2
-        //         let scale = (hoz > 0 ? pos : racketRange - pos) / racketRange
-        //         scale = scale * (params.planeDim.y)
-        //         let zVel = force * scale / params.timeToFall
-        //         // console.log("hoz", hoz, pos, zVel, "Pos", pos, "Scale ", scale)
-        //         // console.log(params.mouseVelocity.x)
-        //         ballBody.velocity.x = getForceInX(maxMV.y / maxTest.x)
-        //         ballBody.velocity.z = getForceInZ(maxMV.x / maxTest.x)
-        //         //ballBody.velocity.z = - diff.x * 30 * params.planeDim.y / 2;
-        //         //ballBody.velocity.z = getSign(ballBody.velocity.z) * limitVelocityZ(ballBody, ballBody.velocity.z)
-                
-                
-        //         //let newV = ballBody.velocity.clone()
-        //         //newV.normalize()
-        //         //ballBody.velocity = newV.scale(50)
-        //         ballBody.velocity.y = 0.5 * params.gravityForce * params.timeToFall - ballBody.position.y / params.timeToFall
-
-        //         //console.log(params.mouseVelocity, horizontalDist, depthDist, ballBody.velocity)
-        //         params.isClicked = false
-        //     //}
-        // }
+        if (rangeInfo.value === true) {
+            let diff = {
+                x: this.clickInfo.startX - rangeInfo.xDist,
+                y: this.clickInfo.startY - rangeInfo.zDist,
+                time: performance.now() - this.clickInfo.startTime
+            }
+            diff.x = Math.min(3, diff.x)
+            diff.y = Math.min(1.5, diff.y)
+            diff.time = Math.max(100, diff.time)
+            let mouseVelocity = {
+                x: (diff.x / diff.time) * (100 / 3) * -1,
+                y: (diff.y / diff.time) * (100 / 1.5) * -1,
+                time: (100 / diff.time),
+                diffTime : diff.time
+            }
+            if (diff.x > 0)
+             this.hit(mouseVelocity)
+            params.isClicked = false
+        }
+ 
        
     }
 
 
     update() {
         this.racketPhy()
+        this.racketBallHit()
     }
 }

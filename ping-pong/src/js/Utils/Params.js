@@ -23,7 +23,7 @@ export const params = {
         z: 0
     },
 
-    enableOrbit : true,
+    enableOrbit : false,
     width: 160,
     height: 35,
     depth: 95,
@@ -44,7 +44,7 @@ export const params = {
     //Other
     PLAYER_ID: 1,
     planeDim: {
-        x: 36.17, //13.7
+        x: 36.17, //18.085
         y: 15.25 //7.625
     },
 
