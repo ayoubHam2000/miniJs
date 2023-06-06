@@ -10,7 +10,6 @@ export class Ball extends THREE.Object3D{
         super()
         this.game = game
         this.scene = game.scene
-        this.racket = game.scene.racketObj
         this.timeStep = params.timeStep
         this.ballDim = params.ballDim
         this.rayCollision = new THREE.Raycaster()
@@ -20,17 +19,16 @@ export class Ball extends THREE.Object3D{
         this.gravityForce = params.gravityForce
 
         //fun
-        this.spotTarget = this.spotObj()
+        //this.spotTarget = this.spotObj()
+        //this.scene.add(this.spotTarget)
         this.init()
 
-        //obj
         this.trail = new TrailRenderer(game, this)
-        this.spot = new Spot()
-        this.add(this.getObject())
         
-        //scene
+        this.spot = new Spot()
         this.scene.add(this.spot)
-        this.scene.add(this.spotTarget)
+        
+        this.add(this.getObject())
         this.scene.add(this)
     }
 
@@ -46,8 +44,8 @@ export class Ball extends THREE.Object3D{
 
     init() {
         this.position.set(5, 5, 0)
-        // this.velocity.set(0, -1, 0)
-        this.changeSpot()
+        this.velocity.set(-10, 0, 0)
+        // this.setVelocity(this.spotTarget.x, this.spotTarget.y, this.spotTarget.speed)
     }
 
     reset() {
@@ -56,36 +54,33 @@ export class Ball extends THREE.Object3D{
         }
     }
 
-    spotObj() {
-        const spotGeo = new THREE.CircleGeometry(params.ballDim, 23);
-        const spotMap = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, 
-            wireframe: false,
-            side: THREE.DoubleSide
-        });
-        const spot = new THREE.Mesh(spotGeo, spotMap);
-        spot.rotation.x = Math.PI / 2
-        return (spot)
-    }
+    // spotObj() {
+    //     const spotGeo = new THREE.CircleGeometry(params.ballDim, 23);
+    //     const spotMap = new THREE.MeshStandardMaterial({ 
+    //         color: 0xffffff, 
+    //         wireframe: false,
+    //         side: THREE.DoubleSide
+    //     });
+    //     const spot = new THREE.Mesh(spotGeo, spotMap);
+    //     spot.rotation.x = Math.PI / 2
+    //     return (spot)
+    // }
 
-    spotObjUpdate() {
-        let p = this.game.guiParams.getVal("spotPos", {x: 0.75, y : 0.5, speed : 0}, 0, 1, 0.001)
-        let x = ((p.x * 2) - 1) * (params.planeDim.x / 2)
-        let y = ((p.y * 2) - 1) * (params.planeDim.y / 2)
-        let speed = p.speed * 20 + 0.5
+    // spotObjUpdate() {
+    //     let p = this.game.guiParams.getVal("spotPos", {x: 0.75, y : 0.5, speed : 0}, 0, 1, 0.001)
+    //     let x = ((p.x * 2) - 1) * (params.planeDim.x / 2)
+    //     let y = ((p.y * 2) - 1) * (params.planeDim.y / 2)
+    //     let speed = p.speed * 20 + 0.5
 
-        this.spotTarget.p = p
-        this.spotTarget.x = x
-        this.spotTarget.y = y
-        this.spotTarget.speed = speed
-        this.spotTarget.position.set(x, 0.3, y)
-    }
+    //     this.spotTarget.p = p
+    //     this.spotTarget.x = x
+    //     this.spotTarget.y = y
+    //     this.spotTarget.speed = speed
+    //     this.spotTarget.position.set(x, 0.3, y)
+    // }
 
-    changeSpot() {
-        this.setVelocity(this.spotTarget.x, this.spotTarget.y, this.spotTarget.speed)
-    }
 
-    setVelocity(posX, posZ, timeToFall) {
+    setVelocity(posX, posZ, speed) {
         //speed < 0 => distance.x < 0 => time > 0
         //speed > 0 => distance.x > 0 => time > 0
         //distance.y < 0 => zVelocity < 0 ...
@@ -94,9 +89,21 @@ export class Ball extends THREE.Object3D{
             y: posZ - this.position.z,
             z: this.position.y
         }
-        let xVelocity = distance.x / timeToFall
-        let zVelocity = distance.y / timeToFall
-        let yVelocity = 0.5 * this.gravityForce * timeToFall - distance.z / timeToFall
+        let speed2d = new THREE.Vector2(distance.x, distance.y).normalize().multiplyScalar(speed)
+        let dist = Math.sqrt(distance.x ** 2 + distance.y ** 2)
+        let time = dist / speed
+        if (time > 1) {
+            time = 1;
+            speed2d.x = distance.x * time
+            speed2d.z = distance.y * time
+        } else if (time < 0.25) {
+            time = 0.25;
+            speed2d.x = distance.x * time
+            speed2d.z = distance.y * time
+        }
+        let xVelocity = speed2d.x
+        let zVelocity = speed2d.y
+        let yVelocity = 0.5 * this.gravityForce * time - distance.z / time
 
         this.velocity.x = xVelocity
         this.velocity.z = zVelocity
@@ -132,9 +139,9 @@ export class Ball extends THREE.Object3D{
             if (arr[0].object.id === this.downWallObj.id) {
                 this.velocity.x *= -1
             } else {
-                //this.velocity.y *= -1
-                this.init()
-                //  this.spot.hit(newPos)
+                this.velocity.y *= -1
+                //this.init()
+                this.spot.hit(newPos)
             }
         } else {
             this.move()
@@ -147,7 +154,6 @@ export class Ball extends THREE.Object3D{
     update() {
         this.trail.update()
         this.spot.update()
-        this.spotObjUpdate()
         this.ballPhy()
         this.reset()
     }

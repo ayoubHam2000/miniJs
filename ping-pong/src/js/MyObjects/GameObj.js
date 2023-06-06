@@ -13,46 +13,33 @@ export class MyScene extends THREE.Scene {
         const models = this.#modelsObj()
     
         this.lightObj = this.#spotLightObj()
-        this.lightObjHelper = this.#lightHelper()
-        this.ambientLightObj = this.#ambientLightObj()
+        this.add(this.lightObj)
 
+        this.lightObjHelper = this.#lightHelper()
+        // this.add(this.lightObjHelper)
+        
+        this.ambientLightObj = this.#ambientLightObj()
+        this.add(this.ambientLightObj)
+        
         this.planeObj = this.#planeObj()
+        this.add(this.planeObj)
+        
         this.infinitePLaneObj = this.#infinitePlane()
-        this.racketObj = this.#racketObj()
-        this.ballObj = this.#ballObj()
-        this.upWallObj = wallsObj.upWallObj
+        this.add(this.infinitePLaneObj)
+        
         this.downWallObj = wallsObj.downWallObj
-        this.leftWallObj = wallsObj.leftWallObj
-        this.rightWallObj = wallsObj.rightWallObj
+        // this.add(this.downWallObj)
 
         // this.environmentSceneObj = this.#environmentScene()
         // this.add(this.environmentSceneObj)
-
+        
         this.tableModel = models.tableModel
-        this.racketModel = models.racketObj.model
-        this.racketParent = models.racketObj.parentObj
-
-        this.#addToScene()
-    }
-
-    #addToScene() {
-        this.add(this.lightObj)
-        this.add(this.ambientLightObj)
-
-        this.add(this.planeObj)
-        this.add(this.infinitePLaneObj)
-        this.add(this.racketObj)
-        //this.add(this.ballObj)
-        //this.add(this.upWallObj)
-        this.add(this.downWallObj)
-        //this.add(this.leftWallObj)
-        //this.add(this.rightWallObj)
-
-         
-
         this.add(this.tableModel)
-        this.add(this.racketParent)
+
+        //used
+        this.racketModel = models.racketModel
     }
+
 
     #environmentScene() {
         const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
@@ -124,33 +111,13 @@ export class MyScene extends THREE.Scene {
         tableModel.rotation.y = 0.5 * Math.PI
         tableModel.scale.set(5, 5, 5)
     
-        /*********************************/
+        /***************************************** */
 
         const racketModel = loaderResult.models.racket.scene
-        racketModel.scale.set(0.15, 0.15, 0.15)
-        racketModel.rotation.y = Math.PI / 2
 
-        /*
-        const infinitePlaneGeometry = new THREE.PlaneGeometry(2, 2)
-        const infinitePlaneMaterial = new THREE.MeshBasicMaterial({
-            color: 0x0000ff,
-            side: THREE.DoubleSide,
-            wireframe: false
-        })
-        const pivotRacket = new THREE.Mesh(infinitePlaneGeometry, infinitePlaneMaterial);
-        */
-       const pivotRacket = new THREE.Group()
-       //pivotRacket.position.y = 2
-        //pivotRacket.position.set( 0,0,0 );
-        //pivotRacket.position.z = 0.1;
-        pivotRacket.add(racketModel)
-        
         return {
             tableModel,
-            racketObj : {
-                model: racketModel,
-                parentObj: pivotRacket
-            }
+            racketModel
         }
     }
 
@@ -160,7 +127,7 @@ export class MyScene extends THREE.Scene {
     }
 
     #infinitePlane() {
-        const infinitePlaneGeometry = new THREE.PlaneGeometry(50, 50)
+        const infinitePlaneGeometry = new THREE.PlaneGeometry(100, 100)
         const infinitePlaneMaterial = new THREE.MeshBasicMaterial({
             color: 0x0000ff,
             side: THREE.DoubleSide,
@@ -169,7 +136,7 @@ export class MyScene extends THREE.Scene {
         const infinitePlaneObj = new THREE.Mesh(infinitePlaneGeometry, infinitePlaneMaterial)
         infinitePlaneObj.rotation.x = 0.5 * Math.PI
         infinitePlaneObj.position.y = params.racketHeight
-        infinitePlaneObj.visible = false
+        infinitePlaneObj.visible = true
         return (infinitePlaneObj)
     }
 
@@ -181,21 +148,12 @@ export class MyScene extends THREE.Scene {
             wireframe: false
         })
         const plane = new THREE.Mesh(planeGeometry, planeMaterial)
-        // plane.rotation.x = 0.5 * Math.PI
+        plane.rotation.x = - 0.5 * Math.PI
         return (plane)
     }
 
     #wallsObj() {
-        const upWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 50)
-        const upWallMeshMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            side: THREE.DoubleSide,
-            wireframe: true,
-            
-        })
-        const upWallObj = new THREE.Mesh(upWallMeshGeometry, upWallMeshMaterial)
-        //plane.rotation.x = 0.5 * Math.PI
-        //this.scene.add(upWallMesh)
+       
 
         const downWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 10)
         const downWallMeshMaterial = new THREE.MeshBasicMaterial({
@@ -205,58 +163,15 @@ export class MyScene extends THREE.Scene {
         })
         downWallMeshMaterial.visible = false
         const downWallObj = new THREE.Mesh(downWallMeshGeometry, downWallMeshMaterial)
-        //plane.rotation.x = 0.5 * Math.PI
+        downWallObj.position.set(-params.planeDim.x / 2, 0, 0)
+        downWallObj.rotation.set(-Math.PI / 2, -Math.PI / 2, 0)
         //this.scene.add(downWallMesh)
 
-        const leftWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 50)
-        const leftWallMeshMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            side: THREE.DoubleSide,
-            wireframe: true
-        })
-        const leftWallObj = new THREE.Mesh(leftWallMeshGeometry, leftWallMeshMaterial)
-        //plane.rotation.x = 0.5 * Math.PI
-        //this.scene.add(leftWallMesh)
-
-        const rightWallMeshGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y, 50)
-        const rightWallMeshMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            side: THREE.DoubleSide,
-            wireframe: true
-        })
-        const rightWallObj = new THREE.Mesh(rightWallMeshGeometry, rightWallMeshMaterial)
-        //plane.rotation.x = 0.5 * Math.PI
-        //this.scene.add(rightWallMesh)
+       
         return  {
-            upWallObj,
-            downWallObj,
-            leftWallObj,
-            rightWallObj
+            downWallObj
         }
     }
 
-    #racketObj() {
-
-        const racketMeshGeometry = new THREE.CircleGeometry(params.racketCircleDim, 50)
-        const racketMeshMaterial = new THREE.MeshBasicMaterial({
-            color: 0xffffff00,
-            side: THREE.DoubleSide,
-            wireframe: false
-        })
-        const racketObj = new THREE.Mesh(racketMeshGeometry, racketMeshMaterial)
-        racketObj.visible = false
-        //plane.rotation.x = 0.5 * Math.PI
-        return (racketObj)
-    }
-
-    #ballObj() {
-        const sphereGeo = new THREE.SphereGeometry(params.ballDim);
-        const sphereMat = new THREE.MeshStandardMaterial({ 
-            color: 0xff0000, 
-            wireframe: false,
-        });
-        const sphereObj = new THREE.Mesh(sphereGeo, sphereMat);
-        
-        return (sphereObj)
-    }
+   
 }

@@ -9,8 +9,9 @@ export class TrailRenderer {
         this.game = game
         this.scene = game.scene
         this.obj = obj
-        this.timeToDisappear = 300
+        this.timeToDisappear = 400
         this.arr = []
+        this.stack = []
         this.lastPoint = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z)
         this.dim = params.ballDim
         this.maxDisplacement = 3
@@ -31,8 +32,33 @@ export class TrailRenderer {
         return (color.r << 16 | color.g << 8 | color.b)
     }
 
-    updatePos(newPos) {
-        this.lastPoint = new THREE.Vector3(newPos.position.x, newPos.position.y, newPos.position.z)
+
+    setItem(pos) {
+        let newItem = undefined
+        if (this.stack.length) {
+            newItem = this.stack[this.stack.length - 1]
+            this.stack.pop()
+        } else {
+            let material = new THREE.MeshBasicMaterial({
+                color: 0x0000ff,
+                side: THREE.DoubleSide,
+            })
+            let geometry = new THREE.CircleGeometry(this.dim)
+            newItem = new THREE.Mesh(geometry, material)
+            newItem.time = 0
+            this.arr.push(newItem)
+            this.scene.add(newItem)
+        }
+        newItem.position.x = pos.x
+        newItem.position.y = pos.y
+        newItem.position.z = pos.z
+        newItem.scale.x = 1
+        newItem.scale.y = 1
+        newItem.visible = true
+        newItem.time = performance.now()
+        let direction = newItem.position.clone().add(this.obj.velocity)
+        newItem.lookAt(direction)
+        return (newItem)
     }
 
     update() {
@@ -44,60 +70,32 @@ export class TrailRenderer {
             this.lastPoint = newPoint
             return 
         }
-        //console.log(this.arr.length)
         for (let i = 1; i < 10; i++) {
             let ratio = i / 9
             intermediatePoint.lerpVectors(this.lastPoint, newPoint, ratio);
-
-            let material = new THREE.MeshBasicMaterial({
-                color: 0x0000ff,
-                side: THREE.DoubleSide,
-            })
-            let geometry = new THREE.CircleGeometry(this.dim)
-            let newItem = new THREE.Mesh(geometry, material)
-            // newItem.position.x = this.obj.position.x
-            // newItem.position.y = this.obj.position.y
-            // newItem.position.z = this.obj.position.z
-            //console.log(intermediatePoint.x)
-            newItem.position.x = intermediatePoint.x
-            newItem.position.y = intermediatePoint.y
-            newItem.position.z = intermediatePoint.z
-
-            let direction = newItem.position.clone().add(this.game.worldObj.ballBody.velocity)
-            newItem.lookAt(direction)
-
-
-            this.arr.push({
-                obj: newItem,
-                time: new Date().getTime()
-            })
-            this.scene.add(newItem)
-
-
+            this.setItem(intermediatePoint)
         }
+        // console.log(this.stack.length)
         this.lastPoint = newPoint
 
 
         for (let i = this.arr.length - 1; i >= 0; i--) {
-            let item = this.arr[i].obj
-            let time = this.arr[i].time
-            let currentTime = new Date().getTime()
-            let diff = currentTime - time
-            if (diff > this.timeToDisappear) {
-                this.arr.splice(i, 1)
-                this.scene.remove(item)
-                continue
+            let item = this.arr[i]
+            let currentTime = performance.now()
+            let diff = currentTime - item.time
+            if (diff <= this.timeToDisappear) {
+                item.scale.x -= 0.04
+                item.scale.y -= 0.04
+                if (item.scale.x < 0)
+                    item.scale.x = 0
+                if (item.scale.y < 0)
+                    item.scale.y = 0
+                item.material.color.set(this.getHexColor(this.interpolateColors(item.scale.x)))
+            } else if (item.visible) {
+                item.visible = false
+                this.stack.push(item)
             }
-            item.scale.x -= 0.04
-            item.scale.y -= 0.04
-            if (item.scale.x < 0)
-                item.scale.x = 0
-            if (item.scale.y < 0)
-                item.scale.y = 0
-            item.material.color.set(this.getHexColor(this.interpolateColors(item.scale.x)))
-            // if (i === 0) {
-            //     console.log(this.interpolateColors(item.scale.x))
-            // }
+            
         }
     }
 }

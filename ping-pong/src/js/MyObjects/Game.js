@@ -1,23 +1,20 @@
 import * as THREE from "three";
-import * as MyMath from "../MyMath";
 import { GuiParams } from "./GuiParams";
 import { MyScene } from "./GameObj";
 import { MyCamera } from './MyCamera'
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import { WorldObj } from "./WorldObj";
 import {params} from '../Utils/Params'
 import { GameConst } from "./gameConst";
 
 export class Game {
     constructor() {
         this.gameConst = new GameConst()
-        this.worldObj = new WorldObj()
+      
         this.renderer = this.#setUpRenderer()
-        this.rayMouseCamera = new THREE.Raycaster()
         this.rayBall = new THREE.Raycaster()
         
         this.scene = new MyScene()
-        this.world = this.worldObj.world
+       
         this.camera = new MyCamera(params.vectorPos1.x, params.vectorPos1.y, params.vectorPos1.z)
 
         this.guiParams = new GuiParams()
@@ -33,10 +30,7 @@ export class Game {
 
 
 
-    tie(obj, body) {
-        obj.position.copy(body.position)
-        obj.quaternion.copy(body.quaternion)
-    }
+    
 
 
 
