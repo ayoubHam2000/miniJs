@@ -19,8 +19,12 @@ trail -
 spot -
 table y position -
 score and name -
-fix hit ball
-enemy racket and ai + score
+fix hit ball -
+net collision -
+enemy racket and ai
+racket follow the ball in y
+score
 loading
 sound
+
 socket

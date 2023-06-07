@@ -73,7 +73,7 @@ export const params = {
     maxHeight : 4,
     timeToFall : 0.75,
     //changed
-    gravityForce : 9.8,
+    gravityForce : 20,
     groundVelocity: 4,
     minVx: 13.7,
     maxVx: 27.4,

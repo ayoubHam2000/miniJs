@@ -181,7 +181,7 @@ export class Racket extends THREE.Object3D {
                 let distX = this.planeX - this.clickInfo.startX
                 let distY = this.planeY - this.clickInfo.startY
                 let dist = Math.sqrt(distX ** 2 + distY ** 2)
-                let maxDist = 4
+                let maxDist = 5
                 if (dist > maxDist) {
                     let a = distX * (maxDist / dist)
                     let b = distY * (maxDist / dist)
@@ -219,8 +219,8 @@ export class Racket extends THREE.Object3D {
         function perform(obj) {
             params.isClicked = false
             obj.clickInfo.canPerform = true
-            let distX = (obj.planeX - obj.clickInfo.startX) / 4
-            let distY = (obj.planeY - obj.clickInfo.startY) / 4
+            let distX = (obj.planeX - obj.clickInfo.startX) / 5
+            let distY = (obj.planeY - obj.clickInfo.startY) / 5
             distX = Math.abs(distX)
             distX = distX * distX * distX
             distY = Math.sqrt(Math.abs(distY)) * Math.sign(distY)
@@ -270,7 +270,6 @@ export class Racket extends THREE.Object3D {
         //let speed = v * (params.planeDim.x * 1.1)
         
         let posX = (mouseVelocity.x * params.planeDim.x * -1) / 2
-        console.log(posX, mouseVelocity, dist)
 
         //let posY = ((y * 2) - 1) * (params.planeDim.y / 2)
         this.ballObj.setVelocity(posX, 0, 10)

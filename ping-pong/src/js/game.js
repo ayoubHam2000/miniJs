@@ -4,14 +4,18 @@ import { load } from './Utils/Loader'
 import { Ball } from "./MyObjects/Ball";
 import { Racket } from "./MyObjects/Racket";
 import { GameConst } from "./MyObjects/gameConst";
+import { Net } from "./MyObjects/Net";
+import { Bot } from "./MyObjects/Bot";
 
 async function startGame() {
     await load()
     const game = new Game()
 
     game.gameConst = new GameConst()
+    game.scene.netObj = new Net(game)
     game.scene.ballObj = new Ball(game)
     game.scene.racketObj = new Racket(game)
+    game.scene.botObj = new Bot(game)
     
     function changing1() {
         // const boxObj = game.scene.environmentSceneObj
@@ -44,9 +48,10 @@ async function startGame() {
         game.scene.tableModel.scale.z = params.table_depth
 
 
-       
+        game.scene.netObj.update()
         game.scene.ballObj.update()
         game.scene.racketObj.update()
+        game.scene.botObj.update()
     }
 
     function hiddenCodeEnd() {

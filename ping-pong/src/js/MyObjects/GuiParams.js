@@ -98,11 +98,12 @@ export class GuiParams {
             return
 
         if (!this.isExist[name]){
+            const newFolder = this.gui.addFolder(name);
+            newFolder.open()
             for (let item in dic)
-                this.vectorFolder.add(dic, item, min, max).step(step)
+                newFolder.add(dic, item, min, max).step(step)
             this.isExist[name] = dic
         }
         return (this.isExist[name])
     }
-
 }

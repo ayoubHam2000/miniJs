@@ -16,7 +16,9 @@ export class Ball extends THREE.Object3D{
         this.velocity = new THREE.Vector3()
         this.downWallObj = this.scene.downWallObj
         this.planeObj = this.scene.planeObj
+        this.netObj = this.scene.netObj
         this.gravityForce = params.gravityForce
+        this.groundVelocity = new THREE.Vector3() //used by bot
 
         this.limit = {
             x: {
@@ -83,19 +85,17 @@ export class Ball extends THREE.Object3D{
         let x = ((p.x * 2) - 1) * (params.planeDim.x / 2)
         let y = ((p.y * 2) - 1) * (params.planeDim.y / 2)
         let speed = p.speed * 3 + 1
-        //console.log(x, y, speed)
 
         this.spotTarget.p = p
         this.spotTarget.x = x
         this.spotTarget.y = y
         this.spotTarget.speed = speed
-        // console.log(x, y, speed)
         this.spotTarget.position.set(x, 0.3, y)
     }
 
 
     getDiscreteSpeed(posX) {
-        let discreteSpeed = [1, 1.5, 2]
+        let discreteSpeed = [1, 2, 2.5]
         let range = params.planeDim.x / discreteSpeed.length
         for (let i = 0; i < discreteSpeed.length; i++) {
             let dist = range * (i + 1)
@@ -105,12 +105,23 @@ export class Ball extends THREE.Object3D{
         return (discreteSpeed[0])
     }
 
+    getDiscretePosX(x) {
+        // 0 <= x <= 1
+        if (x > 0.95)
+            x = 0.8
+        else if (x > 0.2)
+            x = 0.5
+        else
+            x = 0.2
+        return (x)
+    }
+
     hit(x, y) {
         // 0 <= x <= 1 || -1 <= y <= 1
+        x = this.getDiscretePosX(x)
         let posX = x * (this.limit.x.b - this.limit.x.a) + this.limit.x.a
         let posY = ((y + 1) * 0.5) * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
         let speed = this.getDiscreteSpeed(posX)
-        console.log(posX, y, posY, speed)
         this.setVelocity(posX, posY, speed)
     }
 
@@ -149,12 +160,19 @@ export class Ball extends THREE.Object3D{
     }
 
     randomPos() {
-        let x = -Math.random() * (this.limit.x.b - this.limit.x.a) - this.limit.x.a
-        let y = Math.random() * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
-        let speed = 0.5 + Math.random()
+        let x = -Math.random() * 0.8 * (this.limit.x.b - this.limit.x.a) - this.limit.x.a
+        let y = Math.random() * 0.8 * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
+        let speed = this.getDiscreteSpeed(x)
+        // let speed = 0.5 + Math.random()
         return {
             x, y, speed
         }
+    }
+
+    initHard(obj) {
+        let p = obj.game.guiParams.getVal("ball", {ballX: 15, ballY : 1}, -20, 20, 0.01)
+        obj.position.set(p.ballX, 5, p.ballY)
+        obj.velocity.set(0, 0, 0)
     }
 
     ballPhy() {
@@ -165,7 +183,7 @@ export class Ball extends THREE.Object3D{
         rayCaster.set(this.position, normalizedVelocity)
         rayCaster.far = (this.velocity.length() * this.timeStep) + this.ballDim
         
-        const arr = rayCaster.intersectObjects([this.downWallObj, this.planeObj])
+        const arr = rayCaster.intersectObjects([this.downWallObj, this.planeObj, this.netObj])
         if (arr.length) {
             const newPos = arr[0].point
             newPos.x -= normalizedVelocity.x * this.ballDim
@@ -173,13 +191,24 @@ export class Ball extends THREE.Object3D{
             newPos.z -= normalizedVelocity.z * this.ballDim
             this.position.copy(newPos)
             if (arr[0].object.id === this.downWallObj.id) {
-                //this.velocity.x *= -1
-                const newPos = this.randomPos()
-                this.setVelocity(newPos.x, newPos.y, newPos.speed)
-            } else {
+                // this.velocity.x *= -1
+                // const newPos = this.randomPos()
+                // this.setVelocity(newPos.x, newPos.y, newPos.speed)
+                this.move()
+            } else if (arr[0].object.id === this.planeObj.id) {
                 this.velocity.y *= -1
+                this.groundVelocity.copy(this.velocity)
                 //this.init()
                 this.spot.hit(newPos)
+            } 
+            else {
+                // console.log(this.netObj)
+                // this.netObj.hit()
+                // this.velocity.x = -2 * Math.sign(this.velocity.x)
+                // this.velocity.y = 0.2
+                // this.velocity.z = 2 *  Math.sign(this.velocity.z)
+                // setTimeout(this.initHard, 1000, this)
+                this.move()
             }
         } else {
             this.move()
