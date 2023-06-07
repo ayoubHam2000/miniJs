@@ -93,8 +93,8 @@ export class Ball extends THREE.Object3D{
         let speed2d = new THREE.Vector2(distance.x, distance.y).normalize().multiplyScalar(speed)
         let dist = Math.sqrt(distance.x ** 2 + distance.y ** 2)
         let time = dist / speed
-        if (time > 1.1) {
-            time = 1.1;
+        if (time > 1) {
+            time = 1;
             speed2d.x = distance.x * time
             speed2d.y = distance.y * time
         } else if (time < 0.25) {

@@ -21,7 +21,8 @@ export class Racket extends THREE.Object3D {
 
         const racket =  this.getObject()
         this.racketModel = racket.racketModel
-        this.add(this.racketModel)
+        this.racketParent = racket.racketParent
+        this.add(this.racketParent)
         game.scene.add(this)
     }
 
@@ -30,10 +31,26 @@ export class Racket extends THREE.Object3D {
         racketModel.scale.set(0.15, 0.15, 0.15)
         racketModel.rotation.y = Math.PI / 2
 
+        
+        const racketParent = new THREE.Group()
+        racketParent.add(racketModel)
+
+        // const infinitePlaneGeometry = new THREE.PlaneGeometry(5, 5)
+        // const infinitePlaneMaterial = new THREE.MeshBasicMaterial({
+        //     color: 0x0000ff,
+        //     side: THREE.DoubleSide,
+        //     wireframe: true
+        // })
+        // const infinitePlaneObj = new THREE.Mesh(infinitePlaneGeometry, infinitePlaneMaterial)
+        // infinitePlaneObj.rotation.y = 0.5 * Math.PI
+        // racketParent.add(infinitePlaneObj)
+        
         //let pos = this.game.guiParams.getVal("psss", {x:0, y:2, z:0}, -2, 4, 0.001)
-        racketModel.position.y = 2
+        racketModel.position.y = -1.5
+        racketParent.position.set(0, 2.5, 0)
         return {
-            racketModel
+            racketModel,
+            racketParent
         }
     }
 
@@ -60,8 +77,11 @@ export class Racket extends THREE.Object3D {
             // this.b = b
 
             //move the racket my the position of the mouse
+           
             this.position.z = intersects[0].point.z
             this.position.x = intersects[0].point.x
+
+            
 
             //limit the racket in the plane
             if (b < 0)
@@ -74,11 +94,10 @@ export class Racket extends THREE.Object3D {
             else if (a > 1)
                 this.position.x = this.gameConst.player.p3.x
             
-            
             //racket rotation
             const newAngle = - Math.PI * 1.5 * (b * 2 - 1)
             if (newAngle > - Math.PI / 2 && newAngle < Math.PI / 2){
-                this.racketModel.rotation.x = newAngle
+                this.racketParent.rotation.x = newAngle
             }
         }
     }
@@ -100,25 +119,32 @@ export class Racket extends THREE.Object3D {
     }
 
     hit(mouseVelocity) {
-        mouseVelocity.y = Math.min(Math.abs(mouseVelocity.y) * 1.5, 1) * Math.sign(mouseVelocity.y)
-        mouseVelocity.x = Math.min(Math.abs(mouseVelocity.x) * 0.5, 1) * Math.sign(mouseVelocity.x)
+        // 0 < x <= 3 and -2 <= y <= 2 and 100 <= time <= 500
+        mouseVelocity.x = Math.min(2, mouseVelocity.x) / 2
+        mouseVelocity.y = Math.min(2, Math.abs(mouseVelocity.y)) * Math.sign(mouseVelocity.y) / 2
+        //mouseVelocity.time = Math.max(100, mouseVelocity.time)
+        let dist = Math.sqrt(mouseVelocity.x ** 2 + mouseVelocity.y ** 2)
+        mouseVelocity.x = mouseVelocity.x ** 0.5
+        mouseVelocity.y = mouseVelocity.y ** 2
+      
+        
+        // let x = 0.5 + Math.abs(mouseVelocity.x / 2)
+        // let y = 0.5 + mouseVelocity.y / 2
+        // let v = (dist / mouseVelocity.diffTime) * 100
+        //console.log("d", dist, v)
+        //let speed = v * (params.planeDim.x * 1.1)
+        
+        let posX = (mouseVelocity.x * params.planeDim.x * -1) / 2
+        console.log(posX, mouseVelocity, dist)
 
-        let x = 0.5 + Math.abs(mouseVelocity.x / 2)
-        let y = 0.5 + mouseVelocity.y / 2
-        let dist = Math.sqrt(mouseVelocity.x ** 2 + mouseVelocity.y ** 2) / 2
-        let v = (dist / mouseVelocity.diffTime) * 100
-        console.log("d", dist, v)
-        let speed = v * (params.planeDim.x * 1.1)
-
-        let posX = params.planeDim.x * (0.5 - x)
-        let posY = ((y * 2) - 1) * (params.planeDim.y / 2)
-        this.ballObj.setVelocity(posX, posY, speed)
+        //let posY = ((y * 2) - 1) * (params.planeDim.y / 2)
+        this.ballObj.setVelocity(posX, 0, 10)
     }
 
     racketBallHit() {
         const rangeInfo = this.isInRange()
         //changing clickInfo
-        if (!params.isClicked || (params.isClicked && performance.now() - this.clickInfo.startTime > 500)) {
+        if (!params.isClicked || (params.isClicked && performance.now() - this.clickInfo.startTime > 200)) {
             this.clickInfo.startX = rangeInfo.xDist
             this.clickInfo.startY = rangeInfo.zDist
             this.clickInfo.startTime = performance.now()
@@ -130,14 +156,10 @@ export class Racket extends THREE.Object3D {
                 y: this.clickInfo.startY - rangeInfo.zDist,
                 time: performance.now() - this.clickInfo.startTime
             }
-            diff.x = Math.min(3, diff.x)
-            diff.y = Math.min(1.5, diff.y)
-            diff.time = Math.max(100, diff.time)
             let mouseVelocity = {
-                x: (diff.x / diff.time) * (100 / 3) * -1,
-                y: (diff.y / diff.time) * (100 / 1.5) * -1,
-                time: (100 / diff.time),
-                diffTime : diff.time
+                x: diff.x,
+                y: diff.y,
+                time: diff.time
             }
             if (diff.x > 0)
              this.hit(mouseVelocity)
