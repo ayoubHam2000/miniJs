@@ -18,6 +18,17 @@ export class Ball extends THREE.Object3D{
         this.planeObj = this.scene.planeObj
         this.gravityForce = params.gravityForce
 
+        this.limit = {
+            x: {
+                a : - params.planeDim.x * 0.05,
+                b : - params.planeDim.x * 0.45
+            },
+            y : {
+                a: - params.planeDim.y * 0.46,
+                b: + params.planeDim.y * 0.46
+            }
+        }
+
         //fun
         this.spotTarget = this.spotObj()
         this.scene.add(this.spotTarget)
@@ -43,13 +54,14 @@ export class Ball extends THREE.Object3D{
     }
 
     init() {
-        this.position.set(15, 5, 1)
+        let p = this.game.guiParams.getVal("ball", {ballX: 15, ballY : 1}, -20, 20, 0.01)
+        this.position.set(p.ballX, 5, p.ballY)
         this.velocity.set(0, 0, 0)
         //this.setVelocity(this.spotTarget.x, this.spotTarget.y, this.spotTarget.speed)
     }
 
     reset() {
-        if (this.position.y <= -1 || this.position.y > 30 || params.frame === 1) {
+        if (this.position.y <= -1 || this.position.y > 50 || params.frame === 1) {
            this.init()
         }
     }
@@ -70,7 +82,8 @@ export class Ball extends THREE.Object3D{
         let p = this.game.guiParams.getVal("spotPos", {x: 0.75, y : 0.5, speed : 0}, 0, 1, 0.001)
         let x = ((p.x * 2) - 1) * (params.planeDim.x / 2)
         let y = ((p.y * 2) - 1) * (params.planeDim.y / 2)
-        let speed = p.speed * 20 + 0.5
+        let speed = p.speed * 3 + 1
+        //console.log(x, y, speed)
 
         this.spotTarget.p = p
         this.spotTarget.x = x
@@ -81,6 +94,26 @@ export class Ball extends THREE.Object3D{
     }
 
 
+    getDiscreteSpeed(posX) {
+        let discreteSpeed = [1, 1.5, 2]
+        let range = params.planeDim.x / discreteSpeed.length
+        for (let i = 0; i < discreteSpeed.length; i++) {
+            let dist = range * (i + 1)
+            if (Math.abs(posX) <= dist)
+                return discreteSpeed[i]
+        }
+        return (discreteSpeed[0])
+    }
+
+    hit(x, y) {
+        // 0 <= x <= 1 || -1 <= y <= 1
+        let posX = x * (this.limit.x.b - this.limit.x.a) + this.limit.x.a
+        let posY = ((y + 1) * 0.5) * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
+        let speed = this.getDiscreteSpeed(posX)
+        console.log(posX, y, posY, speed)
+        this.setVelocity(posX, posY, speed)
+    }
+
     setVelocity(posX, posZ, speed) {
         //speed < 0 => distance.x < 0 => time > 0
         //speed > 0 => distance.x > 0 => time > 0
@@ -90,19 +123,11 @@ export class Ball extends THREE.Object3D{
             y: posZ - this.position.z,
             z: this.position.y
         }
-        let speed2d = new THREE.Vector2(distance.x, distance.y).normalize().multiplyScalar(speed)
+        let speed2d = new THREE.Vector2(distance.x, distance.y).normalize()
         let dist = Math.sqrt(distance.x ** 2 + distance.y ** 2)
-        let time = dist / speed
-        if (time > 1) {
-            time = 1;
-            speed2d.x = distance.x * time
-            speed2d.y = distance.y * time
-        } else if (time < 0.25) {
-            time = 0.25;
-            speed2d.x = distance.x * time
-            speed2d.y = distance.y * time
-        }
-        // console.log(time, dist, speed)
+        speed2d.multiplyScalar(dist * speed)
+        let time = 1 / speed
+       
         let xVelocity = speed2d.x
         let zVelocity = speed2d.y
         let yVelocity = 0.5 * this.gravityForce * time - distance.z / time
@@ -124,9 +149,9 @@ export class Ball extends THREE.Object3D{
     }
 
     randomPos() {
-        let x = Math.random() * (params.planeDim.x / 2)
-        let y = (Math.random() - 0.5) * (params.planeDim.y)
-        let speed = 0.5 + Math.random() * 0.5
+        let x = -Math.random() * (this.limit.x.b - this.limit.x.a) - this.limit.x.a
+        let y = Math.random() * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
+        let speed = 0.5 + Math.random()
         return {
             x, y, speed
         }

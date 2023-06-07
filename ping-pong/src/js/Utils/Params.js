@@ -48,6 +48,7 @@ export const params = {
         y: 15.25 //7.625
     },
 
+
     racketDim : {
         x: 3.5,
         y: 6.5
@@ -72,7 +73,7 @@ export const params = {
     maxHeight : 4,
     timeToFall : 0.75,
     //changed
-    gravityForce : 4,
+    gravityForce : 9.8,
     groundVelocity: 4,
     minVx: 13.7,
     maxVx: 27.4,
