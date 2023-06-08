@@ -21,7 +21,8 @@ table y position -
 score and name -
 fix hit ball -
 net collision -
-enemy racket and ai
+enemy racket and ai -
+camera
 racket follow the ball in y
 score
 loading

@@ -23,6 +23,9 @@ export const params = {
         z: 0
     },
 
+    loadTex : false,
+    netCollision : true,
+
     enableOrbit : false,
     width: 160,
     height: 35,

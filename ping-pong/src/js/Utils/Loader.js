@@ -5,6 +5,7 @@ import wallsTextures from '../../assets/DTTC/TX_ENV_RGB_dttc_walls/TX_ENV_RGB_dt
 import wallsNormalMap from '../../assets/DTTC/TX_ENV_RGB_dttc_walls/NormalMap2.png'
 import floorTexture from '../../assets/DTTC/TX_ENV_RGB_dttc_floor/TX_ENV_RGB_dttc_floor_UL.jpg'
 import floorNormalMap from '../../assets/DTTC/TX_ENV_RGB_dttc_floor/NormalMap2.png'
+import { params } from './Params';
 
 const loaderResult = {}
 
@@ -78,7 +79,8 @@ async function loadTextures() {
 
 async function load() {
     await load3dObjects()
-    // await loadTextures()
+    if (params.loadTex)
+        await loadTextures()
     console.log("Loading textures and models complete")
 }
 

@@ -2,6 +2,8 @@ import * as THREE from 'three'
 import { params } from '../Utils/Params'
 
 export class Bot extends THREE.Object3D {
+
+ 
     constructor (game) {
         super()
         this.game = game
@@ -9,7 +11,27 @@ export class Bot extends THREE.Object3D {
         this.ballObj = this.scene.ballObj
         this.velocity = new THREE.Vector3()
         this.timeStep = params.timeStep
+        this.gravityForce = params.gravityForce
+        this.target = new THREE.Vector3(0, 0, 0)
+        this.botTarget = new THREE.Vector3(0, 0, 0)
         this.step = 0
+
+        this.moveToInfo = {
+            status : 0,
+            lose : false
+        }
+
+
+        this.limit = {
+            x: {
+                a : - params.planeDim.x * 0.8,
+                b : - params.planeDim.x * 0.4
+            },
+            y : {
+                a: - params.planeDim.y * 0.7,
+                b: + params.planeDim.y * 0.7
+            }
+        }
 
         const racket =  this.getObject()
         this.racketModel = racket.racketModel
@@ -27,38 +49,17 @@ export class Bot extends THREE.Object3D {
         racketParent.add(racketModel)
 
         racketModel.position.y = -1.5
-        racketParent.position.set(-18, 2.5, 0)
+        racketParent.position.set(0, 2.5, 0)
 
        
+        this.position.set(-18, 0, 0)
         return {
             racketModel,
             racketParent
         }
     }
 
-    move() {
-        this.position.x += this.velocity.x * this.timeStep
-        this.position.y += this.velocity.y * this.timeStep
-        this.position.z += this.velocity.z * this.timeStep
-        //this.velocity.y = - this.gravityForce * this.timeStep + this.velocity.y
-    }
-
-    getRangeInfo() {
-        let x = this.ballObj.position.x - this.position.x
-        let y = this.ballObj.position.y - this.position.y
-        let z = this.ballObj.position.z - this.position.z
-        let valuePlane = false
-        let valueY = false
-
-        let planeDist = Math.sqrt(x ** 2 + z ** 2)
-        let maxDistToFollow = 5
-        if (planeDist < maxDistToFollow)
-            valuePlane = true
-        return {
-            x, y, z, valuePlane, valueY
-        }
-    }
-
+    
     rotateObj() {
         //racket rotation
         let b = (this.position.z / params.planeDim.y * 2 + 1) * 0.5
@@ -68,29 +69,104 @@ export class Bot extends THREE.Object3D {
         }
     }
 
-    fallow() {
-        let rangeInfo = this.getRangeInfo()
-       
-        if (Math.abs(rangeInfo.z) > 0 && Math.abs(rangeInfo.x) < 4){
-            console.log(this.position.z, this.ballObj.position.z)
-            this.velocity.set(0, 0, 30 * Math.sign(rangeInfo.z))
-        }
-        else {
-            this.velocity.set(0, 0, 0)
-        }
+
+    determineMaxPossibleHeight() {
+        let gv = this.ballObj.groundInfo.v
+        let gp = this.ballObj.groundInfo.p
         
+        let xMax = (gv.y / this.gravityForce + gp.x / gv.x) * gv.x
+        let zMax = (gv.y / this.gravityForce + gp.z / gv.z) * gv.z
+        xMax = Math.min(Math.abs(xMax), Math.abs(this.limit.x.a)) * Math.sign(xMax)
+        zMax = Math.min(Math.abs(zMax), Math.abs(this.limit.y.a)) * Math.sign(zMax)
+
+        let tx = (xMax - gp.x) / gv.x
+        let tz = (zMax - gp.z) / gv.z
+        let zx = gv.z * tx + gp.z
+        let xz = gv.x * tz + gp.x
+
+        if (Math.abs(zx) <= Math.abs(zMax)) {
+            let y = - 0.5 * this.gravityForce * (tx ** 2) + gv.y * tx + gp.y
+            let res = new THREE.Vector3(xMax, y, zx)
+            //console.log("z", res)
+            return (res)
+        } else {
+            let y = - 0.5 * this.gravityForce * (tz ** 2) + gv.y * tz + gp.y
+            let res = new THREE.Vector3(xz, y, zMax)
+            //console.log("x", res)
+            return (res)
+        }
+    }
+
+    moveTo(time) {
+        if (this.moveToInfo.status = 1) {
+            this.velocity = new THREE.Vector3().copy(this.botTarget).sub(this.position).multiplyScalar(1 / time)
+            this.moveToInfo.status++
+        }
+        if (this.moveToInfo.status === 2) {
+            console.log("Move")
+            let d = this.velocity.clone().multiplyScalar(this.timeStep)
+            let dist = this.botTarget.clone().sub(this.position)
+            if (d.length() >= dist.length()) {
+                console.log(dist)
+                this.position.add(d)
+                this.moveToInfo.status++
+            } else {
+                this.position.add(d)
+            }
+            this.rotateObj()
+        }
+    }
+
+    hitTheBall() {
+        let diff = new THREE.Vector3().copy(this.target).sub(this.ballObj.position)
+        let dist = diff.length()
+        if (dist < 0.6) {
+            if (this.moveToInfo.lose === false) {
+                const newPos = this.ballObj.randomPos()
+                this.ballObj.setVelocity(newPos.x, newPos.y, newPos.speed)
+            } else {
+                setTimeout((obj) => {
+                    console.log("Win")
+                    obj.moveToInfo.lose = false
+                }, 200, this)
+            }
+        }
+        if (dist < 2) {
+            this.moveTo(0.05)
+        }
+    }
+
+
+    randomLose() {
+        let r = Math.random()
+        if (r > 0.6) {
+            console.log("Lose")
+            let z = (Math.random() * 2 - 1) * 2
+            let y = (Math.random() * 2 - 1) * 2
+            z += 1 * Math.sign(z)
+            y += 1 * Math.sign(z)
+            this.moveToInfo.lose = true
+            return (new THREE.Vector3(0, y, z))
+        }
+        return (new THREE.Vector3(0, 0, 0))
     }
 
     update() {
-        if (this.ballObj.groundVelocity.x < 0) {
+        //console.log(this.ballObj)
+
+        if (this.ballObj.groundInfo.v.x < 0 && this.step === 0) {
+            let r = this.randomLose()
+            this.target = this.determineMaxPossibleHeight()
+            this.botTarget = this.target.clone().add(r)
+            this.moveToInfo.status = 0
+            this.ballObj.groundInfo.v.x *= -1
             this.step = 1
         }
-        if (this.step === 1) {
-            let speedY = this.ballObj.groundVelocity.y
-            console.log(speedY)
-            let maxH = speedY ** 2 / (2 * params.gravityForce)
-            console.log(maxH)
-            console.log(this.ballObj.position.y)
+        if (this.ballObj.groundInfo.v.x > 0 && this.step === 1) {
+            this.step = 0
+        }
+        if (this.ballObj.groundInfo.v.x > 0 && this.step === 0) {
+            this.hitTheBall()
         }
     }
 }

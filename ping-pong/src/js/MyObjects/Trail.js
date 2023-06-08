@@ -9,7 +9,7 @@ export class TrailRenderer {
         this.game = game
         this.scene = game.scene
         this.obj = obj
-        this.timeToDisappear = 400
+        this.timeToDisappear = 300
         this.arr = []
         this.stack = []
         this.lastPoint = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z)

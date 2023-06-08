@@ -30,8 +30,10 @@ export class MyScene extends THREE.Scene {
         this.downWallObj = wallsObj.downWallObj
         this.add(this.downWallObj)
 
-        // this.environmentSceneObj = this.#environmentScene()
-        // this.add(this.environmentSceneObj)
+        if (params.loadTex) {
+            this.environmentSceneObj = this.#environmentScene()
+            this.add(this.environmentSceneObj)
+        }
         
         this.tableModel = models.tableModel
         this.add(this.tableModel)

@@ -18,7 +18,11 @@ export class Ball extends THREE.Object3D{
         this.planeObj = this.scene.planeObj
         this.netObj = this.scene.netObj
         this.gravityForce = params.gravityForce
-        this.groundVelocity = new THREE.Vector3() //used by bot
+        this.groundInfo = {
+            //used by bot
+            v : new THREE.Vector3(), // velocity
+            p : new THREE.Vector3() //position
+        }
 
         this.limit = {
             x: {
@@ -26,6 +30,15 @@ export class Ball extends THREE.Object3D{
                 b : - params.planeDim.x * 0.45
             },
             y : {
+                a: - params.planeDim.y * 0.46,
+                b: + params.planeDim.y * 0.46
+            },
+
+            botX: {
+                a : params.planeDim.x * 0.1,
+                b : params.planeDim.x * 0.45
+            },
+            botY : {
                 a: - params.planeDim.y * 0.46,
                 b: + params.planeDim.y * 0.46
             }
@@ -95,8 +108,8 @@ export class Ball extends THREE.Object3D{
 
 
     getDiscreteSpeed(posX) {
-        let discreteSpeed = [1, 2, 2.5]
-        let range = params.planeDim.x / discreteSpeed.length
+        let discreteSpeed = [0.75, 1, 1.25]
+        let range = (params.planeDim.x * 0.5) / discreteSpeed.length
         for (let i = 0; i < discreteSpeed.length; i++) {
             let dist = range * (i + 1)
             if (Math.abs(posX) <= dist)
@@ -118,6 +131,7 @@ export class Ball extends THREE.Object3D{
 
     hit(x, y) {
         // 0 <= x <= 1 || -1 <= y <= 1
+        //this.position.y += 1
         x = this.getDiscretePosX(x)
         let posX = x * (this.limit.x.b - this.limit.x.a) + this.limit.x.a
         let posY = ((y + 1) * 0.5) * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
@@ -160,9 +174,11 @@ export class Ball extends THREE.Object3D{
     }
 
     randomPos() {
-        let x = -Math.random() * 0.8 * (this.limit.x.b - this.limit.x.a) - this.limit.x.a
-        let y = Math.random() * 0.8 * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
+        //this.position.y += 1
+        let x = Math.random() * (this.limit.botX.b - this.limit.botX.a) + this.limit.botX.a
+        let y = Math.random() * (this.limit.botY.b - this.limit.botY.a) + this.limit.botY.a
         let speed = this.getDiscreteSpeed(x)
+        // console.log(x, y, "=> ", speed)
         // let speed = 0.5 + Math.random()
         return {
             x, y, speed
@@ -196,19 +212,22 @@ export class Ball extends THREE.Object3D{
                 // this.setVelocity(newPos.x, newPos.y, newPos.speed)
                 this.move()
             } else if (arr[0].object.id === this.planeObj.id) {
-                this.velocity.y *= -1
-                this.groundVelocity.copy(this.velocity)
+                this.velocity.y *= -0.8
+                this.groundInfo.v.copy(this.velocity)
+                this.groundInfo.p.copy(this.position)
                 //this.init()
                 this.spot.hit(newPos)
             } 
             else {
                 // console.log(this.netObj)
-                // this.netObj.hit()
-                // this.velocity.x = -2 * Math.sign(this.velocity.x)
-                // this.velocity.y = 0.2
-                // this.velocity.z = 2 *  Math.sign(this.velocity.z)
-                // setTimeout(this.initHard, 1000, this)
-                this.move()
+                if (params.netCollision) {
+                    this.netObj.hit()
+                    this.velocity.x = -2 * Math.sign(this.velocity.x)
+                    this.velocity.y = 0.2
+                    this.velocity.z = 2 *  Math.sign(this.velocity.z)
+                    setTimeout(this.initHard, 1000, this)
+                } else
+                    this.move()
             }
         } else {
             this.move()
