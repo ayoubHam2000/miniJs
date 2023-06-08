@@ -23,7 +23,8 @@ fix hit ball -
 net collision -
 enemy racket and ai -
 camera
-racket follow the ball in y
+double tap -> lose
+ai stop when lose or player lose
 score
 loading
 sound

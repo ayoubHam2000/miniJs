@@ -8,8 +8,8 @@ export const params = {
     angle : 1.1,
     x : 0,
     vectorPos1 : {
-        x: 35,
-        y: 11,
+        x: 36,
+        y: 10,
         z: 0,
     },
     vectorRot1 : {

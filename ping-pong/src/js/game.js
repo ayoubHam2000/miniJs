@@ -52,13 +52,14 @@ async function startGame() {
         game.scene.ballObj.update()
         game.scene.racketObj.update()
         game.scene.botObj.update()
+        game.camera.update()
     }
 
     function hiddenCodeEnd() {
         if (params.frame === 0) {
             game.camera.position.x = params.vectorPos1.x;
-            game.camera.position.y = params.vectorPos1.y;
             game.camera.position.z = params.vectorPos1.z;
+            game.camera.position.y = params.vectorPos1.y;
             game.camera.rotation.x = params.vectorRot1.x;
             game.camera.rotation.y = params.vectorRot1.y;
             game.camera.rotation.z = params.vectorRot1.z;

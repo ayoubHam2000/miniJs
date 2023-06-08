@@ -10,6 +10,7 @@ export class Ball extends THREE.Object3D{
         super()
         this.game = game
         this.scene = game.scene
+        this.camera = game.camera
         this.timeStep = params.timeStep
         this.ballDim = params.ballDim
         this.rayCollision = new THREE.Raycaster()
@@ -136,6 +137,7 @@ export class Ball extends THREE.Object3D{
         let posX = x * (this.limit.x.b - this.limit.x.a) + this.limit.x.a
         let posY = ((y + 1) * 0.5) * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
         let speed = this.getDiscreteSpeed(posX)
+        this.camera.cameraMovement.state = 1
         this.setVelocity(posX, posY, speed)
     }
 

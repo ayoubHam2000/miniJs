@@ -8,6 +8,7 @@ export class Bot extends THREE.Object3D {
         super()
         this.game = game
         this.scene = game.scene
+        this.camera = game.camera
         this.ballObj = this.scene.ballObj
         this.velocity = new THREE.Vector3()
         this.timeStep = params.timeStep
@@ -103,7 +104,6 @@ export class Bot extends THREE.Object3D {
             this.moveToInfo.status++
         }
         if (this.moveToInfo.status === 2) {
-            console.log("Move")
             let d = this.velocity.clone().multiplyScalar(this.timeStep)
             let dist = this.botTarget.clone().sub(this.position)
             if (d.length() >= dist.length()) {
@@ -124,9 +124,15 @@ export class Bot extends THREE.Object3D {
             if (this.moveToInfo.lose === false) {
                 const newPos = this.ballObj.randomPos()
                 this.ballObj.setVelocity(newPos.x, newPos.y, newPos.speed)
+                let dir = this.ballObj.velocity.clone().normalize()
+                console.log(dir)
+                let m = 0.1
+                if (dir.z > m)
+                    this.camera.cameraMovement.state = 0
+                else if (dir.z < -m)
+                    this.camera.cameraMovement.state = 2
             } else {
                 setTimeout((obj) => {
-                    console.log("Win")
                     obj.moveToInfo.lose = false
                 }, 200, this)
             }
@@ -139,7 +145,7 @@ export class Bot extends THREE.Object3D {
 
     randomLose() {
         let r = Math.random()
-        if (r > 0.6) {
+        if (r > 0.93) {
             console.log("Lose")
             let z = (Math.random() * 2 - 1) * 2
             let y = (Math.random() * 2 - 1) * 2
