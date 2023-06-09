@@ -9,7 +9,7 @@ export class MyScene extends THREE.Scene {
    
     constructor () {
         super()
-        const wallsObj = this.#wallsObj()
+        //const wallsObj = this.#wallsObj()
         const models = this.#modelsObj()
     
         this.lightObj = this.#spotLightObj()
@@ -27,8 +27,8 @@ export class MyScene extends THREE.Scene {
         this.infinitePLaneObj = this.#infinitePlane()
         this.add(this.infinitePLaneObj)
         
-        this.downWallObj = wallsObj.downWallObj
-        this.add(this.downWallObj)
+        //this.downWallObj = wallsObj.downWallObj
+        //this.add(this.downWallObj)
 
         if (params.loadTex) {
             this.environmentSceneObj = this.#environmentScene()

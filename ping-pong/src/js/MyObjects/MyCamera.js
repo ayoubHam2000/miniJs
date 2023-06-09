@@ -36,7 +36,6 @@ export class MyCamera extends THREE.PerspectiveCamera {
                 
                 if (this.cameraMovement.r !== toR) {
                     let step = Math.sign(toR - this.cameraMovement.r) * rStep
-                    console.log(this.cameraMovement.r)
                     if (Math.abs(this.cameraMovement.r - toR) < Math.abs(step))
                         this.cameraMovement.r = toR
                     else

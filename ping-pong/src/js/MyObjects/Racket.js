@@ -33,7 +33,7 @@ export class Racket extends THREE.Object3D {
         this.add(this.racketParent)
         game.scene.add(this)
 
-        this.testInit()
+        this.init()
     }
 
     getObject() {
@@ -116,21 +116,19 @@ export class Racket extends THREE.Object3D {
         }
     }
 
-   
-
-    testInit() {
-        const point1Geometry = new THREE.CircleGeometry(0.25, 10)
+    init() {
+        const point1Geometry = new THREE.CircleGeometry(0.125, 10)
         const point1Material = new THREE.MeshBasicMaterial({
-            color: 0x0000ff,
+            color: 0x00ffff,
             side: THREE.DoubleSide,
             wireframe: false
         })
         const point1Obj = new THREE.Mesh(point1Geometry, point1Material)
         point1Obj.rotation.y = 0.5 * Math.PI
 
-        const point2Geometry = new THREE.CircleGeometry(0.25, 10)
+        const point2Geometry = new THREE.CircleGeometry(0.125, 10)
         const point2Material = new THREE.MeshBasicMaterial({
-            color: 0x0000ff,
+            color: 0x00ffff,
             side: THREE.DoubleSide,
             wireframe: false
         })
@@ -148,7 +146,7 @@ export class Racket extends THREE.Object3D {
         this.scene.add(point2Obj)
     }
 
-    testUpdate() {
+    racketDir() {
         if (params.isClicked && !this.point1Obj.visible) {
             this.point1Obj.position.set(this.planeX, 0.3, this.planeY)
             this.point1Obj.visible = true
@@ -198,7 +196,7 @@ export class Racket extends THREE.Object3D {
         }
     }
 
-    testIsInRange() {
+    isInRange() {
         let xRange = 4
         let zRange = 2
         let xDist = this.position.x - this.ballObj.position.x
@@ -213,9 +211,39 @@ export class Racket extends THREE.Object3D {
         }  
     }
 
+    moveRacket(dist) {
+        //move racket when the ball is close
+        let newPos = 0
+        let speed = 0.05
+        if (Math.abs(dist) < 4 && this.ballObj.velocity.x > 0) {
+            newPos = this.ballObj.position.y - 2.5
+            speed = 0.2
+        }
+        if (this.position.y !== newPos) {
+            let step = Math.sign(newPos - this.position.y) * speed
+            if (Math.abs(this.position.y - newPos) < Math.abs(step))
+                this.position.y = newPos
+            else
+                this.position.y +=step
+        }
+    }
      
 
-    testHit() {
+    ballInit() {
+        this.ballObj.position.x = params.planeDim.x / 2
+        this.ballObj.position.z = this.position.z
+        this.ballObj.position.y = 4
+
+        let dist = this.ballObj.position.x - this.position.x
+        // console.log(dist)
+        if (Math.abs(dist) < 1 && dist < 0 && params.isClicked) {
+            this.ballObj.initialize = false
+            this.ballObj.velocity.set(-12, 3, 0)
+            params.isClicked = false
+        }
+    }
+
+    hit() {
         function perform(obj) {
             params.isClicked = false
             obj.clickInfo.canPerform = true
@@ -228,86 +256,21 @@ export class Racket extends THREE.Object3D {
             obj.ballObj.hit(distX, distY)
         }
 
-        let rangeInfo = this.testIsInRange()
+        let rangeInfo = this.isInRange()
+        this.moveRacket(rangeInfo.xDist)
         if (rangeInfo.value && this.clickInfo.canPerform && rangeInfo.xDist > 0) {
             this.clickInfo.canPerform = false
             setTimeout(perform, 100, this)
         }
     }
 
-
-    //===========
-
-    isInRange() {
-        let xRange = 4
-        let zRange = 2
-        let xDist = this.position.x - this.ballObj.position.x
-        let zDist = this.position.z - this.ballObj.position.z
-        let value = false
-        if (params.isClicked && Math.abs(xDist) < xRange && Math.abs(zDist) < zRange && xDist >= -0.1)
-            value = true
-        return {
-            value,
-            xDist,
-            zDist
-        }
-    }
-
-    hit(mouseVelocity) {
-        // 0 < x <= 3 and -2 <= y <= 2 and 100 <= time <= 500
-        mouseVelocity.x = Math.min(2, mouseVelocity.x) / 2
-        mouseVelocity.y = Math.min(2, Math.abs(mouseVelocity.y)) * Math.sign(mouseVelocity.y) / 2
-        //mouseVelocity.time = Math.max(100, mouseVelocity.time)
-        let dist = Math.sqrt(mouseVelocity.x ** 2 + mouseVelocity.y ** 2)
-        mouseVelocity.x = mouseVelocity.x ** 0.5
-        mouseVelocity.y = mouseVelocity.y ** 2
-      
-        
-        // let x = 0.5 + Math.abs(mouseVelocity.x / 2)
-        // let y = 0.5 + mouseVelocity.y / 2
-        // let v = (dist / mouseVelocity.diffTime) * 100
-        //console.log("d", dist, v)
-        //let speed = v * (params.planeDim.x * 1.1)
-        
-        let posX = (mouseVelocity.x * params.planeDim.x * -1) / 2
-
-        //let posY = ((y * 2) - 1) * (params.planeDim.y / 2)
-        this.ballObj.setVelocity(posX, 0, 10)
-    }
-
-    racketBallHit() {
-        const rangeInfo = this.isInRange()
-        //changing clickInfo
-        if (!params.isClicked || (params.isClicked && performance.now() - this.clickInfo.startTime > 200)) {
-            this.clickInfo.startX = rangeInfo.xDist
-            this.clickInfo.startY = rangeInfo.zDist
-            this.clickInfo.startTime = performance.now()
-        }
-
-        if (rangeInfo.value === true) {
-            let diff = {
-                x: this.clickInfo.startX - rangeInfo.xDist,
-                y: this.clickInfo.startY - rangeInfo.zDist,
-                time: performance.now() - this.clickInfo.startTime
-            }
-            let mouseVelocity = {
-                x: diff.x,
-                y: diff.y,
-                time: diff.time
-            }
-            if (diff.x > 0)
-             this.hit(mouseVelocity)
-            params.isClicked = false
-        }
- 
-       
-    }
-
-
     update() {
         this.racketPhy()
-        //this.racketBallHit()
-        this.testUpdate()
-        this.testHit()
+        if (this.ballObj.initialize) {
+            this.ballInit()
+        } else {
+            this.racketDir()
+            this.hit()
+        }
     }
 }

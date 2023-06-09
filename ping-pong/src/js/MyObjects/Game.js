@@ -17,6 +17,14 @@ export class Game {
        
         this.camera = new MyCamera(params.vectorPos1.x, params.vectorPos1.y, params.vectorPos1.z)
 
+
+        this.gameInfo = {
+            turn: 0, //the player that will shot the ball
+            initTurn: 0,
+            scorePlayer1: 0,
+            scorePlayer2: 0
+        }
+
         this.guiParams = new GuiParams()
         this.#helpers()
         this.#events(this)
@@ -24,9 +32,11 @@ export class Game {
         
     }
 
-    // gameSetUp(obj) {
-        
-    // }
+    getTurn() {
+        //0->player1 1->player2
+        let a = this.gameInfo.initTurn + parseInt((this.gameInfo.scorePlayer1 + this.gameInfo.scorePlayer2))
+        return (a / 2) % 2
+    }
 
 
 

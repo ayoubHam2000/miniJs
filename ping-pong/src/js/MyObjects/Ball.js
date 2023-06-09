@@ -22,9 +22,12 @@ export class Ball extends THREE.Object3D{
         this.groundInfo = {
             //used by bot
             v : new THREE.Vector3(), // velocity
-            p : new THREE.Vector3() //position
+            p : new THREE.Vector3() // position
         }
 
+        this.bounce = 0
+        this.initialize = true
+        this.initBounce = true
         this.limit = {
             x: {
                 a : - params.planeDim.x * 0.05,
@@ -44,6 +47,7 @@ export class Ball extends THREE.Object3D{
                 b: + params.planeDim.y * 0.46
             }
         }
+
 
         //fun
         this.spotTarget = this.spotObj()
@@ -70,15 +74,33 @@ export class Ball extends THREE.Object3D{
     }
 
     init() {
-        let p = this.game.guiParams.getVal("ball", {ballX: 15, ballY : 1}, -20, 20, 0.01)
-        this.position.set(p.ballX, 5, p.ballY)
-        this.velocity.set(0, 0, 0)
-        //this.setVelocity(this.spotTarget.x, this.spotTarget.y, this.spotTarget.speed)
+        this.lose(this)
+    }
+
+    changeTurn() {
+        this.game.gameInfo.turn = (this.game.gameInfo.turn + 1) % 2
+        this.bounce = 0
+        console.log("Turn: ", this.game.gameInfo.turn)
+    }
+
+    lose(obj) {
+        let initTurn = obj.game.getTurn()
+        this.initialize = true
+        this.initBounce = true
+        obj.position.y = 5
+        obj.velocity.set(0, 0, 0)
+        obj.game.camera.cameraMovement.state = 1
+        this.bounce = 0
+        if (obj.game.gameInfo.turn === 1)
+            obj.game.gameInfo.scorePlayer1++
+        else
+            obj.game.gameInfo.scorePlayer2++
+        // console.log(obj.game.gameInfo)
     }
 
     reset() {
-        if (this.position.y <= -1 || this.position.y > 50 || params.frame === 1) {
-           this.init()
+        if (this.position.y <= -1 || this.position.y > 80) {
+           this.lose(this)
         }
     }
 
@@ -159,6 +181,9 @@ export class Ball extends THREE.Object3D{
         let zVelocity = speed2d.y
         let yVelocity = 0.5 * this.gravityForce * time - distance.z / time
 
+
+        //changeTurn
+        this.changeTurn()
         this.velocity.x = xVelocity
         this.velocity.z = zVelocity
         this.velocity.y = yVelocity
@@ -169,10 +194,12 @@ export class Ball extends THREE.Object3D{
     *******************************/
 
     move() {
-        this.position.x += this.velocity.x * this.timeStep
-        this.position.y += this.velocity.y * this.timeStep
-        this.position.z += this.velocity.z * this.timeStep
-        this.velocity.y = - this.gravityForce * this.timeStep + this.velocity.y
+        if (!this.initialize) {
+            this.position.x += this.velocity.x * this.timeStep
+            this.position.y += this.velocity.y * this.timeStep
+            this.position.z += this.velocity.z * this.timeStep
+            this.velocity.y = - this.gravityForce * this.timeStep + this.velocity.y
+        }
     }
 
     randomPos() {
@@ -187,12 +214,6 @@ export class Ball extends THREE.Object3D{
         }
     }
 
-    initHard(obj) {
-        let p = obj.game.guiParams.getVal("ball", {ballX: 15, ballY : 1}, -20, 20, 0.01)
-        obj.position.set(p.ballX, 5, p.ballY)
-        obj.velocity.set(0, 0, 0)
-    }
-
     ballPhy() {
         const rayCaster = this.rayCollision
         
@@ -201,22 +222,24 @@ export class Ball extends THREE.Object3D{
         rayCaster.set(this.position, normalizedVelocity)
         rayCaster.far = (this.velocity.length() * this.timeStep) + this.ballDim
         
-        const arr = rayCaster.intersectObjects([this.downWallObj, this.planeObj, this.netObj])
+        const arr = rayCaster.intersectObjects([this.planeObj, this.netObj])
         if (arr.length) {
             const newPos = arr[0].point
             newPos.x -= normalizedVelocity.x * this.ballDim
             newPos.y -= normalizedVelocity.y * this.ballDim
             newPos.z -= normalizedVelocity.z * this.ballDim
             this.position.copy(newPos)
-            if (arr[0].object.id === this.downWallObj.id) {
-                // this.velocity.x *= -1
-                // const newPos = this.randomPos()
-                // this.setVelocity(newPos.x, newPos.y, newPos.speed)
-                this.move()
-            } else if (arr[0].object.id === this.planeObj.id) {
+            if (arr[0].object.id === this.planeObj.id) {
                 this.velocity.y *= -0.8
                 this.groundInfo.v.copy(this.velocity)
                 this.groundInfo.p.copy(this.position)
+                this.bounce++
+                if (this.initBounce) {
+                    this.initBounce = false
+                    this.bounce--
+                }
+                if (this.bounce === 2)
+                    this.lose(this)
                 //this.init()
                 this.spot.hit(newPos)
             } 
@@ -227,7 +250,7 @@ export class Ball extends THREE.Object3D{
                     this.velocity.x = -2 * Math.sign(this.velocity.x)
                     this.velocity.y = 0.2
                     this.velocity.z = 2 *  Math.sign(this.velocity.z)
-                    setTimeout(this.initHard, 1000, this)
+                    setTimeout(this.lose, 1000, this)
                 } else
                     this.move()
             }
@@ -240,10 +263,12 @@ export class Ball extends THREE.Object3D{
 
 
     update() {
-        this.trail.update()
-        this.spot.update()
-        this.spotObjUpdate()
-        this.ballPhy()
-        this.reset()
+        if (!this.initialize) {
+            this.trail.update()
+            this.spot.update()
+            this.spotObjUpdate()
+            this.ballPhy()
+            this.reset()
+        }
     }
 }

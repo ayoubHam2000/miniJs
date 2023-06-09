@@ -75,11 +75,15 @@ export class Bot extends THREE.Object3D {
         let gv = this.ballObj.groundInfo.v
         let gp = this.ballObj.groundInfo.p
         
-        let xMax = (gv.y / this.gravityForce + gp.x / gv.x) * gv.x
-        let zMax = (gv.y / this.gravityForce + gp.z / gv.z) * gv.z
+        window.gv = gv
+        window.gp = gp
+        let xMax = ((gv.y * gv.x) / this.gravityForce + gp.x)
+        let zMax = ((gv.y * gv.z) / this.gravityForce + gp.z) 
+        console.log("1", gp.z / gv.z, gv.z)
         xMax = Math.min(Math.abs(xMax), Math.abs(this.limit.x.a)) * Math.sign(xMax)
         zMax = Math.min(Math.abs(zMax), Math.abs(this.limit.y.a)) * Math.sign(zMax)
 
+        console.log("2", gv, gp, xMax, zMax)
         let tx = (xMax - gp.x) / gv.x
         let tz = (zMax - gp.z) / gv.z
         let zx = gv.z * tx + gp.z
@@ -107,7 +111,6 @@ export class Bot extends THREE.Object3D {
             let d = this.velocity.clone().multiplyScalar(this.timeStep)
             let dist = this.botTarget.clone().sub(this.position)
             if (d.length() >= dist.length()) {
-                console.log(dist)
                 this.position.add(d)
                 this.moveToInfo.status++
             } else {
@@ -125,12 +128,15 @@ export class Bot extends THREE.Object3D {
                 const newPos = this.ballObj.randomPos()
                 this.ballObj.setVelocity(newPos.x, newPos.y, newPos.speed)
                 let dir = this.ballObj.velocity.clone().normalize()
-                console.log(dir)
+                const limit = this.ballObj.limit
                 let m = 0.1
-                if (dir.z > m)
+                let lm = 0.7
+                if (dir.z > m && newPos.y > limit.botY.b * lm) {
                     this.camera.cameraMovement.state = 0
-                else if (dir.z < -m)
+                }
+                else if (dir.z < -m && newPos.y < limit.botY.a * lm) {
                     this.camera.cameraMovement.state = 2
+                }
             } else {
                 setTimeout((obj) => {
                     obj.moveToInfo.lose = false
@@ -146,7 +152,7 @@ export class Bot extends THREE.Object3D {
     randomLose() {
         let r = Math.random()
         if (r > 0.93) {
-            console.log("Lose")
+            //console.log("Lose")
             let z = (Math.random() * 2 - 1) * 2
             let y = (Math.random() * 2 - 1) * 2
             z += 1 * Math.sign(z)
@@ -163,6 +169,7 @@ export class Bot extends THREE.Object3D {
         if (this.ballObj.groundInfo.v.x < 0 && this.step === 0) {
             let r = this.randomLose()
             this.target = this.determineMaxPossibleHeight()
+            console.log(this.target)
             this.botTarget = this.target.clone().add(r)
             this.moveToInfo.status = 0
             this.ballObj.groundInfo.v.x *= -1

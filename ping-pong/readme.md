@@ -22,10 +22,13 @@ score and name -
 fix hit ball -
 net collision -
 enemy racket and ai -
-camera
+hitting the ball -> change racket pos -
+
+camera (lose, hit)
 double tap -> lose
 ai stop when lose or player lose
 score
+
 loading
 sound
 
