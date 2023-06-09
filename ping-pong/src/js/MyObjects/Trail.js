@@ -17,6 +17,7 @@ export class TrailRenderer {
         this.maxDisplacement = 3
         this.color1 = { r: 0, g: 0, b: 255 };   // Blue
         this.color2  = { r: 255, g: 0, b: 0 };   // Red
+        this.stop = false
     }
 
 
@@ -64,19 +65,21 @@ export class TrailRenderer {
     update() {
         
 
-        let newPoint = new THREE.Vector3(this.obj.position.x, this.obj.position.y, this.obj.position.z)
-        let intermediatePoint = new THREE.Vector3()
-        if (dist3D(newPoint, this.lastPoint) > this.maxDisplacement) {
+        if (!this.stop) {
+            let newPoint = new THREE.Vector3(this.obj.position.x, this.obj.position.y, this.obj.position.z)
+            let intermediatePoint = new THREE.Vector3()
+            if (dist3D(newPoint, this.lastPoint) > this.maxDisplacement) {
+                this.lastPoint = newPoint
+                return 
+            }
+            for (let i = 1; i < 10; i++) {
+                let ratio = i / 9
+                intermediatePoint.lerpVectors(this.lastPoint, newPoint, ratio);
+                this.setItem(intermediatePoint)
+            }
+            // console.log(this.stack.length)
             this.lastPoint = newPoint
-            return 
         }
-        for (let i = 1; i < 10; i++) {
-            let ratio = i / 9
-            intermediatePoint.lerpVectors(this.lastPoint, newPoint, ratio);
-            this.setItem(intermediatePoint)
-        }
-        // console.log(this.stack.length)
-        this.lastPoint = newPoint
 
 
         for (let i = this.arr.length - 1; i >= 0; i--) {

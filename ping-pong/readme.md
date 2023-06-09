@@ -24,12 +24,15 @@ net collision -
 enemy racket and ai -
 hitting the ball -> change racket pos -
 
-camera (lose, hit)
-double tap -> lose
-ai stop when lose or player lose
-score
+camera (lose, hit) -
+double tap -> lose -
+score -
+switch turns -
+bot turn -> hit ball in his side -
+bot stop when lose or player lose -
 
-loading
-sound
+loading -
+fast and randomize init ball -
 
+sound 
 socket

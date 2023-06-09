@@ -7,6 +7,7 @@ import { GameConst } from "./MyObjects/gameConst";
 import { Net } from "./MyObjects/Net";
 import { Bot } from "./MyObjects/Bot";
 
+
 async function startGame() {
     await load()
     const game = new Game()
@@ -17,6 +18,7 @@ async function startGame() {
     game.scene.racketObj = new Racket(game)
     game.scene.botObj = new Bot(game)
     
+  
     function changing1() {
         // const boxObj = game.scene.environmentSceneObj
         const light = game.scene.ambientLightObj
@@ -74,6 +76,8 @@ async function startGame() {
         hiddenCodeEnd()
     }
 
+
+   
 
     game.renderer.setAnimationLoop(gameLoop)
 }

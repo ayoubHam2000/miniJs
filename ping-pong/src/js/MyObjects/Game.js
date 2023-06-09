@@ -34,8 +34,8 @@ export class Game {
 
     getTurn() {
         //0->player1 1->player2
-        let a = this.gameInfo.initTurn + parseInt((this.gameInfo.scorePlayer1 + this.gameInfo.scorePlayer2))
-        return (a / 2) % 2
+        let a = this.gameInfo.initTurn + parseInt((this.gameInfo.scorePlayer1 + this.gameInfo.scorePlayer2) / 2)
+        return (a % 2)
     }
 
 
@@ -67,6 +67,7 @@ export class Game {
     #setUpRenderer() {
         //THREE.ColorManagement.enabled = true;
         const renderer = new THREE.WebGLRenderer()
+        // renderer.setPixelRatio(window.devicePixelRatio * 1);
         //renderer.outputColorSpace = THREE.SRGBColorSpace;
         // THREE.SRGBColorSpace = "srgb"
         renderer.shadowMap.enabled = true; // Enable shadow map rendering
@@ -98,7 +99,7 @@ export class Game {
             params.mousePosition.y = - (e.clientY / window.innerHeight) * 2 + 1;
             params.mouseVelocity.x = params.mousePosition.x - params.mousePosition.oldX;
             params.mouseVelocity.y = params.mousePosition.y - params.mousePosition.oldY; 
-            // console.log(params.mouseVelocity)
+            // console.log(params.mousePosition)
         })
 
         window.addEventListener('mousedown', function(e) {

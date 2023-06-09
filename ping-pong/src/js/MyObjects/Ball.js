@@ -28,6 +28,7 @@ export class Ball extends THREE.Object3D{
         this.bounce = 0
         this.initialize = true
         this.initBounce = true
+        this.netLose = false
         this.limit = {
             x: {
                 a : - params.planeDim.x * 0.05,
@@ -74,33 +75,40 @@ export class Ball extends THREE.Object3D{
     }
 
     init() {
-        this.lose(this)
+        this.lose(this, "init")
     }
 
-    changeTurn() {
-        this.game.gameInfo.turn = (this.game.gameInfo.turn + 1) % 2
+    changeTurn(to) {
+        if (!to) {
+            this.game.gameInfo.turn = (this.game.gameInfo.turn + 1) % 2
+        } else {
+            this.game.gameInfo.turn = to    
+        }
         this.bounce = 0
         console.log("Turn: ", this.game.gameInfo.turn)
     }
 
-    lose(obj) {
-        let initTurn = obj.game.getTurn()
-        this.initialize = true
-        this.initBounce = true
+    lose(obj, cause) {
+        console.log(cause)
+        obj.initialize = true
+        obj.initBounce = true
+        obj.netLose = false
         obj.position.y = 5
         obj.velocity.set(0, 0, 0)
         obj.game.camera.cameraMovement.state = 1
-        this.bounce = 0
-        if (obj.game.gameInfo.turn === 1)
-            obj.game.gameInfo.scorePlayer1++
-        else
-            obj.game.gameInfo.scorePlayer2++
-        // console.log(obj.game.gameInfo)
+        obj.bounce = 0
+        if (cause !== "init") {
+            if (obj.game.gameInfo.turn === 1)
+                obj.game.gameInfo.scorePlayer1++
+            else
+                obj.game.gameInfo.scorePlayer2++
+        }
+        console.log("Score1: ", obj.game.gameInfo.scorePlayer1, " Score2: ", obj.game.gameInfo.scorePlayer2)
     }
 
     reset() {
         if (this.position.y <= -1 || this.position.y > 80) {
-           this.lose(this)
+           this.lose(this, "out of bound")
         }
     }
 
@@ -182,7 +190,6 @@ export class Ball extends THREE.Object3D{
         let yVelocity = 0.5 * this.gravityForce * time - distance.z / time
 
 
-        //changeTurn
         this.changeTurn()
         this.velocity.x = xVelocity
         this.velocity.z = zVelocity
@@ -233,13 +240,15 @@ export class Ball extends THREE.Object3D{
                 this.velocity.y *= -0.8
                 this.groundInfo.v.copy(this.velocity)
                 this.groundInfo.p.copy(this.position)
-                this.bounce++
+                if (this.netLose === false)
+                    this.bounce++
                 if (this.initBounce) {
                     this.initBounce = false
                     this.bounce--
                 }
-                if (this.bounce === 2)
-                    this.lose(this)
+                if (this.bounce === 2) {
+                    this.lose(this, "tow bounce")
+                }
                 //this.init()
                 this.spot.hit(newPos)
             } 
@@ -250,7 +259,9 @@ export class Ball extends THREE.Object3D{
                     this.velocity.x = -2 * Math.sign(this.velocity.x)
                     this.velocity.y = 0.2
                     this.velocity.z = 2 *  Math.sign(this.velocity.z)
-                    setTimeout(this.lose, 1000, this)
+                    this.netLose = true
+                    console.log(this.netLose)
+                    setTimeout(this.lose, 1000, this, "net collision")
                 } else
                     this.move()
             }
@@ -263,12 +274,15 @@ export class Ball extends THREE.Object3D{
 
 
     update() {
+        this.trail.update()
+        this.spot.update()
         if (!this.initialize) {
-            this.trail.update()
-            this.spot.update()
+            this.trail.stop = false
             this.spotObjUpdate()
             this.ballPhy()
             this.reset()
+        } else {
+            this.trail.stop = true
         }
     }
 }

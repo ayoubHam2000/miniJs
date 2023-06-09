@@ -23,7 +23,7 @@ export const params = {
         z: 0
     },
 
-    loadTex : false,
+    loadTex : true,
     netCollision : true,
 
     enableOrbit : false,

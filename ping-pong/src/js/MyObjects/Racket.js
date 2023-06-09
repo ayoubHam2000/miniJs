@@ -232,18 +232,24 @@ export class Racket extends THREE.Object3D {
     ballInit() {
         this.ballObj.position.x = params.planeDim.x / 2
         this.ballObj.position.z = this.position.z
-        this.ballObj.position.y = 4
+        this.ballObj.position.y = 3
 
         let dist = this.ballObj.position.x - this.position.x
         // console.log(dist)
-        if (Math.abs(dist) < 1 && dist < 0 && params.isClicked) {
+        if (Math.abs(dist) < 2 && dist < 0 && params.isClicked) {
             this.ballObj.initialize = false
-            this.ballObj.velocity.set(-12, 3, 0)
+            let r = (Math.random() * 2 - 1) * params.planeDim.y * 0.2
+            this.ballObj.velocity.set(-15, 4, r)
+            //this.ballObj.setVelocity(5, 2, 1)
             params.isClicked = false
+            this.ballObj.changeTurn(1)
         }
     }
 
     hit() {
+        if (this.game.gameInfo.turn === 1)
+            return
+        
         function perform(obj) {
             params.isClicked = false
             obj.clickInfo.canPerform = true
@@ -266,7 +272,7 @@ export class Racket extends THREE.Object3D {
 
     update() {
         this.racketPhy()
-        if (this.ballObj.initialize) {
+        if (this.ballObj.initialize && this.game.getTurn() === 0) {
             this.ballInit()
         } else {
             this.racketDir()
