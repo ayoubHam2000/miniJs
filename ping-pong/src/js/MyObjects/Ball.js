@@ -161,6 +161,12 @@ export class Ball extends THREE.Object3D{
     }
 
     hit(x, y) {
+        if (this.bounce === 0) {
+            this.netLose = true
+            console.log(this.netLose)
+            setTimeout(this.lose, 300, this, "no bounce")
+            //this.lose(this, "no bounce")
+        }
         // 0 <= x <= 1 || -1 <= y <= 1
         //this.position.y += 1
         x = this.getDiscretePosX(x)

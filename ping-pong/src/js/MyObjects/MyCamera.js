@@ -53,7 +53,7 @@ export class MyCamera extends THREE.PerspectiveCamera {
     }
 
     update() {
-        this.moveInCircle(this.cameraMovement.state)
+        //this.moveInCircle(1)
     }
 }
 

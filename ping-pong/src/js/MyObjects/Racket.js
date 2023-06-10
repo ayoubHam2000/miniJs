@@ -57,7 +57,7 @@ export class Racket extends THREE.Object3D {
         
         //let pos = this.game.guiParams.getVal("psss", {x:0, y:2, z:0}, -2, 4, 0.001)
         racketModel.position.y = -1.5
-        racketParent.position.set(0, 2.5, 0)
+        this.position.set(0, 2.5, 0)
         return {
             racketModel,
             racketParent
@@ -211,14 +211,14 @@ export class Racket extends THREE.Object3D {
         }  
     }
 
-    moveRacket(dist) {
-        //move racket when the ball is close
-        let newPos = 0
-        let speed = 0.05
-        if (Math.abs(dist) < 4 && this.ballObj.velocity.x > 0) {
+    moveRacket(newPos, speed) {
+        // move racket when the ball is close
+        // let newPos = 2.5
+        // let speed = 0.05
+        /*if (Math.abs(dist) < 4 && this.ballObj.velocity.x > 0) {
             newPos = this.ballObj.position.y - 2.5
             speed = 0.2
-        }
+        }*/
         if (this.position.y !== newPos) {
             let step = Math.sign(newPos - this.position.y) * speed
             if (Math.abs(this.position.y - newPos) < Math.abs(step))
@@ -240,7 +240,6 @@ export class Racket extends THREE.Object3D {
             this.ballObj.initialize = false
             let r = (Math.random() * 2 - 1) * params.planeDim.y * 0.2
             this.ballObj.velocity.set(-15, 4, r)
-            //this.ballObj.setVelocity(5, 2, 1)
             params.isClicked = false
             this.ballObj.changeTurn(1)
         }
@@ -263,20 +262,28 @@ export class Racket extends THREE.Object3D {
         }
 
         let rangeInfo = this.isInRange()
-        this.moveRacket(rangeInfo.xDist)
-        if (rangeInfo.value && this.clickInfo.canPerform && rangeInfo.xDist > 0) {
-            this.clickInfo.canPerform = false
-            setTimeout(perform, 100, this)
+        this.moveRacket(2.5, 0.05)
+        if (rangeInfo.value && rangeInfo.xDist > 0) {
+            if (this.clickInfo.canPerform) {
+                this.clickInfo.canPerform = false
+                setTimeout(perform, 100, this)
+            } else {
+                this.ballObj.velocity.x = 0
+                this.ballObj.position.x = this.position.x - 1
+                this.moveRacket(this.position.y, 0.2)
+                //this.position.y = this.ballObj.position.y
+            }
         }
     }
 
     update() {
         this.racketPhy()
+        this.racketDir()
         if (this.ballObj.initialize && this.game.getTurn() === 0) {
             this.ballInit()
-        } else {
-            this.racketDir()
+        } else if (this.game.gameInfo.turn === 0) {
             this.hit()
         }
+        
     }
 }

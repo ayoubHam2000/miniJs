@@ -36,3 +36,13 @@ fast and randomize init ball -
 
 sound 
 socket
+
+//fix
+score
+no bounce 
+hit ball position (bot, player)
+
+//to remove
+objs
+camera
+racket move with ball

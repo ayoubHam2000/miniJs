@@ -188,7 +188,7 @@ export class Bot extends THREE.Object3D {
             this.ballInit()
         }
         else if (this.ballObj.netLose === false && this.game.gameInfo.turn === 1){
-            if (this.ballObj.groundInfo.v.x < 0 && this.step === 0) {
+            if (this.ballObj.groundInfo.v.x < 0 && this.step === 0 && this.ballObj.bounce === 1) {
                 let r = this.randomLose()
                 this.target = this.determineMaxPossibleHeight()
                 this.botTarget = this.target.clone().add(r)
