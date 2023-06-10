@@ -100,7 +100,8 @@ export class Bot extends THREE.Object3D {
     }
 
     moveTo(time) {
-        if (this.moveToInfo.status = 1) {
+        if (this.moveToInfo.status === 1) {
+            this.botTarget.y += -2
             this.velocity = new THREE.Vector3().copy(this.botTarget).sub(this.position).multiplyScalar(1 / time)
             this.moveToInfo.status++
         }
@@ -108,9 +109,8 @@ export class Bot extends THREE.Object3D {
             let d = this.velocity.clone().multiplyScalar(this.timeStep)
             let dist = this.botTarget.clone().sub(this.position)
             if (d.length() >= dist.length()) {
-                this.position.add(d)
-                this.position.x++
-                this.moveToInfo.status++
+                console.log("Done")
+                this.position.add(dist)
             } else {
                 this.position.add(d)
             }
@@ -141,15 +141,15 @@ export class Bot extends THREE.Object3D {
                 }, 200, this)
             }
         }
-        if (dist < 2) {
-            this.moveTo(0.05)
+        if (dist < 4) {
+            this.moveTo(0.1)
         }
     }
 
 
     randomLose() {
         let r = Math.random()
-        if (r > 0.93) {
+        if (r > 1) {
             //console.log("Lose")
             let z = (Math.random() * 2 - 1) * 2
             let y = (Math.random() * 2 - 1) * 2
@@ -192,7 +192,7 @@ export class Bot extends THREE.Object3D {
                 let r = this.randomLose()
                 this.target = this.determineMaxPossibleHeight()
                 this.botTarget = this.target.clone().add(r)
-                this.moveToInfo.status = 0
+                this.moveToInfo.status = 1
                 this.ballObj.groundInfo.v.x *= -1
                 this.step = 1
             }

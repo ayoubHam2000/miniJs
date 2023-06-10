@@ -77,7 +77,7 @@ async function startGame() {
     }
 
 
-   
+  
 
     game.renderer.setAnimationLoop(gameLoop)
 }

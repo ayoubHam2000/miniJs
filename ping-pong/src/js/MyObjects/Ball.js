@@ -6,6 +6,12 @@ import * as THREE from 'three'
 
 export class Ball extends THREE.Object3D{
     
+    static LOSE_INIT = 0
+    static LOSE_OUT_OF_BOUND = 1
+    static LOSE_NET = 2
+    static LOSE_DOUBLE_BOUNCE = 3
+    static LOSE_NO_BOUNCE = 4
+
     constructor(game) {
         super()
         this.game = game
@@ -29,6 +35,7 @@ export class Ball extends THREE.Object3D{
         this.initialize = true
         this.initBounce = true
         this.netLose = false
+        this.theLose = false
         this.limit = {
             x: {
                 a : - params.planeDim.x * 0.05,
@@ -62,6 +69,7 @@ export class Ball extends THREE.Object3D{
         
         this.add(this.getObject())
         this.scene.add(this)
+
     }
 
     getObject() {
@@ -75,7 +83,7 @@ export class Ball extends THREE.Object3D{
     }
 
     init() {
-        this.lose(this, "init")
+        this.lose(Ball.LOSE_INIT)
     }
 
     changeTurn(to) {
@@ -85,11 +93,10 @@ export class Ball extends THREE.Object3D{
             this.game.gameInfo.turn = to    
         }
         this.bounce = 0
-        console.log("Turn: ", this.game.gameInfo.turn)
+        // console.log("Turn: ", this.game.gameInfo.turn)
     }
 
-    lose(obj, cause) {
-        console.log(cause)
+    loseInit(obj) {
         obj.initialize = true
         obj.initBounce = true
         obj.netLose = false
@@ -97,18 +104,58 @@ export class Ball extends THREE.Object3D{
         obj.velocity.set(0, 0, 0)
         obj.game.camera.cameraMovement.state = 1
         obj.bounce = 0
-        if (cause !== "init") {
-            if (obj.game.gameInfo.turn === 1)
-                obj.game.gameInfo.scorePlayer1++
-            else
-                obj.game.gameInfo.scorePlayer2++
+        obj.theLose = false
+    }
+
+    lose(cause, time) {
+        this.theLose = true
+        let arr = {}
+        arr[Ball.LOSE_INIT] = "init"
+        arr[Ball.LOSE_OUT_OF_BOUND] = "out of bound"
+        arr[Ball.LOSE_NET] = "net"
+        arr[Ball.LOSE_DOUBLE_BOUNCE] = "double bounce"
+        arr[Ball.LOSE_NO_BOUNCE] = "no bounce"
+        
+
+        if (cause !== Ball.LOSE_INIT) {
+            let p = [0, 0]
+            if (this.position.x < 0) {
+                if (cause === Ball.LOSE_OUT_OF_BOUND) {
+                    p = [1, 0]
+                } else if (cause === Ball.LOSE_NET) {
+                    p = [1, 0]
+                } else if (cause === Ball.LOSE_DOUBLE_BOUNCE) {
+                    p = [1, 0]
+                } else if (cause === Ball.LOSE_NO_BOUNCE) {
+                    p = [1, 0]
+                }
+            } else {
+                if (cause === Ball.LOSE_OUT_OF_BOUND) {
+                    p = [0, 1]
+                } else if (cause === Ball.LOSE_NET) {
+                    p = [0, 1]
+                } else if (cause === Ball.LOSE_DOUBLE_BOUNCE) {
+                    p = [0, 1]
+                } else if (cause === Ball.LOSE_NO_BOUNCE) {
+                    p = [0, 1]
+                }
+            }
+            this.game.gameInfo.scorePlayer1 += p[0]
+            this.game.gameInfo.scorePlayer2 += p[1]
         }
-        console.log("Score1: ", obj.game.gameInfo.scorePlayer1, " Score2: ", obj.game.gameInfo.scorePlayer2)
+        let s = this.position.x < 0 ? "Bot Side" : "My Side"
+        console.log(arr[cause], s, " Score1: ", this.game.gameInfo.scorePlayer1, " Score2: ", this.game.gameInfo.scorePlayer2)
+        if (time) {
+            setTimeout(this.loseInit, time, this)
+        } else {
+            this.loseInit(this)
+            this.theLose = false
+        }
     }
 
     reset() {
         if (this.position.y <= -1 || this.position.y > 80) {
-           this.lose(this, "out of bound")
+           this.lose(Ball.LOSE_OUT_OF_BOUND)
         }
     }
 
@@ -151,9 +198,9 @@ export class Ball extends THREE.Object3D{
 
     getDiscretePosX(x) {
         // 0 <= x <= 1
-        if (x > 0.95)
+        if (x > 0.92)
             x = 0.8
-        else if (x > 0.2)
+        else if (x > 0.15)
             x = 0.5
         else
             x = 0.2
@@ -163,9 +210,7 @@ export class Ball extends THREE.Object3D{
     hit(x, y) {
         if (this.bounce === 0) {
             this.netLose = true
-            console.log(this.netLose)
-            setTimeout(this.lose, 300, this, "no bounce")
-            //this.lose(this, "no bounce")
+            this.lose(Ball.LOSE_NO_BOUNCE, 300)
         }
         // 0 <= x <= 1 || -1 <= y <= 1
         //this.position.y += 1
@@ -253,24 +298,24 @@ export class Ball extends THREE.Object3D{
                     this.bounce--
                 }
                 if (this.bounce === 2) {
-                    this.lose(this, "tow bounce")
+                    this.lose(Ball.LOSE_DOUBLE_BOUNCE)
                 }
                 //this.init()
                 this.spot.hit(newPos)
             } 
             else {
                 // console.log(this.netObj)
-                if (params.netCollision) {
+                if (params.netCollision && this.theLose === false) {
                     this.netObj.hit()
                     this.velocity.x = -2 * Math.sign(this.velocity.x)
                     this.velocity.y = 0.2
                     this.velocity.z = 2 *  Math.sign(this.velocity.z)
                     this.netLose = true
-                    console.log(this.netLose)
-                    setTimeout(this.lose, 1000, this, "net collision")
+                    //console.log(this.netLose)
+                    this.lose(Ball.LOSE_NET, 1000)
                 } else
                     this.move()
-            }
+            }   
         } else {
             this.move()
         }
