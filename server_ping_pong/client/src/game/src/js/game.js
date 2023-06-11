@@ -8,8 +8,8 @@ import { Net } from "./MyObjects/Net";
 import { Bot } from "./MyObjects/Bot";
 import { io } from 'socket.io-client'
 
-function getSocket() {
-    const socket = io("http://localhost:3000")
+function getSocket(game) {
+    const socket = io("http://10.12.6.8:3000")
     
     socket.on("connect", () => {
         console.log("Client is connected")
@@ -22,15 +22,46 @@ function getSocket() {
         // });
     })
 
+    socket.on("start", (data) => {
+        // data.turn
+        console.log(data)
+        game.start(data)
+    })
+
+    socket.on("player2Event", (data) => {
+        //data.ballPosition
+        //data.ballVelocity
+        game.scene.botObj.player2Receive(data)
+    })
+
     return (socket)
 }
 
-async function startGame() {
+class SocketManager {
+    constructor(socket) {
+        this.socket = socket
+    }
 
+    sendData(data) {
+        if (!this.socket)
+            return
+        //data.position
+        //data.velocity
+        data.position = data.position.clone()
+        data.velocity = data.velocity.clone()
+        data.position.z *= -1
+        data.position.x *= -1
+
+        data.velocity.x *= -1
+        data.velocity.z *= -1
+        console.log("send data the other player: ", data)
+        this.socket.emit("event", data)
+    }
+}
+
+async function startGame() {
     await load()
     const game = new Game()
-    const socket = getSocket()
-    game.socket = socket
 
     game.gameConst = new GameConst()
     game.scene.netObj = new Net(game)
@@ -38,6 +69,8 @@ async function startGame() {
     game.scene.racketObj = new Racket(game)
     game.scene.botObj = new Bot(game)
     
+    const socket = getSocket(game)
+    game.socketMgr = new SocketManager(socket)
   
     function changing1() {
         // const boxObj = game.scene.environmentSceneObj
@@ -70,6 +103,8 @@ async function startGame() {
         game.scene.tableModel.scale.z = params.table_depth
 
 
+        if (!game.start)
+            return
         game.scene.netObj.update()
         game.scene.ballObj.update()
         game.scene.racketObj.update()

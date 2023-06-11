@@ -219,7 +219,7 @@ export class Ball extends THREE.Object3D{
         let posY = ((y + 1) * 0.5) * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
         let speed = this.getDiscreteSpeed(posX)
         this.camera.cameraMovement.state = 1
-        this.setVelocity(posX, posY, speed)
+        return (this.setVelocity(posX, posY, speed))
     }
 
     setVelocity(posX, posZ, speed) {
@@ -245,6 +245,10 @@ export class Ball extends THREE.Object3D{
         this.velocity.x = xVelocity
         this.velocity.z = zVelocity
         this.velocity.y = yVelocity
+        return {
+            position: this.position,
+            velocity: this.velocity
+        }
     }
 
     /*******************************

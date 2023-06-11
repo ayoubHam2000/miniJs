@@ -22,7 +22,9 @@ export class Game {
             turn: 0, //the player that will shot the ball
             initTurn: 0,
             scorePlayer1: 0,
-            scorePlayer2: 0
+            scorePlayer2: 0,
+            start: false,
+            isBot: false
         }
 
         this.guiParams = new GuiParams()
@@ -30,6 +32,14 @@ export class Game {
         this.#events(this)
         //this.gameSetUp(this)
         
+    }
+
+    start(data) {
+        if (this.gameInfo.isBot)
+            return
+        this.gameInfo.turn = data.turn
+        this.gameInfo.initTurn = data.turn
+        this.gameInfo.start = true
     }
 
     getTurn() {

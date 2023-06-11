@@ -15,6 +15,7 @@ export class Bot extends THREE.Object3D {
         this.gravityForce = params.gravityForce
         this.target = new THREE.Vector3(0, 0, 0)
         this.botTarget = new THREE.Vector3(0, 0, 0)
+        this.socketData = undefined
         this.step = 0
         this.performInit = false
 
@@ -109,7 +110,6 @@ export class Bot extends THREE.Object3D {
             let d = this.velocity.clone().multiplyScalar(this.timeStep)
             let dist = this.botTarget.clone().sub(this.position)
             if (d.length() >= dist.length()) {
-                console.log("Done")
                 this.position.add(dist)
             } else {
                 this.position.add(d)
@@ -182,8 +182,7 @@ export class Bot extends THREE.Object3D {
         setTimeout(perform, 1200, this)
     }
 
-    update() {
-        //console.log(this.ballObj)
+    botUpdate() {
         if (this.ballObj.initialize && this.game.getTurn() === 1) {
             this.ballInit()
         }
@@ -203,6 +202,74 @@ export class Bot extends THREE.Object3D {
                 this.hitTheBall()
             }
         }
+    }
 
+
+    //=====================================
+    //=====================================
+    //=====================================
+
+    player2BallInit() {
+        this.position.set(-18, 0, 0)
+        this.ballObj.position.x = - params.planeDim.x / 2 + 1
+        this.ballObj.position.z = this.position.z
+        this.ballObj.position.y = 3
+    }
+
+    player2Receive(data) {
+        console.log("bot received ", data)
+        this.socketData = data
+    }
+
+    player2MoveTo(time) {
+        if (this.moveToInfo.status === 1) {
+            this.botTarget.y += -2
+            this.velocity = new THREE.Vector3().copy(this.botTarget).sub(this.position).multiplyScalar(1 / time)
+            this.moveToInfo.status++
+        }
+        if (this.moveToInfo.status === 2) {
+            let d = this.velocity.clone().multiplyScalar(this.timeStep)
+            let dist = this.botTarget.clone().sub(this.position)
+            let flag = false
+            if (d.length() >= dist.length()) {
+                this.position.add(dist)
+                flag = true
+            } else {
+                this.position.add(d)
+            }
+            this.rotateObj()
+            return (flag)
+        }
+    }
+
+    player2Update() {
+        if (this.ballObj.initialize && !this.socketData) {
+            this.player2BallInit()
+        }
+        if (this.socketData) {
+            //this.botTarget.copy(this.socketData.position)
+            //console.log(this.botTarget, this.position)
+            //let arrivedToTarget = this.player2MoveTo(0.05)
+            //if (arrivedToTarget) {
+                this.position.copy(this.socketData.position)
+                this.position.y -= 2
+                this.position.x -= 1
+                this.ballObj.position.copy(this.socketData.position)
+                this.ballObj.velocity.copy(this.socketData.velocity)
+                this.ballObj.initialize = false
+                this.ballObj.changeTurn(0)
+                this.socketData = undefined
+            //}
+        } else {
+            this.moveToInfo.status = 1
+        }
+    }
+
+    update() {
+        if (this.game.gameInfo.isBot) {
+            this.botUpdate()
+        } else if (this.game.gameInfo.turn === 1) {
+            this.player2Update()
+        }
     }
 }

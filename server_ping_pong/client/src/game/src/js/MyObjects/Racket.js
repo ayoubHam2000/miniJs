@@ -242,6 +242,12 @@ export class Racket extends THREE.Object3D {
             this.ballObj.velocity.set(-15, 4, r)
             params.isClicked = false
             this.ballObj.changeTurn(1)
+            //socket
+            let data = {
+                position : this.ballObj.position,
+                velocity: this.ballObj.velocity
+            }
+            this.game.socketMgr.sendData(data)
         }
     }
 
@@ -258,7 +264,8 @@ export class Racket extends THREE.Object3D {
             distX = distX * distX * distX
             distY = Math.sqrt(Math.abs(distY)) * Math.sign(distY)
             //console.log(distX, distY)
-            obj.ballObj.hit(distX, distY)
+            let data = obj.ballObj.hit(distX, distY)
+            obj.game.socketMgr.sendData(data)
         }
 
         let rangeInfo = this.isInRange()
