@@ -35,6 +35,7 @@ export class Game {
     }
 
     start(data) {
+        console.log("Game is started ...")
         if (this.gameInfo.isBot)
             return
         this.gameInfo.turn = data.turn
@@ -43,8 +44,8 @@ export class Game {
     }
 
     getTurn() {
-        //0->player1 1->player2
-        let a = this.gameInfo.initTurn + parseInt((this.gameInfo.scorePlayer1 + this.gameInfo.scorePlayer2) / 2)
+        //0->player1 1->player2 
+        let a = (this.gameInfo.initTurn) + parseInt((this.gameInfo.scorePlayer1 + this.gameInfo.scorePlayer2) / 2)
         return (a % 2)
     }
 

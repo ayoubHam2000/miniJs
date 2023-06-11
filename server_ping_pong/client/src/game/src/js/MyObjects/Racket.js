@@ -108,6 +108,9 @@ export class Racket extends THREE.Object3D {
             else if (a > 1)
                 this.position.x = this.gameConst.player.p3.x
             
+            this.game.socketMgr.racketMove({
+                position: this.position
+            })
             //racket rotation
             const newAngle = - Math.PI * 1.5 * (b * 2 - 1)
             if (newAngle > - Math.PI / 2 && newAngle < Math.PI / 2){
@@ -233,6 +236,7 @@ export class Racket extends THREE.Object3D {
         this.ballObj.position.x = params.planeDim.x / 2
         this.ballObj.position.z = this.position.z
         this.ballObj.position.y = 3
+        console.log("Init Ball", this.ballObj.position)
 
         let dist = this.ballObj.position.x - this.position.x
         // console.log(dist)

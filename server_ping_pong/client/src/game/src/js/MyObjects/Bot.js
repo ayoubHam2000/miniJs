@@ -210,15 +210,20 @@ export class Bot extends THREE.Object3D {
     //=====================================
 
     player2BallInit() {
-        this.position.set(-18, 0, 0)
-        this.ballObj.position.x = - params.planeDim.x / 2 + 1
+        //this.position.set(-18, 0, 0)
+        this.ballObj.position.x = - params.planeDim.x / 2
         this.ballObj.position.z = this.position.z
         this.ballObj.position.y = 3
     }
 
-    player2Receive(data) {
+    player2SocketReceive(data) {
         console.log("bot received ", data)
         this.socketData = data
+    }
+
+    player2SocketMoveRacket(data) {
+        this.position.copy(data.position)
+        this.rotateObj()
     }
 
     player2MoveTo(time) {
@@ -243,7 +248,7 @@ export class Bot extends THREE.Object3D {
     }
 
     player2Update() {
-        if (this.ballObj.initialize && !this.socketData) {
+        if (this.ballObj.initialize && !this.socketData && this.game.getTurn() === 1) {
             this.player2BallInit()
         }
         if (this.socketData) {
@@ -268,7 +273,7 @@ export class Bot extends THREE.Object3D {
     update() {
         if (this.game.gameInfo.isBot) {
             this.botUpdate()
-        } else if (this.game.gameInfo.turn === 1) {
+        } else {
             this.player2Update()
         }
     }

@@ -1,8 +1,11 @@
+const clc = require('cli-color');
 const io = require('socket.io')(3000, {
     cors: {
         origin : ["http://10.12.6.8:5173"]
     }
 })
+
+let roomId = 0
 
 class AClient {
     constructor (clientId) {
@@ -10,13 +13,13 @@ class AClient {
     }
 }
 
-
 class ARoom {
-    constructor (roomId) {
+    constructor () {
         this.roomId = roomId
         this.player1 = undefined
         this.player2 = undefined
         this.closed = false
+        roomId++
     }
 
     add(player) {
@@ -30,15 +33,20 @@ class ARoom {
         }
     }
 
-
-
-    startPlaying() {
-        console.log("Start playing")
-        io.to(this.player1.clientId).emit("start", {turn: 0})
-        io.to(this.player2.clientId).emit("start", {turn: 1})
+    playerLeft(clientId) {
+        if (this.closed) {
+            let player2 = this.getPlayer2Id(clientId)
+            io.to(player2).emit("opponentLeft", clientId)
+            console.log("player left => ", player2)
+        }
     }
 
-    getPlayer2(clientId) {
+    startPlaying() {
+        io.to(this.player1.clientId).emit("start", {turn: 0, id: this.player1.clientId})
+        io.to(this.player2.clientId).emit("start", {turn: 1, id: this.player2.clientId})
+    }
+
+    getPlayer2Id(clientId) {
         if (clientId === this.player1.clientId)
             return (this.player2.clientId)
         return (this.player1.clientId)
@@ -62,12 +70,14 @@ class Manager {
 
     addClient(clientId) {
         if (!this.hasClient(clientId)) {
-            console.log(`Client ${clientId} added`)
+            console.log(`Client ${clientId} added to room nb ${this.aRoom.roomId}`)
             const newClient = new AClient(clientId)
             this.aRoom.add(newClient)
             this.clients.push(clientId)
-            this.clientRooms[clientId] = this.aRoom
+            this.clientRooms.set(clientId, this.aRoom)
             if (this.aRoom.closed) {
+                let m = clc.green(`Start playing between ${this.aRoom.player1.clientId} and ${this.aRoom.player2.clientId} room ${this.aRoom.roomId} => nbRooms ${this.clientRooms.size / 2}`)
+                console.log(m)
                 this.aRoom = new ARoom()
             }
         }
@@ -77,43 +87,45 @@ class Manager {
         //data.clientId
         //data.ballPosition
         //data.ballVelocity
-        let room = this.clientRooms[data.clientId]
+        let room = this.clientRooms.get(data.clientId)
         if (room.closed) {
-            console.log("Room", room)
-            let player2 = this.clientRooms[data.clientId].getPlayer2(data.clientId)
+            let player2 = room.getPlayer2Id(data.clientId)
             io.to(player2).emit("player2Event", data)
         }
     }
 
+    racketMove(data) {
+        let room = this.clientRooms.get(data.clientId)
+        if (room?.closed) {
+            let player2 = room.getPlayer2Id(data.clientId)
+            io.to(player2).emit("moveRacket", data)
+        }
+    }
+
     removeClient(clientId) {
-        let room = this.clientRooms[clientId]
-        let player1 = room.player1
-        let player2 = room.player2
-
-        if (player1) {
-            console.log(`Client ${clientId} removed`)
-            this.clients.splice(indexToRemove, this.clients.indexOf(player1.clientId));
-            this.clientRooms.delete(player1.clientId)
-            if (room === this.aRoom) {
-                this.aRoom.player1 = undefined
+        let room = this.clientRooms.get(clientId)
+        if (room) {
+            let player1 = room.player1
+            let player2 = room.player2
+    
+            room.playerLeft(clientId)
+            if (player1) {
+                console.log(`Client ${player1.clientId} removed, room nb ${room.roomId}`)
+                this.clients.splice(this.clients.indexOf(player1.clientId), 1);
+                this.clientRooms.delete(player1.clientId)
+                if (room === this.aRoom) {
+                    this.aRoom.player1 = undefined
+                }
+            }
+            if (player2) {
+                console.log(`Client ${player2.clientId} removed, room nb ${room.roomId}`)
+                this.clients.splice(this.clients.indexOf(player2.clientId), 1);
+                this.clientRooms.delete(player2.clientId)
+                if (room === this.aRoom) {
+                    this.aRoom.player2 = undefined
+                }
             }
         }
-        if (player2) {
-            console.log(`Client ${clientId} removed`)
-            this.clients.splice(indexToRemove, this.clients.indexOf(player2.clientId));
-            this.clientRooms.delete(player2.clientId)
-            if (room === this.aRoom) {
-                this.aRoom.player1 = undefined
-            }
-        }
-
-
-   
-        //let room = this.clientRooms[clientId]
-        
-
-
-        
     }
 }
 
@@ -132,6 +144,11 @@ io.on("connection", socket => {
         //data.ballVelocity
         data.clientId = socketId
         manager.sendToPlater2(data)
+    })
+
+    socket.on("racketMove", (data) => {
+        data.clientId = socketId
+        manager.racketMove(data)
     })
 
     socket.on('disconnect',  () => {

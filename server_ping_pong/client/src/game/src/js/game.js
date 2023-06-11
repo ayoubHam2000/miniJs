@@ -31,7 +31,18 @@ function getSocket(game) {
     socket.on("player2Event", (data) => {
         //data.ballPosition
         //data.ballVelocity
-        game.scene.botObj.player2Receive(data)
+        game.scene.botObj.player2SocketReceive(data)
+    })
+
+    socket.on("moveRacket", (data) => {
+        //data.position
+        game.scene.botObj.player2SocketMoveRacket(data)
+    })
+
+    socket.on("opponentLeft", (data) => {
+        console.log("opponentLeft ", data)
+        game.gameInfo.start = false
+        alert("Game End!!!")
     })
 
     return (socket)
@@ -57,6 +68,17 @@ class SocketManager {
         console.log("send data the other player: ", data)
         this.socket.emit("event", data)
     }
+
+    racketMove(data) {
+        if (!this.socket)
+            return
+        //data.position
+        
+        data.position = data.position.clone()
+        data.position.z *= -1
+        data.position.x *= -1
+        this.socket.emit("racketMove", data)
+    }
 }
 
 async function startGame() {
@@ -68,6 +90,7 @@ async function startGame() {
     game.scene.ballObj = new Ball(game)
     game.scene.racketObj = new Racket(game)
     game.scene.botObj = new Bot(game)
+    window.game = game
     
     const socket = getSocket(game)
     game.socketMgr = new SocketManager(socket)
@@ -103,7 +126,7 @@ async function startGame() {
         game.scene.tableModel.scale.z = params.table_depth
 
 
-        if (!game.start)
+        if (!game.gameInfo.start)
             return
         game.scene.netObj.update()
         game.scene.ballObj.update()

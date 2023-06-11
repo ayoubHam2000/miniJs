@@ -5,7 +5,7 @@ export class GuiParams {
     constructor() {
         this.isExist = {}
         this.gui = new dat.GUI()
-
+        //dat.GUI.toggleHide();
         
         this.vectorFolder = this.gui.addFolder('Values');
         this.vectorFolder.open()
