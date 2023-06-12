@@ -60,6 +60,7 @@ export class Bot extends THREE.Object3D {
             racketModel,
             racketParent
         }
+        
     }
 
     
