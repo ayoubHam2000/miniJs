@@ -1,21 +1,19 @@
 import * as THREE from "three";
 import { GuiParams } from "./GuiParams";
-import { MyScene } from "./GameObj";
+import { MyScene } from "./MyScene";
 import { MyCamera } from './MyCamera'
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import {params} from '../Utils/Params'
-import { GameConst } from "./gameConst";
 
 export class Game {
     constructor() {
-        this.gameConst = new GameConst()
       
         this.renderer = this.#setUpRenderer()
         this.rayBall = new THREE.Raycaster()
         
         this.scene = new MyScene()
        
-        this.camera = new MyCamera(params.vectorPos1.x, params.vectorPos1.y, params.vectorPos1.z)
+        this.camera = new MyCamera()
 
 
         this.gameInfo = {

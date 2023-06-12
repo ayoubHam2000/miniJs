@@ -21,8 +21,6 @@ export class Ball extends THREE.Object3D{
         this.ballDim = params.ballDim
         this.rayCollision = new THREE.Raycaster()
         this.velocity = new THREE.Vector3()
-        this.downWallObj = this.scene.downWallObj
-        this.planeObj = this.scene.planeObj
         this.netObj = this.scene.netObj
         this.gravityForce = params.gravityForce
         this.groundInfo = {
@@ -57,7 +55,6 @@ export class Ball extends THREE.Object3D{
         }
 
 
-        //fun
         this.spotTarget = this.spotObj()
         this.scene.add(this.spotTarget)
         this.init()
@@ -67,19 +64,50 @@ export class Ball extends THREE.Object3D{
         this.spot = new Spot()
         this.scene.add(this.spot)
         
-        this.add(this.getObject())
-        this.scene.add(this)
+        const objs = this.getObjects()
 
+        this.ballObj = objs.ballObj
+        this.add(this.ballObj)
+
+        this.tablePlaneObj = objs.tablePlaneObj
+        this.scene.add(this.planeObj)
+        
+        this.scene.add(this)
     }
 
-    getObject() {
+    getObjects() {
+       return {
+            ...this.getTablePlaneObj(),
+            ...this.getBallObj()
+       }
+    }
+
+    getTablePlaneObj() {
+        const tablePlaneGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y)
+        const tablePlaneMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            side: THREE.DoubleSide,
+            wireframe: false
+        })
+        const tablePlaneObj = new THREE.Mesh(tablePlaneGeometry, tablePlaneMaterial)
+        tablePlaneObj.rotation.x = - 0.5 * Math.PI
+
+        return {
+            tablePlaneObj
+        }
+    }
+
+    getBallObj() {
         const sphereGeo = new THREE.SphereGeometry(params.ballDim);
         const sphereMat = new THREE.MeshStandardMaterial({ 
             color: 0xff0000, 
             wireframe: false,
         });
         const sphereObj = new THREE.Mesh(sphereGeo, sphereMat);
-        return (sphereObj)
+        sphereObj.castShadow = true
+        return {
+            ballObj: sphereObj
+        }
     }
 
     init() {
@@ -284,14 +312,14 @@ export class Ball extends THREE.Object3D{
         rayCaster.set(this.position, normalizedVelocity)
         rayCaster.far = (this.velocity.length() * this.timeStep) + this.ballDim
         
-        const arr = rayCaster.intersectObjects([this.planeObj, this.netObj])
+        const arr = rayCaster.intersectObjects([this.tablePlaneObj, this.netObj])
         if (arr.length) {
             const newPos = arr[0].point
             newPos.x -= normalizedVelocity.x * this.ballDim
             newPos.y -= normalizedVelocity.y * this.ballDim
             newPos.z -= normalizedVelocity.z * this.ballDim
             this.position.copy(newPos)
-            if (arr[0].object.id === this.planeObj.id) {
+            if (arr[0].object.id === this.tablePlaneObj.id) {
                 this.velocity.y *= -0.8
                 this.groundInfo.v.copy(this.velocity)
                 this.groundInfo.p.copy(this.position)

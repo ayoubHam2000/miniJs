@@ -9,8 +9,8 @@ export class Net extends THREE.Object3D {
         this.scene = game.scene
         this.counter = 0
 
-        this.planeObj = this.getObject()
-        this.add(this.planeObj)
+        this.netPlaneObj = this.getObject()
+        this.add(this.netPlaneObj)
         this.scene.add(this)
     }
 
@@ -23,11 +23,11 @@ export class Net extends THREE.Object3D {
             blending: THREE.AdditiveBlending,
             opacity: 0
         })
-        const planeObj = new THREE.Mesh(planeGeo, planeMat)
-        planeObj.position.set(0, 0.75, 0)
-        planeObj.rotation.y = 0.5 * Math.PI
+        const netPlaneObj = new THREE.Mesh(planeGeo, planeMat)
+        netPlaneObj.position.set(0, 0.75, 0)
+        netPlaneObj.rotation.y = 0.5 * Math.PI
 
-        return (planeObj)
+        return (netPlaneObj)
     }
 
 
@@ -38,15 +38,15 @@ export class Net extends THREE.Object3D {
     update() {
         //let pos = this.game.guiParams.getVal("scale", {x:0, y: 1, z: 1}, 0, 10, 0.01)
         if (this.counter === 1) {
-            this.planeObj.material.opacity += 0.02
-            if (this.planeObj.material.opacity > 0.2){
-                this.planeObj.material.opacity = 0.2
+            this.netPlaneObj.material.opacity += 0.02
+            if (this.netPlaneObj.material.opacity > 0.2){
+                this.netPlaneObj.material.opacity = 0.2
                 this.counter++
             }
         } else if (this.counter === 2) {
-            this.planeObj.material.opacity -= 0.02
-            if (this.planeObj.material.opacity < 0) {
-                this.planeObj.material.opacity = 0
+            this.netPlaneObj.material.opacity -= 0.02
+            if (this.netPlaneObj.material.opacity < 0) {
+                this.netPlaneObj.material.opacity = 0
                 this.counter++
             }
         } else {

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { params } from '../Utils/Params'
-import { Vector3D, dist3D } from "../MyMath"
+import { dist3D } from "../MyMath"
 
 
 export class TrailRenderer {

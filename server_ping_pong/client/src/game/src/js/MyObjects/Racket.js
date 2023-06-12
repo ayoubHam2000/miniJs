@@ -8,7 +8,6 @@ export class Racket extends THREE.Object3D {
         this.game = game
         this.scene = game.scene
         this.camera = game.camera
-        this.gameConst = game.gameConst
         this.ballObj = game.scene.ballObj
         this.rayMouseCamera = new THREE.Raycaster()
         this.planeX = 0
@@ -27,16 +26,42 @@ export class Racket extends THREE.Object3D {
             canPerform: true
         }
 
-        const racket =  this.getObject()
-        this.racketModel = racket.racketModel
-        this.racketParent = racket.racketParent
+        const objs =  this.getObjects()
+        this.racketPlaneObj = objs.racketPlaneObj
+        game.scene.add(this.racketPlaneObj)
+
+        this.racketModel = objs.racketModel
+        this.racketParent = objs.racketParent
         this.add(this.racketParent)
         game.scene.add(this)
 
         this.init()
     }
 
-    getObject() {
+    getObjects() {
+       return {
+            ...this.getRacketObj(),
+            ...this.getRacketObj()
+       }
+    }
+
+    getRacketPlaneObj() {
+        const racketPlaneGeometry = new THREE.PlaneGeometry(100, 100)
+        const racketPlaneMaterial = new THREE.MeshBasicMaterial({
+            color: 0x0000ff,
+            side: THREE.DoubleSide,
+            wireframe: true
+        })
+        const racketPlaneObj = new THREE.Mesh(racketPlaneGeometry, racketPlaneMaterial)
+        racketPlaneObj.rotation.x = 0.5 * Math.PI
+        racketPlaneObj.position.y = params.racketHeight
+        racketPlaneObj.visible = false
+        return {
+            racketPlaneObj
+        }
+    }
+
+    getRacketObj() {
         const racketModel = this.scene.racketModel
         racketModel.scale.set(0.15, 0.15, 0.15)
         racketModel.rotation.y = Math.PI / 2
@@ -45,17 +70,7 @@ export class Racket extends THREE.Object3D {
         const racketParent = new THREE.Group()
         racketParent.add(racketModel)
 
-        // const infinitePlaneGeometry = new THREE.PlaneGeometry(5, 5)
-        // const infinitePlaneMaterial = new THREE.MeshBasicMaterial({
-        //     color: 0x0000ff,
-        //     side: THREE.DoubleSide,
-        //     wireframe: true
-        // })
-        // const infinitePlaneObj = new THREE.Mesh(infinitePlaneGeometry, infinitePlaneMaterial)
-        // infinitePlaneObj.rotation.y = 0.5 * Math.PI
-        // racketParent.add(infinitePlaneObj)
-        
-        //let pos = this.game.guiParams.getVal("psss", {x:0, y:2, z:0}, -2, 4, 0.001)
+     
         racketModel.position.y = -1.5
         this.position.set(0, 2.5, 0)
         return {
@@ -69,18 +84,18 @@ export class Racket extends THREE.Object3D {
         
         const mousePosition = new THREE.Vector2(params.mousePosition.x, params.mousePosition.y)
         this.rayMouseCamera.setFromCamera(mousePosition, this.camera)
-        const intersects = this.rayMouseCamera.intersectObject(this.scene.infinitePLaneObj)
+        const intersects = this.rayMouseCamera.intersectObject(this.racketPlaneObj)
 
         //If there is an intersection
         if (intersects.length) {
             // translating the plan so that p1 becomes the origin.
             const p = {
-                x: intersects[0].point.x - this.gameConst.player.p1.x,
-                y: intersects[0].point.z - this.gameConst.player.p1.y
+                x: intersects[0].point.x - params.player.p1.x,
+                y: intersects[0].point.z - params.player.p1.y
             }
             
             //getCoefficient a, b of vec1 and vec2 of the plane
-            const invMatrix = this.gameConst.player.invMatrix
+            const invMatrix = params.player.invMatrix
             const a = p.x * invMatrix.a + p.y * invMatrix.c
             const b = p.x * invMatrix.b + p.y * invMatrix.d
             
@@ -99,14 +114,14 @@ export class Racket extends THREE.Object3D {
 
             //limit the racket in the plane
             if (b < 0)
-                this.position.z = this.gameConst.player.p1.y
+                this.position.z = params.player.p1.y
             else if (b > 1)
-                this.position.z = this.gameConst.player.p2.y
+                this.position.z = params.player.p2.y
         
             if (a < 0)
-                this.position.x = this.gameConst.player.p1.x
+                this.position.x = params.player.p1.x
             else if (a > 1)
-                this.position.x = this.gameConst.player.p3.x
+                this.position.x = params.player.p3.x
             
             this.game.socketMgr.racketMove({
                 position: this.position
