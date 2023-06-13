@@ -44,9 +44,8 @@ export class Human extends Player2 {
                 this.position.y -= 2
                 this.position.x -= 1
                 this.ballObj.position.copy(this.socketData.position)
-                this.ballObj.velocity.copy(this.socketData.velocity)
-                this.ballObj.initialize = false
-                this.game.changeTurn()
+                let v = this.socketData.velocity
+                this.ballObj.directSetVelocity(v.x, v.y, v.z)
                 this.socketData = undefined
             //}
         } else {

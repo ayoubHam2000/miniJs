@@ -51,9 +51,7 @@ export class Ball extends THREE.Object3D{
 
         this.bounce = 0
         this.initialize = true
-        this.initBounce = true
-        this.netLose = false
-        this.theLose = false
+        this.lose = false
         this.init()
 
         this.trail = new TrailRenderer(game, this)
@@ -108,21 +106,21 @@ export class Ball extends THREE.Object3D{
     }
 
     init() {
-        this.lose(Ball.LOSE_INIT)
+        this.loseFunction(Ball.LOSE_INIT)
     }
 
     loseInit(obj) {
         obj.initialize = true
-        obj.initBounce = true
-        obj.netLose = false
+        obj.lose = false
         obj.position.y = 5
         obj.velocity.set(0, 0, 0)
         obj.bounce = 0
-        obj.theLose = false
     }
 
-    lose(cause, time) {
-        this.theLose = true
+    loseFunction(cause, time) {
+        if (this.lose === true)
+            return
+        console.trace(` myFunction called from:`);
         let arr = {}
         arr[Ball.LOSE_INIT] = "init"
         arr[Ball.LOSE_OUT_OF_BOUND] = "out of bound"
@@ -159,17 +157,18 @@ export class Ball extends THREE.Object3D{
         }
         let s = this.position.x < 0 ? "Bot Side" : "My Side"
         console.log(arr[cause], s, " Score1: ", this.game.gameInfo.scorePlayer1, " Score2: ", this.game.gameInfo.scorePlayer2)
+        
+        this.lose = true
         if (time) {
             setTimeout(this.loseInit, time, this)
         } else {
             this.loseInit(this)
-            this.theLose = false
         }
     }
 
     reset() {
         if (this.position.y <= -1 || this.position.y > 80) {
-           this.lose(Ball.LOSE_OUT_OF_BOUND)
+           this.loseFunction(Ball.LOSE_OUT_OF_BOUND)
         }
     }
 
@@ -196,10 +195,6 @@ export class Ball extends THREE.Object3D{
     }
 
     hit(x, y) {
-        if (this.bounce === 0) {
-            this.netLose = true
-            this.lose(Ball.LOSE_NO_BOUNCE, 300)
-        }
         // 0 <= x <= 1 || -1 <= y <= 1
         //this.position.y += 1
         x = this.getDiscretePosX(x)
@@ -209,7 +204,26 @@ export class Ball extends THREE.Object3D{
         return (this.setVelocity(posX, posY, speed))
     }
 
+
+    #ballIsHit() {
+        if (this.bounce === 0 && this.initialize === false) {
+            this.loseFunction(Ball.LOSE_NO_BOUNCE, 300)
+        }
+        this.initialize = false
+        this.bounce = 0
+        this.game.changeTurn()
+    }
+
+    directSetVelocity(x, y, z) {
+        if (this.lose === true)
+            return
+        this.velocity.set(x, y, z)
+        this.#ballIsHit()
+    }
+
     setVelocity(posX, posZ, speed) {
+        if (this.lose === true)
+            return
         //speed < 0 => distance.x < 0 => time > 0
         //speed > 0 => distance.x > 0 => time > 0
         //distance.y < 0 => zVelocity < 0 ...
@@ -228,10 +242,10 @@ export class Ball extends THREE.Object3D{
         let yVelocity = 0.5 * this.gravityForce * time - distance.z / time
 
 
-        this.game.changeTurn()
         this.velocity.x = xVelocity
         this.velocity.z = zVelocity
         this.velocity.y = yVelocity
+        this.#ballIsHit()
         return {
             position: this.position,
             velocity: this.velocity
@@ -263,8 +277,25 @@ export class Ball extends THREE.Object3D{
         }
     }
 
+    incrementBounce() {
+        if (this.lose === true)
+            return
+        
+        if (
+            (this.velocity.x > 0 && this.position.x >= 0)
+            || (this.velocity.x < 0 && this.position.x <= 0)
+            ) {
+                this.bounce++
+            }
+
+        if (this.bounce === 2) {
+            this.loseFunction(Ball.LOSE_DOUBLE_BOUNCE)
+        }
+    }
+
     ballPhy() {
         const rayCaster = this.rayCollision
+        let moveFlag = true
         
         //init rayCaster
         let normalizedVelocity = this.velocity.clone().normalize()
@@ -279,37 +310,24 @@ export class Ball extends THREE.Object3D{
             newPos.z -= normalizedVelocity.z * this.ballDim
             this.position.copy(newPos)
             if (arr[0].object.id === this.tablePlaneObj.id) {
+                moveFlag = false
                 this.velocity.y *= -0.8
                 this.groundInfo.v.copy(this.velocity)
                 this.groundInfo.p.copy(this.position)
-                if (this.netLose === false)
-                    this.bounce++
-                if (this.initBounce) {
-                    this.initBounce = false
-                    this.bounce--
-                }
-                if (this.bounce === 2) {
-                    this.lose(Ball.LOSE_DOUBLE_BOUNCE)
-                }
-                //this.init()
+                this.incrementBounce()
                 this.spot.hit(newPos)
             } 
-            else {
-                // console.log(this.netObj)
-                if (params.netCollision && this.theLose === false) {
-                    this.netObj.hit()
-                    this.velocity.x = -2 * Math.sign(this.velocity.x)
-                    this.velocity.y = 0.2
-                    this.velocity.z = 2 *  Math.sign(this.velocity.z)
-                    this.netLose = true
-                    //console.log(this.netLose)
-                    this.lose(Ball.LOSE_NET, 1000)
-                } else
-                    this.move()
+            else if (this.lose === false) {
+                moveFlag = false
+                this.netObj.hit()
+                this.velocity.x = -2 * Math.sign(this.velocity.x)
+                this.velocity.y = 0.2
+                this.velocity.z = 2 *  Math.sign(this.velocity.z)
+                this.loseFunction(Ball.LOSE_NET, 1000)
             }   
-        } else {
-            this.move()
         }
+        if (moveFlag)
+            this.move()
     }
 
 

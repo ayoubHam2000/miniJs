@@ -108,10 +108,8 @@ export class Bot extends Player2 {
         
         function perform(obj) {
             let r = (Math.random() * 2 - 1) * params.planeDim.y * 0.2
-            obj.ballObj.initialize = false
             obj.performInit = false
-            obj.ballObj.velocity.set(12, 3, r)
-            this.game.changeTurn()
+            obj.ballObj.directSetVelocity(10, 3, r)
         }
 
         this.game.changeTurn(1)
@@ -128,7 +126,7 @@ export class Bot extends Player2 {
         if (this.ballObj.initialize && this.game.getTurnInit() === 1) {
             this.ballInit()
         }
-        else if (this.ballObj.netLose === false && this.game.getTurn() === 1){
+        else if (this.ballObj.lose === false && this.game.getTurn() === 1){
             if (this.ballObj.groundInfo.v.x < 0 && this.step === 0 && this.ballObj.bounce === 1) {
                 let r = this.randomLose()
                 this.target = this.determineMaxPossibleHeight()

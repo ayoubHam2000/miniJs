@@ -257,11 +257,9 @@ export class Racket extends THREE.Object3D {
         let dist = this.ballObj.position.x - this.position.x
         // console.log(dist)
         if (Math.abs(dist) < 2 && dist < 0 && params.mouse.isClicked && this.ballObj.initialize) {
-            this.ballObj.initialize = false
             let r = Math.random() * params.planeDim.y * -0.2 * Math.sign(this.ballObj.position.z)
-            this.ballObj.velocity.set(-13, 4, r)
+            this.ballObj.directSetVelocity(-13, 4, r)
             params.mouse.isClicked = false
-            this.game.changeTurn()
             //socket
             let data = {
                 position : this.ballObj.position,

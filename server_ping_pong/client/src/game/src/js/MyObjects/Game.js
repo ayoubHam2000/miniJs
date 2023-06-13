@@ -63,7 +63,6 @@ export class Game {
         } else {
             this.gameInfo.turn = to    
         }
-        this.scene.ballObj.bounce = 0
     }
 
 

@@ -9,9 +9,9 @@ export const params = {
 //Not used
     //params
     withSocket: true,
-    loadTex : false,
+    loadTex : true,
     netCollision : true,
-    timeStep: 1/90,
+    timeStep: 1/50,
 
     //window
     winWidth : window.innerWidth,
