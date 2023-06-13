@@ -55,8 +55,7 @@ export class Ball extends THREE.Object3D{
         }
 
 
-        this.spotTarget = this.spotObj()
-        this.scene.add(this.spotTarget)
+
         this.init()
 
         this.trail = new TrailRenderer(game, this)
@@ -70,7 +69,7 @@ export class Ball extends THREE.Object3D{
         this.add(this.ballObj)
 
         this.tablePlaneObj = objs.tablePlaneObj
-        this.scene.add(this.planeObj)
+        this.scene.add(this.tablePlaneObj)
         
         this.scene.add(this)
     }
@@ -114,23 +113,12 @@ export class Ball extends THREE.Object3D{
         this.lose(Ball.LOSE_INIT)
     }
 
-    changeTurn(to) {
-        if (!to) {
-            this.game.gameInfo.turn = (this.game.gameInfo.turn + 1) % 2
-        } else {
-            this.game.gameInfo.turn = to    
-        }
-        this.bounce = 0
-        // console.log("Turn: ", this.game.gameInfo.turn)
-    }
-
     loseInit(obj) {
         obj.initialize = true
         obj.initBounce = true
         obj.netLose = false
         obj.position.y = 5
         obj.velocity.set(0, 0, 0)
-        obj.game.camera.cameraMovement.state = 1
         obj.bounce = 0
         obj.theLose = false
     }
@@ -187,32 +175,6 @@ export class Ball extends THREE.Object3D{
         }
     }
 
-    spotObj() {
-        const spotGeo = new THREE.CircleGeometry(params.ballDim, 23);
-        const spotMap = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, 
-            wireframe: false,
-            side: THREE.DoubleSide
-        });
-        const spot = new THREE.Mesh(spotGeo, spotMap);
-        spot.rotation.x = Math.PI / 2
-        return (spot)
-    }
-
-    spotObjUpdate() {
-        let p = this.game.guiParams.getVal("spotPos", {x: 0.75, y : 0.5, speed : 0}, 0, 1, 0.001)
-        let x = ((p.x * 2) - 1) * (params.planeDim.x / 2)
-        let y = ((p.y * 2) - 1) * (params.planeDim.y / 2)
-        let speed = p.speed * 3 + 1
-
-        this.spotTarget.p = p
-        this.spotTarget.x = x
-        this.spotTarget.y = y
-        this.spotTarget.speed = speed
-        this.spotTarget.position.set(x, 0.3, y)
-    }
-
-
     getDiscreteSpeed(posX) {
         let discreteSpeed = [0.75, 1, 1.25]
         let range = (params.planeDim.x * 0.5) / discreteSpeed.length
@@ -246,7 +208,6 @@ export class Ball extends THREE.Object3D{
         let posX = x * (this.limit.x.b - this.limit.x.a) + this.limit.x.a
         let posY = ((y + 1) * 0.5) * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
         let speed = this.getDiscreteSpeed(posX)
-        this.camera.cameraMovement.state = 1
         return (this.setVelocity(posX, posY, speed))
     }
 
@@ -269,7 +230,7 @@ export class Ball extends THREE.Object3D{
         let yVelocity = 0.5 * this.gravityForce * time - distance.z / time
 
 
-        this.changeTurn()
+        this.game.changeTurn()
         this.velocity.x = xVelocity
         this.velocity.z = zVelocity
         this.velocity.y = yVelocity
@@ -354,14 +315,22 @@ export class Ball extends THREE.Object3D{
     }
 
 
-
+    changeColor() {
+        let t = (this.game.getTurn() + this.game.gameInfo.initTurn) % 2
+        if (t === 0)
+            this.ballObj.material.color.set(0x00ff00)
+        else if (t === 1)
+            this.ballObj.material.color.set(0x0000ff)
+        else
+            this.ballObj.material.color.set(0xff0000)
+    }
 
     update() {
+        this.changeColor()
         this.trail.update()
         this.spot.update()
         if (!this.initialize) {
             this.trail.stop = false
-            this.spotObjUpdate()
             this.ballPhy()
             this.reset()
         } else {

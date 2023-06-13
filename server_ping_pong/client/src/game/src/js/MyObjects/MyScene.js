@@ -8,21 +8,16 @@ import { Racket } from "./Racket";
 import { Net } from "./Net";
 import { Bot } from "./Bot";
 import { SpotLight } from "./SpotLight";
+import { Human } from "./Human";
 
 
 export class MyScene extends THREE.Scene {
    
    
-    constructor (game) {
+    constructor () {
         super()
 
-        this.game = game
-        this.ambientLightObj = new AmbientLight(game)
-        this.spotLight = new SpotLight(game)
-        this.netObj = new Net(game)
-        this.ballObj = new Ball(game)
-        this.racketObj = new Racket(game)
-        this.botObj = new Bot(game)
+
 
         //const wallsObj = this.#wallsObj()
         const models = this.#modelsObj()
@@ -39,6 +34,22 @@ export class MyScene extends THREE.Scene {
         this.racketModel = models.racketModel
     }
 
+    init(game) {
+        this.game = game
+        this.game.scene = this
+        this.ambientLightObj = new AmbientLight(game)
+        this.spotLight = new SpotLight(game)
+        this.netObj = new Net(game)
+        this.ballObj = new Ball(game)
+        this.racketObj = new Racket(game)
+
+        if (game.gameInfo.isBot) {
+            this.player2 = new Bot(game)
+        } else {
+            this.player2 = new Human(game)
+        }
+        
+    } 
 
     #environmentScene() {
         const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
@@ -113,7 +124,7 @@ export class MyScene extends THREE.Scene {
         this.netObj.update()
         this.ballObj.update()
         this.racketObj.update()
-        this.botObj.update()
+        this.player2.update()
     }
 
 }

@@ -40,7 +40,7 @@ export class Racket extends THREE.Object3D {
 
     getObjects() {
        return {
-            ...this.getRacketObj(),
+            ...this.getRacketPlaneObj(),
             ...this.getRacketObj()
        }
     }
@@ -82,7 +82,7 @@ export class Racket extends THREE.Object3D {
     racketPhy() {
         //Get mouse intersection with the plane coordinate
         
-        const mousePosition = new THREE.Vector2(params.mousePosition.x, params.mousePosition.y)
+        const mousePosition = new THREE.Vector2(params.mouse.x, params.mouse.y)
         this.rayMouseCamera.setFromCamera(mousePosition, this.camera)
         const intersects = this.rayMouseCamera.intersectObject(this.racketPlaneObj)
 
@@ -165,7 +165,7 @@ export class Racket extends THREE.Object3D {
     }
 
     racketDir() {
-        if (params.isClicked && !this.point1Obj.visible) {
+        if (params.mouse.isClicked && !this.point1Obj.visible) {
             this.point1Obj.position.set(this.planeX, 0.3, this.planeY)
             this.point1Obj.visible = true
             this.clickInfo.startX = this.planeX
@@ -174,7 +174,7 @@ export class Racket extends THREE.Object3D {
             this.clickInfo.dt = performance.now()
             this.clickInfo.dx = this.planeX
             this.clickInfo.dt = this.planeY
-        } else if (params.isClicked && this.point1Obj.visible) {
+        } else if (params.mouse.isClicked && this.point1Obj.visible) {
             let diffDt = performance.now() - this.clickInfo.dt
             let flag = true
             if (diffDt > 50) {
@@ -208,7 +208,7 @@ export class Racket extends THREE.Object3D {
                     this.clickInfo.startY = b
                 }
             }
-        } else if (!params.isClicked) {
+        } else if (!params.mouse.isClicked) {
             this.point1Obj.visible = false
             this.point2Obj.visible = false
         }
@@ -220,7 +220,7 @@ export class Racket extends THREE.Object3D {
         let xDist = this.position.x - this.ballObj.position.x
         let zDist = this.position.z - this.ballObj.position.z
         let value = false
-        if (params.isClicked && Math.abs(xDist) < xRange && Math.abs(zDist) < zRange && xDist >= -0.1)
+        if (params.mouse.isClicked && Math.abs(xDist) < xRange && Math.abs(zDist) < zRange && xDist >= -0.1)
             value = true
         return {
             value,
@@ -248,19 +248,20 @@ export class Racket extends THREE.Object3D {
      
 
     ballInit() {
+        this.game.changeTurn(0)
         this.ballObj.position.x = params.planeDim.x / 2
         this.ballObj.position.z = this.position.z
         this.ballObj.position.y = 3
-        console.log("Init Ball", this.ballObj.position)
+        //console.log("Init Ball", this.ballObj.position)
 
         let dist = this.ballObj.position.x - this.position.x
         // console.log(dist)
-        if (Math.abs(dist) < 2 && dist < 0 && params.isClicked) {
+        if (Math.abs(dist) < 2 && dist < 0 && params.mouse.isClicked && this.ballObj.initialize) {
             this.ballObj.initialize = false
             let r = Math.random() * params.planeDim.y * -0.2 * Math.sign(this.ballObj.position.z)
-            this.ballObj.velocity.set(-15, 4, r)
-            params.isClicked = false
-            this.ballObj.changeTurn(1)
+            this.ballObj.velocity.set(-13, 4, r)
+            params.mouse.isClicked = false
+            this.game.changeTurn()
             //socket
             let data = {
                 position : this.ballObj.position,
@@ -271,11 +272,11 @@ export class Racket extends THREE.Object3D {
     }
 
     hit() {
-        if (this.game.gameInfo.turn === 1)
+        if (this.game.getTurn() === 1)
             return
         
         function perform(obj) {
-            params.isClicked = false
+            params.mouse.isClicked = false
             obj.clickInfo.canPerform = true
             let distX = (obj.planeX - obj.clickInfo.startX) / 5
             let distY = (obj.planeY - obj.clickInfo.startY) / 5
@@ -305,9 +306,9 @@ export class Racket extends THREE.Object3D {
     update() {
         this.racketPhy()
         this.racketDir()
-        if (this.ballObj.initialize && this.game.getTurn() === 0) {
+        if (this.ballObj.initialize && this.game.getTurnInit() === 0) {
             this.ballInit()
-        } else if (this.game.gameInfo.turn === 0) {
+        } else if (this.game.getTurn() === 0) {
             this.hit()
         }
         

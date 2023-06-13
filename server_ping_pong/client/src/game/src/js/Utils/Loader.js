@@ -11,7 +11,6 @@ const loaderResult = {}
 
 //Walls Texture
 function tex(texture, index) {
-    console.log(texture.image.width)
     const spriteSize = new THREE.Vector2(texture.image.width, texture.image.width / 4); // Size of each sprite
 
     // Calculate the sprite's UV coordinates based on its index
@@ -26,12 +25,14 @@ function tex(texture, index) {
     // Create a texture region for the specific sprite
     texture.offset.set(row * spriteWidth, column * spriteHeight);
     texture.repeat.set(spriteWidth, spriteHeight);
-    texture.encoding = THREE.sRGBEncoding;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return (texture)
 }
 
 //Floor Texture
 function floorText(texture) {
-    texture.encoding = THREE.sRGBEncoding;
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return (texture)
 }
 
 //===================================
@@ -50,29 +51,51 @@ async function load3dObjects() {
     }
 }
 
+function loadTexture(url) {
+    return new Promise((resolve, reject) => {
+      const textureLoader = new THREE.TextureLoader();
+  
+      textureLoader.load(
+        url,
+        resolve, // Resolve the promise when the texture is loaded
+        undefined, // No progress callback
+        reject // Reject the promise if there is an error
+      );
+    });
+  }
+
+ 
 async function loadTextures() {
-    const textureLoader = new THREE.TextureLoader()
+
+    //const textures = await Promise.all(texturePromises);
+    const textureUrls = [
+        wallsTextures,
+        wallsNormalMap,
+        floorTexture,
+        floorNormalMap
+    ];
+    const textures = await Promise.all(textureUrls.map((url) => loadTexture(url)))
 
     loaderResult.tex = {
         backWall : {
-            tex : textureLoader.load(wallsTextures, (texture) => tex(texture, 0)),
-            normalMap : textureLoader.load(wallsNormalMap, (texture) => tex(texture, 0))
+            tex :  tex(textures[0].clone(), 0),
+            normalMap : tex(textures[1].clone(), 0),
         },
         frontWall : {
-            tex : textureLoader.load(wallsTextures, (texture) => tex(texture, 2)),
-            normalMap : textureLoader.load(wallsNormalMap, (texture) => tex(texture, 2))
+            tex : tex(textures[0].clone(), 2),
+            normalMap : tex(textures[1].clone(), 2),
         },
         leftWall : {
-            tex: textureLoader.load(wallsTextures, (texture) => tex(texture, 3)),
-            normalMap : textureLoader.load(wallsNormalMap, (texture) => tex(texture, 3))
+            tex: tex(textures[0].clone(), 3),
+            normalMap : tex(textures[1].clone(), 3),
         },
         rightWall : {
-            tex: textureLoader.load(wallsTextures, (texture) => tex(texture, 1)),
-            normalMap : textureLoader.load(wallsNormalMap, (texture) => tex(texture, 1))
+            tex: tex(textures[0].clone(), 1),
+            normalMap : tex(textures[1].clone(), 1),
         },
         floor : {
-            tex: textureLoader.load(floorTexture, (texture) => floorText(texture)),
-            normalMap : textureLoader.load(floorNormalMap, (texture) => floorText(texture))
+            tex: floorText(textures[2]),
+            normalMap : floorText(textures[3]),
         }
     }
 }

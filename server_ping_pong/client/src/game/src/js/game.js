@@ -5,6 +5,10 @@ import { io } from 'socket.io-client'
 
 
 function getSocket(game) {
+    if (!params.withSocket) {
+        game.setPlayer2ToBotMode()
+        return undefined
+    }
     const socket = io("http://10.12.6.8:3000")
     
     socket.on("connect", () => {
@@ -27,12 +31,12 @@ function getSocket(game) {
     socket.on("player2Event", (data) => {
         //data.ballPosition
         //data.ballVelocity
-        game.scene.botObj.player2SocketReceive(data)
+        game.scene.player2.socketReceive(data)
     })
 
     socket.on("moveRacket", (data) => {
         //data.position
-        game.scene.botObj.player2SocketMoveRacket(data)
+        game.scene.player2.socketMoveRacket(data)
     })
 
     socket.on("opponentLeft", (data) => {
@@ -81,12 +85,15 @@ async function startGame() {
     await load()
     const game = new Game()
 
-
-    window.game = game
-    
+    //socket
     const socket = getSocket(game)
     game.socketMgr = new SocketManager(socket)
-  
+
+    //game init
+    window.game = game
+    game.scene.init(game)
+
+    //loop
     function guiChangeValues() {
         game.orbit.enabled = params.enableOrbit
     }

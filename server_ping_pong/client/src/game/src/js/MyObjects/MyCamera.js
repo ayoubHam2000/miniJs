@@ -12,7 +12,7 @@ export class MyCamera extends THREE.PerspectiveCamera {
 
        
         this.position.copy(params.cameraPos)
-        this.rotation.copy(params.cameraRotation)
+        this.rotation.setFromVector3(params.cameraRotation)
     }
 }
 

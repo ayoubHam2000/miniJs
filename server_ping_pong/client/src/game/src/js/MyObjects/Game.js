@@ -41,12 +41,30 @@ export class Game {
         this.gameInfo.start = true
     }
 
-    getTurn() {
-        //0->player1 1->player2 
+    setPlayer2ToBotMode() {
+        this.gameInfo.start = true
+        this.gameInfo.isBot = true
+    }
+
+    getTurnInit() {
+        //0->player1 1->player2
         let a = (this.gameInfo.initTurn) + parseInt((this.gameInfo.scorePlayer1 + this.gameInfo.scorePlayer2) / 2)
         return (a % 2)
     }
 
+    getTurn() {
+        return this.gameInfo.turn
+    }
+
+    changeTurn(to = undefined) {
+        // console.trace(`=>${to} myFunction called from:`);
+        if (to === undefined) {
+            this.gameInfo.turn = (this.gameInfo.turn + 1) % 2
+        } else {
+            this.gameInfo.turn = to    
+        }
+        this.scene.ballObj.bounce = 0
+    }
 
 
     
@@ -102,24 +120,23 @@ export class Game {
         });
 
         window.addEventListener('mousemove', function(e) {
-            params.mousePosition.oldX = params.mousePosition.x;
-            params.mousePosition.oldY = params.mousePosition.y;
-            params.mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
-            params.mousePosition.y = - (e.clientY / window.innerHeight) * 2 + 1;
-            params.mouseVelocity.x = params.mousePosition.x - params.mousePosition.oldX;
-            params.mouseVelocity.y = params.mousePosition.y - params.mousePosition.oldY; 
-            // console.log(params.mousePosition)
+            params.mouse.oldX = params.mouse.x;
+            params.mouse.oldY = params.mouse.y;
+            params.mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            params.mouse.y = - (e.clientY / window.innerHeight) * 2 + 1;
+            params.mouse.vx = params.mouse.x - params.mouse.oldX;
+            params.mouse.vy = params.mouse.y - params.mouse.oldY; 
         })
 
         window.addEventListener('mousedown', function(e) {
-            params.mouseClickPos.x = (e.clientX / window.innerWidth) * 2 - 1;
-            params.mouseClickPos.y = - (e.clientY / window.innerHeight) * 2 + 1;
-            params.isClicked = true
+            params.mouse.cx = (e.clientX / window.innerWidth) * 2 - 1;
+            params.mouse.cy = - (e.clientY / window.innerHeight) * 2 + 1;
+            params.mouse.isClicked = true
             //console.log("onmousedown", params.mouseClickPos)
         })
 
         window.addEventListener('mouseup', function(e) {
-            params.isClicked = false
+            params.mouse.isClicked = false
             //console.log("onmouseup", params.mouseClickPos)
         })
     }
