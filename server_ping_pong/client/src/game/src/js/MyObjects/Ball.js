@@ -29,11 +29,6 @@ export class Ball extends THREE.Object3D{
             p : new THREE.Vector3() // position
         }
 
-        this.bounce = 0
-        this.initialize = true
-        this.initBounce = true
-        this.netLose = false
-        this.theLose = false
         this.limit = {
             x: {
                 a : - params.planeDim.x * 0.05,
@@ -54,8 +49,11 @@ export class Ball extends THREE.Object3D{
             }
         }
 
-
-
+        this.bounce = 0
+        this.initialize = true
+        this.initBounce = true
+        this.netLose = false
+        this.theLose = false
         this.init()
 
         this.trail = new TrailRenderer(game, this)

@@ -11,7 +11,7 @@ export const params = {
     withSocket: true,
     loadTex : false,
     netCollision : true,
-    timeStep: 1/50,
+    timeStep: 1/90,
 
     //window
     winWidth : window.innerWidth,
