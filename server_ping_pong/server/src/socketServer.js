@@ -102,6 +102,29 @@ class Manager {
         }
     }
 
+    lose(data) {
+        let room = this.clientRooms.get(data.clientId)
+        if (room?.closed) {
+            let player1 = room.player1
+            let player2 = room.player2
+            if (player1.clientId === data.clientId) {
+                let a = clc.green(`${new Date().getTime()} client ${data.clientId} lose : ${data.reason} ${data.ballPosX} score => ${data.score.p1} ${data.score.p2}`)
+                console.log(a)
+                let ballPosX = data.ballPosX
+                let p = [0, 1]
+                if (ballPosX > 0)
+                    p = [1, 0]
+                let newData = {
+                    p,
+                    ...data
+                }
+                io.to(player1.clientId).emit("loseEvent", newData)
+                newData.p = p.reverse()
+                io.to(player2.clientId).emit("loseEvent", newData)
+            }
+        }
+    }
+
     removeClient(clientId) {
         let room = this.clientRooms.get(clientId)
         if (room) {
@@ -144,6 +167,11 @@ io.on("connection", socket => {
         //data.ballVelocity
         data.clientId = socketId
         manager.sendToPlater2(data)
+    })
+
+    socket.on("lose", (data) => {
+        data.clientId = socketId
+        manager.lose(data)
     })
 
     socket.on("racketMove", (data) => {

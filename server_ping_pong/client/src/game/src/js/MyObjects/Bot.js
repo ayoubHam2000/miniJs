@@ -109,7 +109,7 @@ export class Bot extends Player2 {
         function perform(obj) {
             let r = (Math.random() * 2 - 1) * params.planeDim.y * 0.2
             obj.performInit = false
-            obj.ballObj.directSetVelocity(10, 3, r)
+            obj.ballObj.directSetVelocity(12, 3, r)
         }
 
         this.game.changeTurn(1)

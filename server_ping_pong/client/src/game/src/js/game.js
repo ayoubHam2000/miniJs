@@ -39,6 +39,10 @@ function getSocket(game) {
         game.scene.player2.socketMoveRacket(data)
     })
 
+    socket.on("loseEvent", (data) => {
+        game.scene.ballObj.socketLose(data)
+    })
+
     socket.on("opponentLeft", (data) => {
         console.log("opponentLeft ", data)
         game.gameInfo.start = false
@@ -67,6 +71,12 @@ class SocketManager {
         data.velocity.z *= -1
         console.log("send data the other player: ", data)
         this.socket.emit("event", data)
+    }
+
+    lose(data) {
+        if (!this.socket)
+            return
+        this.socket.emit("lose", data)
     }
 
     racketMove(data) {

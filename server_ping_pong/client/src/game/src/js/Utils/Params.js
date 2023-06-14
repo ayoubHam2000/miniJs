@@ -9,9 +9,10 @@ export const params = {
 //Not used
     //params
     withSocket: true,
-    loadTex : true,
+    loadTex : false,
     netCollision : true,
-    timeStep: 1/50,
+    timeStep: 1/40,
+    gravityForce : 12,
 
     //window
     winWidth : window.innerWidth,
@@ -70,7 +71,6 @@ export const params = {
 
     racketHeight : 2.5,
     ballDim : 0.2,
-    gravityForce : 14,
 
 
     //utils
@@ -116,7 +116,7 @@ function playerInfo () {
     const planePoints = {
         p1 : new Vector2(params.planeDim.x / 2 + hOffset, +params.planeDim.y / 2 + wOffset),
         p2 : new Vector2(params.planeDim.x / 2 + hOffset, -params.planeDim.y / 2 - wOffset),
-        p3 : new Vector2(1, +params.planeDim.y / 2 + wOffset),
+        p3 : new Vector2(2, +params.planeDim.y / 2 + wOffset),
     }
 
     const planeProperties = getPlaneProperties(planePoints)

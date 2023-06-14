@@ -6,11 +6,10 @@ import * as THREE from 'three'
 
 export class Ball extends THREE.Object3D{
     
-    static LOSE_INIT = 0
-    static LOSE_OUT_OF_BOUND = 1
-    static LOSE_NET = 2
-    static LOSE_DOUBLE_BOUNCE = 3
-    static LOSE_NO_BOUNCE = 4
+    static LOSE_OUT_OF_BOUND = 0
+    static LOSE_NET = 1
+    static LOSE_DOUBLE_BOUNCE = 2
+    static LOSE_NO_BOUNCE = 3
 
     constructor(game) {
         super()
@@ -106,10 +105,11 @@ export class Ball extends THREE.Object3D{
     }
 
     init() {
-        this.loseFunction(Ball.LOSE_INIT)
+        this.loseInit(this)
     }
 
     loseInit(obj) {
+        console.log("Init")
         obj.initialize = true
         obj.lose = false
         obj.position.y = 5
@@ -117,52 +117,59 @@ export class Ball extends THREE.Object3D{
         obj.bounce = 0
     }
 
-    loseFunction(cause, time) {
-        if (this.lose === true)
-            return
-        console.trace(` myFunction called from:`);
+    #getLoseReason(cause) {
         let arr = {}
-        arr[Ball.LOSE_INIT] = "init"
+       
         arr[Ball.LOSE_OUT_OF_BOUND] = "out of bound"
         arr[Ball.LOSE_NET] = "net"
         arr[Ball.LOSE_DOUBLE_BOUNCE] = "double bounce"
         arr[Ball.LOSE_NO_BOUNCE] = "no bounce"
-        
+        return (arr[cause])
+    }
 
-        if (cause !== Ball.LOSE_INIT) {
-            let p = [0, 0]
-            if (this.position.x < 0) {
-                if (cause === Ball.LOSE_OUT_OF_BOUND) {
-                    p = [1, 0]
-                } else if (cause === Ball.LOSE_NET) {
-                    p = [1, 0]
-                } else if (cause === Ball.LOSE_DOUBLE_BOUNCE) {
-                    p = [1, 0]
-                } else if (cause === Ball.LOSE_NO_BOUNCE) {
-                    p = [1, 0]
-                }
-            } else {
-                if (cause === Ball.LOSE_OUT_OF_BOUND) {
-                    p = [0, 1]
-                } else if (cause === Ball.LOSE_NET) {
-                    p = [0, 1]
-                } else if (cause === Ball.LOSE_DOUBLE_BOUNCE) {
-                    p = [0, 1]
-                } else if (cause === Ball.LOSE_NO_BOUNCE) {
-                    p = [0, 1]
-                }
-            }
-            this.game.gameInfo.scorePlayer1 += p[0]
-            this.game.gameInfo.scorePlayer2 += p[1]
-        }
-        let s = this.position.x < 0 ? "Bot Side" : "My Side"
-        console.log(arr[cause], s, " Score1: ", this.game.gameInfo.scorePlayer1, " Score2: ", this.game.gameInfo.scorePlayer2)
-        
-        this.lose = true
-        if (time) {
-            setTimeout(this.loseInit, time, this)
+    socketLose(data) {
+        this.game.gameInfo.scorePlayer1 += data.p[0]
+        this.game.gameInfo.scorePlayer2 += data.p[1]
+        let score = [this.game.gameInfo.scorePlayer1, this.game.gameInfo.scorePlayer2]
+        let loseTime = data.time
+        console.log(`Player1 : ${score[0]} Player2: ${score[1]} reason ${data.reason}`)
+        if (loseTime) {
+            setTimeout(this.loseInit, loseTime, this)
         } else {
             this.loseInit(this)
+        }
+    }
+
+    loseFunction(cause, time) {
+        if (this.lose === true)
+            return
+        this.lose = true
+        
+        if (!params.withSocket) {
+            let p = [1, 0]
+            if (this.position.x > 0)
+                p = [0, 1]
+            this.game.gameInfo.scorePlayer1 += p[0]
+            this.game.gameInfo.scorePlayer2 += p[1]
+            console.log(`=> Player1 : ${this.game.gameInfo.scorePlayer1} Player2: ${this.game.gameInfo.scorePlayer2}`)
+            if (time) {
+                setTimeout(this.loseInit, time, this)
+            } else {
+                this.loseInit(this)
+            }
+        } else {
+            if (this.game.gameInfo.initTurn === 0) {
+                console.log("Send Lose Event")
+                this.game.socketMgr.lose({
+                    reason: this.#getLoseReason(cause),
+                    ballPosX: this.position.x,
+                    time: time,
+                    score: {
+                        p1: this.game.gameInfo.scorePlayer1,
+                        p2: this.game.gameInfo.scorePlayer2
+                    }
+                })
+            }
         }
     }
 

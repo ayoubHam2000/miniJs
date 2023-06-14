@@ -270,7 +270,7 @@ export class Racket extends THREE.Object3D {
     }
 
     hit() {
-        if (this.game.getTurn() === 1)
+        if (this.game.getTurn() === 1 || this.ballObj.position.x <= 1 || this.ballObj.lose)
             return
         
         function perform(obj) {
@@ -282,8 +282,11 @@ export class Racket extends THREE.Object3D {
             distX = distX * distX * distX
             distY = Math.sqrt(Math.abs(distY)) * Math.sign(distY)
             //console.log(distX, distY)
-            let data = obj.ballObj.hit(distX, distY)
-            obj.game.socketMgr.sendData(data)
+            if (obj.ballObj.lose === false) {
+                let data = obj.ballObj.hit(distX, distY)
+                console.log("Ball is hit: = >", obj.ballObj.position.x)
+                obj.game.socketMgr.sendData(data)
+            }
         }
 
         let rangeInfo = this.isInRange()
@@ -306,7 +309,7 @@ export class Racket extends THREE.Object3D {
         this.racketDir()
         if (this.ballObj.initialize && this.game.getTurnInit() === 0) {
             this.ballInit()
-        } else if (this.game.getTurn() === 0) {
+        } else {
             this.hit()
         }
         
