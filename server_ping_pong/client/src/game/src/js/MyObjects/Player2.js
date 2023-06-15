@@ -23,6 +23,8 @@ export class Player2 extends THREE.Object3D {
         this.racketParent = racket.racketParent
         this.add(this.racketParent)
         this.scene.add(this)
+
+        this.socketData = undefined
     }
 
     getObject() {
@@ -54,4 +56,12 @@ export class Player2 extends THREE.Object3D {
         }
     }
 
+    socketMoveRacket(data) {
+        this.position.copy(data.position)
+        this.rotateObj()
+    }
+
+    update() {
+        
+    }
 }

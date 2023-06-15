@@ -1,14 +1,10 @@
-import { Game } from "./MyObjects";
 import { params } from './Utils/Params'
 import { load } from './Utils/Loader'
 import { io } from 'socket.io-client'
-import * as THREE from 'three'
+import { Game } from './MyObjects/Game'
+
 
 function getSocket(game) {
-    if (!params.withSocket) {
-        game.setPlayer2ToBotMode()
-        return undefined
-    }
     const socket = io("http://10.12.6.8:3000")
     
     socket.on("connect", () => {
@@ -28,6 +24,10 @@ function getSocket(game) {
         game.start(data)
     })
 
+    socket.on("ballInfo", (data) => {
+        game.scene.ballObj.socketGetBallInfo(data)
+    })
+
     socket.on("player2Event", (data) => {
         //data.ballPosition
         //data.ballVelocity
@@ -36,6 +36,7 @@ function getSocket(game) {
 
     socket.on("moveRacket", (data) => {
         //data.position
+        //console.log(data)
         game.scene.player2.socketMoveRacket(data)
     })
 
@@ -57,20 +58,12 @@ class SocketManager {
         this.socket = socket
     }
 
-    sendData(data) {
+    hitBall(data) {
         if (!this.socket)
             return
-        //data.position
-        //data.velocity
-        data.position = data.position.clone()
-        data.velocity = data.velocity.clone()
-        data.position.z *= -1
-        data.position.x *= -1
-
-        data.velocity.x *= -1
-        data.velocity.z *= -1
-        console.log("send data the other player: ", data)
-        this.socket.emit("event", data)
+        //data.distX
+        //data.distY
+        this.socket.emit("hitBall", data)
     }
 
     lose(data) {
@@ -87,7 +80,7 @@ class SocketManager {
         data.position = data.position.clone()
         data.position.z *= -1
         data.position.x *= -1
-        this.socket.emit("racketMove", data)
+        this.socket.emit("moveRacket", data)
     }
 }
 

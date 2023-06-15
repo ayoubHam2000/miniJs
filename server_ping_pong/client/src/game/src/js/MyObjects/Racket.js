@@ -246,60 +246,31 @@ export class Racket extends THREE.Object3D {
         }
     }
      
+    //=============================================
+    //=============================================
 
-    ballInit() {
-        this.game.changeTurn(0)
-        this.ballObj.position.x = params.planeDim.x / 2
-        this.ballObj.position.z = this.position.z
-        this.ballObj.position.y = 3
-        //console.log("Init Ball", this.ballObj.position)
-
-        let dist = this.ballObj.position.x - this.position.x
-        // console.log(dist)
-        if (Math.abs(dist) < 2 && dist < 0 && params.mouse.isClicked && this.ballObj.initialize) {
-            let r = Math.random() * params.planeDim.y * -0.2 * Math.sign(this.ballObj.position.z)
-            this.ballObj.directSetVelocity(-13, 4, r)
-            params.mouse.isClicked = false
-            //socket
-            let data = {
-                position : this.ballObj.position,
-                velocity: this.ballObj.velocity
-            }
-            this.game.socketMgr.sendData(data)
+    performHit(obj) {
+        params.mouse.isClicked = false
+        obj.clickInfo.canPerform = true
+        let distX = (obj.planeX - obj.clickInfo.startX) / 5
+        let distY = (obj.planeY - obj.clickInfo.startY) / 5
+        distX = Math.abs(distX)
+        distX = distX * distX * distX
+        distY = Math.sqrt(Math.abs(distY)) * Math.sign(distY)
+        let data = {
+            distX, distY
         }
+        obj.game.socketMgr.hitBall(data)
     }
 
     hit() {
-        if (this.game.getTurn() === 1 || this.ballObj.position.x <= 1 || this.ballObj.lose)
-            return
-        
-        function perform(obj) {
-            params.mouse.isClicked = false
-            obj.clickInfo.canPerform = true
-            let distX = (obj.planeX - obj.clickInfo.startX) / 5
-            let distY = (obj.planeY - obj.clickInfo.startY) / 5
-            distX = Math.abs(distX)
-            distX = distX * distX * distX
-            distY = Math.sqrt(Math.abs(distY)) * Math.sign(distY)
-            //console.log(distX, distY)
-            if (obj.ballObj.lose === false) {
-                let data = obj.ballObj.hit(distX, distY)
-                console.log("Ball is hit: = >", obj.ballObj.position.x)
-                obj.game.socketMgr.sendData(data)
-            }
-        }
-
         let rangeInfo = this.isInRange()
-        this.moveRacket(2.5, 0.05)
         if (rangeInfo.value && rangeInfo.xDist > 0) {
             if (this.clickInfo.canPerform) {
                 this.clickInfo.canPerform = false
-                setTimeout(perform, 100, this)
+                setTimeout(this.performHit, 100, this)
             } else {
-                this.ballObj.velocity.x = 0
-                this.ballObj.position.x = this.position.x - 1
                 this.moveRacket(this.position.y, 0.2)
-                //this.position.y = this.ballObj.position.y
             }
         }
     }
@@ -307,11 +278,7 @@ export class Racket extends THREE.Object3D {
     update() {
         this.racketPhy()
         this.racketDir()
-        if (this.ballObj.initialize && this.game.getTurnInit() === 0) {
-            this.ballInit()
-        } else {
-            this.hit()
-        }
-        
+        this.moveRacket(2.5, 0.05)
+        this.hit()
     }
 }

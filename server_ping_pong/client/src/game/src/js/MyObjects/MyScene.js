@@ -6,9 +6,8 @@ import { AmbientLight } from "./AmbientLight";
 import { Ball } from "./Ball";
 import { Racket } from "./Racket";
 import { Net } from "./Net";
-import { Bot } from "./Bot";
 import { SpotLight } from "./SpotLight";
-import { Human } from "./Human";
+import { Player2 } from "./Player2";
 
 
 export class MyScene extends THREE.Scene {
@@ -42,13 +41,7 @@ export class MyScene extends THREE.Scene {
         this.netObj = new Net(game)
         this.ballObj = new Ball(game)
         this.racketObj = new Racket(game)
-
-        if (game.gameInfo.isBot) {
-            this.player2 = new Bot(game)
-        } else {
-            this.player2 = new Human(game)
-        }
-        
+        this.player2 = new Player2(game)
     } 
 
     #environmentScene() {

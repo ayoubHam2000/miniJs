@@ -5,7 +5,6 @@ const Ball = require('./Ball')
 module.exports = class Game {
     constructor() {
 
-        this.scene = new THREE.Scene()
 
         this.gameInfo = {
             turn: 0, //the player that will shot the ball
@@ -36,11 +35,6 @@ module.exports = class Game {
         this.gameInfo.start = true
     }
 
-    setPlayer2ToBotMode() {
-        this.gameInfo.start = true
-        this.gameInfo.isBot = true
-    }
-
     getTurnInit() {
         //0->player1 1->player2
         let a = (this.gameInfo.initTurn) + parseInt((this.gameInfo.scorePlayer1 + this.gameInfo.scorePlayer2) / 2)
@@ -65,11 +59,15 @@ module.exports = class Game {
         // if (!this.gameInfo.start)
         //     return
         this.ballObj.update()
+        params.frame++
     }
 
     gameLoop() {
-        setInterval((game) => game.update(), 1000 / 60, this)
+        this.interval = setInterval((game) => game.update(), 1000 / 60, this)
     }
 
+    stop() {
+        clearInterval(this.interval)
+    }
 }
     

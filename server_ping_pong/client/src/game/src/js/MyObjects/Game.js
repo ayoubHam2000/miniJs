@@ -9,10 +9,7 @@ export class Game {
     constructor() {
       
         this.renderer = this.#setUpRenderer()
-
-        
         this.scene = new MyScene()
-       
         this.camera = new MyCamera()
 
 
@@ -33,6 +30,7 @@ export class Game {
     }
 
     start(data) {
+        //botSocket
         console.log("Game is started ...")
         if (this.gameInfo.isBot)
             return
@@ -41,10 +39,7 @@ export class Game {
         this.gameInfo.start = true
     }
 
-    setPlayer2ToBotMode() {
-        this.gameInfo.start = true
-        this.gameInfo.isBot = true
-    }
+
 
     getTurnInit() {
         //0->player1 1->player2
