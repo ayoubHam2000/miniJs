@@ -1,12 +1,8 @@
-import { Game } from "./Game"
-import { TrailRenderer } from "./Trail"
-import { Spot } from "./Spot"
-import { params } from "../Utils/Params"
-import * as THREE from 'three'
-import { Plane } from "../Utils/Plane"
-import { MyRay } from "../Utils/Ray"
+const params = require('./Params')
+const THREE = require('three')
 
-export class Ball extends THREE.Object3D{
+
+module.exports = class Ball extends THREE.Object3D {
     
     static LOSE_OUT_OF_BOUND = 0
     static LOSE_NET = 1
@@ -17,12 +13,10 @@ export class Ball extends THREE.Object3D{
         super()
         this.game = game
         this.scene = game.scene
-        this.camera = game.camera
         this.timeStep = params.timeStep
         this.ballDim = params.ballDim
-        this.ray = new MyRay()
+        this.rayCollision = new THREE.Raycaster()
         this.velocity = new THREE.Vector3()
-        this.netObj = this.scene.netObj
         this.gravityForce = params.gravityForce
         this.groundInfo = {
             //used by bot
@@ -55,53 +49,57 @@ export class Ball extends THREE.Object3D{
         this.lose = false
         this.init()
 
-        this.trail = new TrailRenderer(game, this)
-        
-        this.spot = new Spot()
-        this.scene.add(this.spot)
-        
-        const objs = this.#getObjects()
-
-
-
-
+        const objs = this.getObjects()
         this.ballObj = objs.ballObj
-        this.add(this.ballObj)
-
-        this.tablePlaneObj = new Plane({x: 0, y: 0, z : 0}, {x: 1, y: 0, z: 0}, {x: 0, y: 0, z: 1})
-        this.netPlaneObj = new Plane({x: 0, y: 0, z : 0}, {x: 0, y: 1, z: 0}, {x: 0, y: 0, z: 1})
-
-        
-        //this.position.set(12, 5, 3)
-        //this.directSetVelocity(-5, 5, 0)
-
-        this.scene.add(this)
-
+        this.netObj = objs.netObj
+        this.tablePlaneObj = objs.tablePlaneObj
     }
 
-
-//#region ff
-    #getObjects() {
+    getObjects() {
        return {
-            ...this.#getBallObj()
+            ...this.getTablePlaneObj(),
+            ...this.getBallObj(),
+            ...this.getNetObj()
        }
     }
 
-    #getBallObj() {
+    getTablePlaneObj() {
+        const tablePlaneGeometry = new THREE.PlaneGeometry(params.planeDim.x, params.planeDim.y)
+        const tablePlaneMaterial = new THREE.MeshBasicMaterial({
+            side: THREE.DoubleSide,
+        })
+        const tablePlaneObj = new THREE.Mesh(tablePlaneGeometry, tablePlaneMaterial)
+        tablePlaneObj.rotation.x = - 0.5 * Math.PI
+
+        return {
+            tablePlaneObj
+        }
+    }
+
+    getBallObj() {
         const sphereGeo = new THREE.SphereGeometry(params.ballDim);
-        const sphereMat = new THREE.MeshStandardMaterial({ 
-            color: 0xff0000, 
-            wireframe: false,
-        });
+        const sphereMat = new THREE.MeshStandardMaterial();
         const sphereObj = new THREE.Mesh(sphereGeo, sphereMat);
-        sphereObj.castShadow = true
         return {
             ballObj: sphereObj
         }
     }
 
+    getNetObj() {
+        const planeGeo = new THREE.PlaneGeometry(18, 1.5)
+        const planeMat = new THREE.MeshBasicMaterial()
+        const netPlaneObj = new THREE.Mesh(planeGeo, planeMat)
+        netPlaneObj.position.set(0, 0.75, 0)
+        netPlaneObj.rotation.y = 0.5 * Math.PI
+
+        return {
+            netObj : netPlaneObj
+        }
+    }
+
     init() {
         this.loseInit(this)
+        this.directSetVelocity(0, 4, 0)
     }
 
     loseInit(obj) {
@@ -123,50 +121,9 @@ export class Ball extends THREE.Object3D{
         return (arr[cause])
     }
 
-    socketLose(data) {
-        this.game.gameInfo.scorePlayer1 += data.p[0]
-        this.game.gameInfo.scorePlayer2 += data.p[1]
-        let score = [this.game.gameInfo.scorePlayer1, this.game.gameInfo.scorePlayer2]
-        let loseTime = data.time
-        console.log(`Player1 : ${score[0]} Player2: ${score[1]} reason ${data.reason}`)
-        if (loseTime) {
-            setTimeout(this.loseInit, loseTime, this)
-        } else {
-            this.loseInit(this)
-        }
-    }
 
     loseFunction(cause, time) {
-        if (this.lose === true)
-            return
-        this.lose = true
-        
-        if (!params.withSocket) {
-            let p = [1, 0]
-            if (this.position.x > 0)
-                p = [0, 1]
-            this.game.gameInfo.scorePlayer1 += p[0]
-            this.game.gameInfo.scorePlayer2 += p[1]
-            console.log(`=> Player1 : ${this.game.gameInfo.scorePlayer1} Player2: ${this.game.gameInfo.scorePlayer2}`)
-            if (time) {
-                setTimeout(this.loseInit, time, this)
-            } else {
-                this.loseInit(this)
-            }
-        } else {
-            if (this.game.gameInfo.initTurn === 0) {
-                console.log("Send Lose Event")
-                this.game.socketMgr.lose({
-                    reason: this.#getLoseReason(cause),
-                    ballPosX: this.position.x,
-                    time: time,
-                    score: {
-                        p1: this.game.gameInfo.scorePlayer1,
-                        p2: this.game.gameInfo.scorePlayer2
-                    }
-                })
-            }
-        }
+        console.log("Lose", cause, time)
     }
 
     reset() {
@@ -254,7 +211,7 @@ export class Ball extends THREE.Object3D{
             velocity: this.velocity
         }
     }
-//#endregion
+
     /*******************************
     *            Update            
     *******************************/
@@ -297,67 +254,54 @@ export class Ball extends THREE.Object3D{
     }
 
     ballPhy() {
+        const rayCaster = this.rayCollision
         let moveFlag = true
-        const normalizedVelocity = this.velocity.clone().normalize()
-        this.ray.set(this.position, normalizedVelocity)
-        this.ray.far = (this.velocity.length() * this.timeStep) + this.ballDim
-
-        const arr = this.ray.intersectObjects([this.tablePlaneObj, this.netPlaneObj])
+        
+        //init rayCaster
+        let normalizedVelocity = this.velocity.clone().normalize()
+        rayCaster.set(this.position, normalizedVelocity)
+        rayCaster.far = (this.velocity.length() * this.timeStep) + this.ballDim
+        
+        const arr = rayCaster.intersectObjects([this.tablePlaneObj, this.netObj])
         if (arr.length) {
+           
             const newPos = arr[0].point
             newPos.x -= normalizedVelocity.x * this.ballDim
             newPos.y -= normalizedVelocity.y * this.ballDim
             newPos.z -= normalizedVelocity.z * this.ballDim
-            this.velocity.x -= normalizedVelocity.x * this.ballDim
-            this.velocity.y -= normalizedVelocity.y * this.ballDim
-            this.velocity.z -= normalizedVelocity.z * this.ballDim
-            if (arr[0].object === this.tablePlaneObj) {
-                this.position.copy(newPos)
+            this.position.copy(newPos)
+            if (arr[0].object.id === this.tablePlaneObj.id) {
                 moveFlag = false
                 this.velocity.y *= -1
                 this.groundInfo.v.copy(this.velocity)
                 this.groundInfo.p.copy(this.position)
-                //this.incrementBounce()
-                this.spot.hit(newPos)
+                this.incrementBounce()
+
             } 
-            else if (arr[0].object === this.netPlaneObj) {
-                if (this.lose === false && newPos.y <= params.netDim.y && Math.abs(newPos.z) <= params.netDim.x / 2) {
-                    this.position.copy(newPos)
-                    moveFlag = false
-                    this.netObj.hit()
-                    this.velocity.x = -2 * Math.sign(this.velocity.x)
-                    this.velocity.y = 0.2
-                    this.velocity.z = 2 *  Math.sign(this.velocity.z)
-                    this.loseFunction(Ball.LOSE_NET, 1000)
-                }
-            }
+            else if (this.lose === false) {
+                moveFlag = false
+                this.netObj.hit()
+                this.velocity.x = -2 * Math.sign(this.velocity.x)
+                this.velocity.y = 0.2
+                this.velocity.z = 2 *  Math.sign(this.velocity.z)
+                this.loseFunction(Ball.LOSE_NET, 1000)
+            }   
         }
         if (moveFlag)
-            this.move()      
+            this.move()
     }
 
-    changeColor() {
-        let t = (this.game.getTurn() + this.game.gameInfo.initTurn) % 2
-        if (t === 0)
-            this.ballObj.material.color.set(0x00ff00)
-        else if (t === 1)
-            this.ballObj.material.color.set(0x0000ff)
-        else
-            this.ballObj.material.color.set(0xff0000)
-    }
+
+    
 
     update() {
+        //if (!this.initialize) {
+            console.log(this.tablePlaneObj.position)
 
-
-        this.changeColor()
-        this.trail.update()
-        this.spot.update()
-        if (!this.initialize) {
-            this.trail.stop = false
             this.ballPhy()
             this.reset()
-        } else {
-            this.trail.stop = true
-        }
+            console.log(this.position)
+            //console.log(this.velocity)
+        //}
     }
 }

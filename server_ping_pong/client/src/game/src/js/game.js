@@ -2,7 +2,7 @@ import { Game } from "./MyObjects";
 import { params } from './Utils/Params'
 import { load } from './Utils/Loader'
 import { io } from 'socket.io-client'
-
+import * as THREE from 'three'
 
 function getSocket(game) {
     if (!params.withSocket) {
@@ -90,6 +90,9 @@ class SocketManager {
         this.socket.emit("racketMove", data)
     }
 }
+
+
+
 
 async function startGame() {
     await load()

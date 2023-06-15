@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { params } from '../Utils/Params'
 
 export class Net extends THREE.Object3D {
 
@@ -15,7 +16,7 @@ export class Net extends THREE.Object3D {
     }
 
     getObject() {
-        const planeGeo = new THREE.PlaneGeometry(18, 1.5)
+        const planeGeo = new THREE.PlaneGeometry(params.netDim.x, params.netDim.y)
         const planeMat = new THREE.MeshBasicMaterial({
             color: 0xff0000,
             side: THREE.DoubleSide,

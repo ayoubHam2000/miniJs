@@ -8,7 +8,7 @@ export const params = {
 
 //Not used
     //params
-    withSocket: true,
+    withSocket: false,
     loadTex : false,
     netCollision : true,
     timeStep: 1/40,
@@ -53,6 +53,10 @@ export const params = {
     planeDim: {
         x: 36.17, //18.085
         y: 15.25 //7.625
+    },
+    netDim: {
+        x: 18,
+        y: 1.5
     },
 
 

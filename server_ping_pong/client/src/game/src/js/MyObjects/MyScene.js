@@ -120,7 +120,7 @@ export class MyScene extends THREE.Scene {
 
     update() {
         if (!this.game.gameInfo.start)
-            return
+           return
         this.netObj.update()
         this.ballObj.update()
         this.racketObj.update()

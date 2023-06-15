@@ -9,7 +9,7 @@ export class Game {
     constructor() {
       
         this.renderer = this.#setUpRenderer()
-        this.rayBall = new THREE.Raycaster()
+
         
         this.scene = new MyScene()
        
