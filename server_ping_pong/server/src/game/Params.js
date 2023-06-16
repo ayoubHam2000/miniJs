@@ -1,5 +1,5 @@
 const params = {
-    timeStep : 1 / 40,
+    timeStep : 1 / 45,
     ballDim: 0.2,
     gravityForce: 12,
     frame: 0,

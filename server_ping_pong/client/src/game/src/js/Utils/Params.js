@@ -11,8 +11,8 @@ export const params = {
     botSocket: true,
     loadTex : false,
     netCollision : true,
-    timeStep: 1/40,
-    gravityForce : 12,
+    timeStep: 1/45,
+    gravityForce : 16,
 
     //window
     winWidth : window.innerWidth,

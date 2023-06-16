@@ -39,13 +39,13 @@ export class Net extends THREE.Object3D {
     update() {
         //let pos = this.game.guiParams.getVal("scale", {x:0, y: 1, z: 1}, 0, 10, 0.01)
         if (this.counter === 1) {
-            this.netPlaneObj.material.opacity += 0.02
+            this.netPlaneObj.material.opacity += 0.01
             if (this.netPlaneObj.material.opacity > 0.2){
                 this.netPlaneObj.material.opacity = 0.2
                 this.counter++
             }
         } else if (this.counter === 2) {
-            this.netPlaneObj.material.opacity -= 0.02
+            this.netPlaneObj.material.opacity -= 0.01
             if (this.netPlaneObj.material.opacity < 0) {
                 this.netPlaneObj.material.opacity = 0
                 this.counter++

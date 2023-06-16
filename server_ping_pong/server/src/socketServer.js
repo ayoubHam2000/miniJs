@@ -58,8 +58,7 @@ class ARoom {
 
     start() {
         this.game = new Game()
-        this.game.room = this
-        this.game.init(this.botMode)
+        this.game.init(this, this.botMode)
         this.game.gameLoop()
 
         if (this.botMode === false) {
@@ -91,6 +90,9 @@ class ARoom {
     sendBallInfo(data) {
         //data.position
         //data.velocity
+        //data.init
+        //data.spotPos
+        //data.net
         let data2 = {
             position : {
                 x: -data.position.x,
@@ -101,6 +103,15 @@ class ARoom {
                 x: -data.velocity.x,
                 y: data.velocity.y,
                 z: -data.velocity.z,
+            },
+            init : data.init,
+            net : data.net
+        }
+        if (data.spotPos) {
+            data2.spotPos = {
+                x: -data.spotPos.x,
+                y: data.spotPos.y,
+                z: -data.spotPos.z
             }
         }
         this.#broadCast("ballInfo", data, data2)
@@ -112,6 +123,10 @@ class ARoom {
         if (this.botMode)
             return
         let player2 = this.getPlayer2Id(data.clientId)
+        if (data.clientId === this.player1.clientId)
+            this.game.racketP1.set(-data.position.x, data.position.y, -data.position.z)
+        if (data.clientId === this.player2.clientId)
+            this.game.racketP2.set(data.position.x, data.position.y, data.position.z)
         this.io.to(player2).emit("moveRacket", data)
     }
     
@@ -121,10 +136,29 @@ class ARoom {
         console.log(`Send to ${this.player1.clientId}`)
         this.io.to(this.player1.clientId).emit("moveRacket", data)
     }
+
+    sendGameScore(data) {
+        if (this.closed === false)
+            return
+        let data2 = {
+            score : data.score.reverse()
+        }
+        this.#broadCast("gameScore", data, data2)
+    }
+
+    sendTurn(data) {
+        if (this.closed === false)
+            return
+        this.#broadCast("turn", data, data)
+    }
+
     //===============
 
     receiveHitBall(data) {
+        let playerType = this.player1.clientId === data.clientId ? -1 : 1
+        data.playerType = playerType
         this.game.ballObj.socketReceiveHit(data)
+
     }
 }
     
@@ -132,7 +166,7 @@ class SocketManager {
     constructor() {
         this.io = socketIo(3000, {
             cors: {
-                origin : ["http://10.12.6.8:5173"]
+                origin : ["http://10.12.5.9:5173"]
             }
         })
 

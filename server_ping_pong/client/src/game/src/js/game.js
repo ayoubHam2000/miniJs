@@ -5,7 +5,7 @@ import { Game } from './MyObjects/Game'
 
 
 function getSocket(game) {
-    const socket = io("http://10.12.6.8:3000")
+    const socket = io("http://10.12.5.9:3000")
     
     socket.on("connect", () => {
         console.log("Client is connected")
@@ -38,8 +38,18 @@ function getSocket(game) {
 
     socket.on("moveRacket", (data) => {
         //data.position
-        console.log(data)
+        //console.log(data)
         game.scene.player2.socketMoveRacket(data)
+    })
+
+    socket.on("gameScore", (data) => {
+        console.log("game score", game.gameInfo)
+        game.gameInfo.scorePlayer1 = data.score[0]
+        game.gameInfo.scorePlayer2 = data.score[1]
+    })
+
+    socket.on("turn", (data) => {
+        game.gameInfo.turn = data.turn
     })
 
     socket.on("loseEvent", (data) => {
@@ -110,6 +120,10 @@ async function startGame() {
     {
         guiChangeValues()
         game.scene.update()
+
+        // let p = game.guiParams.getVal("pos", {x: 0, y:5, z:0}, -20, 20, 0.1)
+        // game.scene.spotLight.position.set(p.x, p.y, p.z)
+
         params.frame++
         game.renderer.render(game.scene, game.camera)
     }

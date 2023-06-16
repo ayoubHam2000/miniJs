@@ -63,7 +63,7 @@ export class Ball extends THREE.Object3D{
     }
 
     changeColor() {
-        let t = (this.game.getTurn() + this.game.gameInfo.initTurn) % 2
+        let t = (this.game.getTurn()) % 2
         if (t === 0)
             this.ballObj.material.color.set(0x00ff00)
         else if (t === 1)
@@ -77,17 +77,18 @@ export class Ball extends THREE.Object3D{
         const velocity = data.velocity
         this.position.set(position.x, position.y, position.z)
         this.velocity.set(velocity.x, velocity.y, velocity.z)
+        this.trail.stop = data.init
+        if (data.spotPos)
+            this.spot.hit(data.spotPos)
+        if (data.net)
+            this.game.scene.netObj.hit()
     }
 
     update() {
         this.changeColor()
         this.trail.update()
         this.spot.update()
-        this.move()
-        if (!this.initialize) {
-            this.trail.stop = false
-        } else {
-            this.trail.stop = true
-        }
+        if (this.trail.stop === false)
+            this.move()
     }
 }

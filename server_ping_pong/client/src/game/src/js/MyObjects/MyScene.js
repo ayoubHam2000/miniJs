@@ -78,9 +78,10 @@ export class MyScene extends THREE.Scene {
                 normalMap: loaderResult.tex.rightWall.normalMap, 
                 map: loaderResult.tex.rightWall.tex
             }),//right
-        ]   
+        ]
         //console.log(bexWithTexMultiMaterial[0])
         const boxObj = new THREE.Mesh(boxGeometry, bexWithTexMultiMaterial)
+        //boxObj.receiveShadow = true
         boxObj.scale.x = params.sceneBox.width
         boxObj.scale.y = params.sceneBox.height
         boxObj.scale.z = params.sceneBox.depth
@@ -103,6 +104,11 @@ export class MyScene extends THREE.Scene {
         /***************************************** */
 
         const racketModel = loaderResult.models.racket.scene
+        racketModel.traverse((node) => {
+            if (node.isMesh) {
+                node.castShadow = true;
+            }
+        });
 
         return {
             tableModel,

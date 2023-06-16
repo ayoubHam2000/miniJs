@@ -7,6 +7,11 @@ module.exports = class Game {
     constructor() {
 
 
+        this.room = undefined
+        this.botObj = undefined
+        this.ballObj = undefined
+        this.racketP1 = undefined
+        this.racketP2 = undefined
         this.gameInfo = {
             turn: 0, //the player that will shot the ball
             initTurn: 0,
@@ -17,7 +22,10 @@ module.exports = class Game {
         }
     }
 
-    init(botMode = false) {
+    init(room, botMode = false) {
+        this.room = room
+        this.racketP1 = new THREE.Vector3()
+        this.racketP2 = new THREE.Vector3()
         this.ballObj = new Ball(this)
         if (botMode)
             this.botObj = new Bot(this)
@@ -38,6 +46,17 @@ module.exports = class Game {
         this.gameInfo.start = true
     }
 
+    changeScore(p) {
+        this.gameInfo.scorePlayer1 += p[0]
+        this.gameInfo.scorePlayer2 += p[1]
+        let s = (p[2] === 0 ? "Player1 " : "Player2 ")
+        console.log(p[3], s, " Score1: ", this.gameInfo.scorePlayer1, " Score2: ", this.gameInfo.scorePlayer2)
+        this.changeTurn(this.getTurnInit())
+        this.room.sendGameScore({
+            score: [this.gameInfo.scorePlayer1, this.gameInfo.scorePlayer2]
+        })
+    }
+
     getTurnInit() {
         //0->player1 1->player2
         let a = (this.gameInfo.initTurn) + parseInt((this.gameInfo.scorePlayer1 + this.gameInfo.scorePlayer2) / 2)
@@ -53,8 +72,11 @@ module.exports = class Game {
         if (to === undefined) {
             this.gameInfo.turn = (this.gameInfo.turn + 1) % 2
         } else {
-            this.gameInfo.turn = to    
+            this.gameInfo.turn = to
         }
+        this.room.sendTurn({
+            turn: this.gameInfo.turn
+        })
     }
 
 

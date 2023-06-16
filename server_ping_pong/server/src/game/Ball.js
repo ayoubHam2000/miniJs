@@ -24,6 +24,11 @@ module.exports = class Ball {
             v : new THREE.Vector3(), // velocity
             p : new THREE.Vector3() // position
         }
+        this.ballInfo = {
+            net : false,
+            spot : false,
+            init: true
+        }
 
         this.limit = {
             x: {
@@ -63,16 +68,16 @@ module.exports = class Ball {
 
     #init() {
         this.#loseInit(this)
-        this.position.set(2, 5, 2)
-        this.#directSetVelocity(20, -5, 0)
     }
 
-    #loseInit(obj) {
-        console.log("Init")
+    #loseInit(obj) {    
         obj.initialize = true
         obj.lose = false
         obj.position.y = 5
         obj.velocity.set(0, 0, 0)
+
+        // obj.position.set(18, 2, 0)
+        // obj.#directSetVelocity(-11, 1, 5)
         obj.bounce = 0
     }
 
@@ -88,12 +93,22 @@ module.exports = class Ball {
 
 
     #loseFunction(cause, time) {
-        console.log("Lose", cause, time)
-        this.#init()
+        if (this.lose === true)
+            return 
+        this.lose = true
+        let p = [0, 1, 0, this.#getLoseReason(cause)]
+        if (this.position.x < 0)
+            p = [1, 0, 1, this.#getLoseReason(cause)]
+        this.game.changeScore(p)
+        if (time) {
+            setTimeout(this.#loseInit, time, this)
+        } else {
+            this.#loseInit(this)
+        }
     }
 
     #reset() {
-        if (this.position.y <= -1 || this.position.y > 80) {
+        if (this.position.y <= -3 || this.position.y > 80) {
            this.#loseFunction(Ball.LOSE_OUT_OF_BOUND)
         }
     }
@@ -101,6 +116,23 @@ module.exports = class Ball {
     /*******************************
     *            Hit            
     *******************************/
+
+    #isOutOfLimitTable() {
+        return (
+            this.position.x > params.planeDim.x / 2 ||
+            this.position.x < - params.planeDim.x / 2 ||
+            this.position.z < - params.planeDim.y / 2 ||
+            this.position.z > params.planeDim.y / 2
+        )
+    }
+
+    #isOutOfLimitNet() {
+        return (
+            this.position.y > params.netDim.y ||
+            this.position.x < -params.netDim.x / 2 || 
+            this.position.x > params.netDim.x / 2
+        )
+    }
 
     #getDiscreteSpeed(posX) {
         let discreteSpeed = [0.75, 1, 1.25]
@@ -124,22 +156,6 @@ module.exports = class Ball {
         return (x)
     }
 
-    #hit(x, y) {
-        x = Math.abs(x)
-        // 0 <= x <= 1 || -1 <= y <= 1
-        //this.position.y += 1
-        x = this.#getDiscretePosX(x)
-        let posX = x * (this.limit.x.b - this.limit.x.a) + this.limit.x.a
-        let posY = ((y + 1) * 0.5) * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
-        let speed = this.#getDiscreteSpeed(posX)
-        if (this.position.x < 0) {
-            posX *= -1
-            posY *= -1
-        }
-        return (this.#setVelocity(posX, posY, speed))
-    }
-
-
     #ballIsHit() {
         if (this.bounce === 0 && this.initialize === false) {
             this.#loseFunction(Ball.LOSE_NO_BOUNCE, 300)
@@ -149,7 +165,7 @@ module.exports = class Ball {
         this.game.changeTurn()
     }
 
-    #directSetVelocity(x, y, z) {
+    directSetVelocity(x, y, z) {
         if (this.lose === true)
             return
         this.velocity.set(x, y, z)
@@ -157,12 +173,9 @@ module.exports = class Ball {
     }
 
     randomPos() {
-        //this.position.y += 1
         let x = Math.random() * (this.limit.botX.b - this.limit.botX.a) + this.limit.botX.a
         let y = Math.random() * (this.limit.botY.b - this.limit.botY.a) + this.limit.botY.a
         let speed = this.#getDiscreteSpeed(x)
-        // console.log(x, y, "=> ", speed)
-        // let speed = 0.5 + Math.random()
         return {
             x, y, speed
         }
@@ -203,9 +216,46 @@ module.exports = class Ball {
         }
     }
 
+
+    #hit(x, y, playerType) {
+        // 0 <= x <= 1 || -1 <= y <= 1
+        console.log("playerType", playerType)
+        if (x > 0 || Math.sign(playerType) === Math.sign(this.position.x) 
+        || Math.sign(this.position.x) !== Math.sign(this.velocity.x))
+            return
+        x = Math.abs(x)
+        x = this.#getDiscretePosX(x)
+        let posX = x * (this.limit.x.b - this.limit.x.a) + this.limit.x.a
+        let posY = ((y + 1) * 0.5) * (this.limit.y.b - this.limit.y.a) + this.limit.y.a
+        let speed = this.#getDiscreteSpeed(posX)
+        if (this.position.x < 0) {
+            posX *= -1
+            posY *= -1
+        }
+        return (this.#setVelocity(posX, posY, speed))
+    }
+
+    #initHit(x, y, playerType, racketPos) {
+        let dist = (racketPos.x - this.position.x)
+        console.log("Hit in dist", dist)
+        if (Math.sign(x) === -1) {
+            this.#ballIsHit()
+            let r = Math.random() * params.planeDim.y * -0.2 * Math.sign(this.position.z)
+            this.velocity.set(-8 * Math.sign(this.position.x), 4, r)
+        }
+    }
+
+
+    
     /*******************************
     *            Update            
     *******************************/
+
+    #initBall() {
+        let turn = this.game.getTurnInit()
+        let racketPos = (turn === 0 ? this.game.racketP1 : this.game.racketP2)
+        this.position.set(-params.planeDim.x / 2 * Math.sign(turn * 2 - 1), 3, racketPos.z)
+    }
 
     #move() {
         if (!this.initialize) {
@@ -248,20 +298,24 @@ module.exports = class Ball {
             this.velocity.y -= normalizedVelocity.y * this.ballDim
             this.velocity.z -= normalizedVelocity.z * this.ballDim
             if (arr[0].object === this.tablePlaneObj) {
-                this.position.copy(newPos)
-                moveFlag = false
-                this.velocity.y *= -1
-                this.groundInfo.v.copy(this.velocity)
-                this.groundInfo.p.copy(this.position)
-                this.#incrementBounce()
+                if (!this.#isOutOfLimitTable()) {
+                    this.position.copy(newPos)
+                    moveFlag = false
+                    this.velocity.y *= -1
+                    this.ballInfo.spot = true
+                    this.groundInfo.v.copy(this.velocity)
+                    this.groundInfo.p.copy(this.position)
+                    this.#incrementBounce()
+                }
             } 
             else if (arr[0].object === this.netPlaneObj) {
-                if (this.lose === false && newPos.y <= params.netDim.y && Math.abs(newPos.z) <= params.netDim.x / 2) {
+                if (this.lose === false && !this.#isOutOfLimitNet()) {
                     this.position.copy(newPos)
                     moveFlag = false
                     this.velocity.x = -2 * Math.sign(this.velocity.x)
                     this.velocity.y = 0.2
                     this.velocity.z = 2 *  Math.sign(this.velocity.z)
+                    this.ballInfo.net = true
                     this.#loseFunction(Ball.LOSE_NET, 1000)
                 }
             }
@@ -271,29 +325,41 @@ module.exports = class Ball {
     }
 
     socketReceiveHit(data) {
-        this.#hit(data.distX, data.distY)
+        if (!this.initialize) {
+            this.#hit(data.distX, data.distY, data.playerType)
+        } else {
+            let racketPos = (this.game.getTurnInit() === 0 ? this.game.racketP1 : this.game.racketP2)
+            this.#initHit(data.distX, data.distY, data.playerType, racketPos)
+        }
     }
 
     #socketSendBallInfo() {
-        this.game.room.sendBallInfo(
-            {
+        if (params.frame % 3 !== 0)
+            return
+        let data = {
             position: this.position,
-            velocity: this.velocity
-        })
+            velocity: this.velocity,
+            init : this.initialize
+        }
+        data.spotPos = undefined
+        if (this.ballInfo.spot) {
+            data.spotPos = this.groundInfo.p
+            this.ballInfo.spot = false
+        }
+        data.net = this.ballInfo.net
+        if (this.ballInfo.net) {
+            this.ballInfo.net = false
+        }
+        this.game.room.sendBallInfo(data)
     }
 
-    //racket init
-    //racket hit ball change pos
-    //net
-    //spot
-    //lose init trail
-    //bot
     update() {
-        //if (!this.initialize) {
+        if (!this.initialize) {
             this.#ballPhy()
-            this.#reset()
-            this.#socketSendBallInfo()
-            
-        //}
+        } else {
+            this.#initBall()
+        }
+        this.#reset()
+        this.#socketSendBallInfo()    
     }
 }

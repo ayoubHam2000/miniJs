@@ -131,21 +131,15 @@ module.exports = class Bot {
             obj.ballObj.directSetVelocity(12, 3, r)
         }
 
-        this.game.changeTurn(1)
-        this.position.set(-18, 0, 0)
-        this.ballObj.position.x = - params.planeDim.x / 2 + 1
-        this.ballObj.position.z = this.position.z
-        this.ballObj.position.y = 3
-
         this.performInit = true
         setTimeout(perform, 1200, this)
     }
 
     update() {
-        // if (this.ballObj.initialize && this.game.getTurnInit() === 1) {
-        //     this.ballInit()
-        // }
-        //else if (this.ballObj.lose === false && this.game.getTurn() === 1){
+        if (this.ballObj.initialize && this.game.getTurnInit() === 1) {
+            this.ballInit()
+        }
+        else if (this.ballObj.lose === false && this.game.getTurn() === 1){
             if (this.ballObj.groundInfo.v.x < 0 && this.step === 0 && this.ballObj.bounce === 1) {
                 let r = this.randomLose()
                 this.target = this.determineMaxPossibleHeight()
@@ -160,7 +154,7 @@ module.exports = class Bot {
             if (this.ballObj.groundInfo.v.x > 0 && this.step === 0) {
                 this.hitTheBall()
             }
-        //}
+        }
     }
 
 }

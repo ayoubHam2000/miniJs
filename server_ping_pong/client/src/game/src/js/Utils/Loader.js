@@ -26,6 +26,7 @@ function tex(texture, index) {
     texture.offset.set(row * spriteWidth, column * spriteHeight);
     texture.repeat.set(spriteWidth, spriteHeight);
     texture.colorSpace = THREE.SRGBColorSpace;
+    
     return (texture)
 }
 

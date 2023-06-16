@@ -254,7 +254,7 @@ export class Racket extends THREE.Object3D {
         obj.clickInfo.canPerform = true
         let distX = (obj.planeX - obj.clickInfo.startX) / 5
         let distY = (obj.planeY - obj.clickInfo.startY) / 5
-        distX = Math.abs(distX)
+        //distX = Math.abs(distX)
         distX = distX * distX * distX
         distY = Math.sqrt(Math.abs(distY)) * Math.sign(distY)
         let data = {
