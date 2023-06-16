@@ -12,13 +12,17 @@ class ARoom {
 
     static roomId = 0
 
-    constructor (io) {
+    constructor (io, botMode = false) {
         this.roomId = ARoom.roomId
         this.io = io
+        this.botMode = botMode
         this.closed = false
         this.player1 = undefined
         this.player2 = undefined
         this.game = undefined
+
+        if (this.botMode)
+            this.closed = true
         ARoom.roomId++
     }
 
@@ -41,35 +45,45 @@ class ARoom {
 
     #broadCast(event, data1, data2) {
         this.io.to(this.player1.clientId).emit(event, data1)
-        this.io.to(this.player2.clientId).emit(event, data2)
+        if (this.botMode === false)
+            this.io.to(this.player2.clientId).emit(event, data2)
     }
 
     #sendToOther(event, clientId, data) {
-        if (this.closed) {
-            let player2 = this.getPlayer2Id(clientId)
-            this.io.to(player2).emit(event, data)
-        }
+        if (this.closed === false)
+            return
+        let player2 = this.getPlayer2Id(clientId)
+        this.io.to(player2).emit(event, data)
     }
 
     start() {
         this.game = new Game()
         this.game.room = this
-        this.game.init()
+        this.game.init(this.botMode)
         this.game.gameLoop()
 
-
-        this.#broadCast(
-            "start", 
-            {turn: 0, id: this.player1.clientId}, 
-            {turn: 1, id: this.player2.clientId}
-        )
+        if (this.botMode === false) {
+            this.#broadCast(
+                "start", 
+                {turn: 0, id: this.player1.clientId}, 
+                {turn: 1, id: this.player2.clientId}
+            )
+        } else {
+            this.#broadCast(
+                "start", 
+                {turn: 0, id: this.player1.clientId},
+                undefined
+            )
+        }
     }
 
     playerLeft(clientId) {
         if (this.closed === false)
             return
         this.game.stop()
-        this.#sendToOther("", clientId, clientId)
+        if (this.botMode === false) {
+            this.#sendToOther("", clientId, clientId)
+        }
     }
 
     //===============
@@ -93,12 +107,20 @@ class ARoom {
     }
 
     sendRacketMove(data) {
-        if (this.closed) {
-            let player2 = this.getPlayer2Id(data.clientId)
-            this.io.to(player2).emit("moveRacket", data)
-        }
+        if (this.closed === false)
+            return
+        if (this.botMode)
+            return
+        let player2 = this.getPlayer2Id(data.clientId)
+        this.io.to(player2).emit("moveRacket", data)
     }
     
+    sendBotRacketInfo(data) {
+        if (this.closed === false)
+            return
+        console.log(`Send to ${this.player1.clientId}`)
+        this.io.to(this.player1.clientId).emit("moveRacket", data)
+    }
     //===============
 
     receiveHitBall(data) {
@@ -124,8 +146,9 @@ class SocketManager {
         this.io.on("connection", socket => {
             const socketId = socket.id
         
-            socket.on("join", () => {
-                this.#addClient(socketId)
+            socket.on("join", (data) => {
+                data.clientId = socketId
+                this.#addClient(data)
             })
         
             socket.on("disconnect",  () => {
@@ -145,17 +168,29 @@ class SocketManager {
         })
     }
 
-    #addClient(clientId) {
+    #addClient(data) {
+        let clientId = data.clientId
         if (!(clientId in this.clients)) {
-            console.log(`Client ${clientId} added to room nb ${this.aRoom.roomId}`)
-            this.aRoom.add(clientId)
-            this.clients.push(clientId)
-            this.clientRooms.set(clientId, this.aRoom)
-            if (this.aRoom.closed) {
-                let m = clc.green(`Start playing between ${this.aRoom.player1.clientId} and ${this.aRoom.player2.clientId} room ${this.aRoom.roomId} => nbRooms ${this.clientRooms.size / 2}`)
+            if (data.botMode === true) {
+                let newBotRoom = new ARoom(this.io, true)
+                console.log(`Client ${clientId} added to Bot room nb ${newBotRoom.roomId}`)
+                newBotRoom.add(clientId)
+                this.clients.push(clientId)
+                this.clientRooms.set(clientId, newBotRoom)
+                let m = clc.green(`Start playing between ${clientId} and Bot room ${newBotRoom.roomId} => nbRooms ${this.clientRooms.size / 2}`)
                 console.log(m)
-                this.aRoom.start()
-                this.aRoom = new ARoom(this.io)
+                newBotRoom.start()
+            } else {
+                console.log(`Client ${clientId} added to room nb ${this.aRoom.roomId}`)
+                this.aRoom.add(clientId)
+                this.clients.push(clientId)
+                this.clientRooms.set(clientId, this.aRoom)
+                if (this.aRoom.closed) {
+                    let m = clc.green(`Start playing between ${this.aRoom.player1.clientId} and ${this.aRoom.player2.clientId} room ${this.aRoom.roomId} => nbRooms ${this.clientRooms.size / 2}`)
+                    console.log(m)
+                    this.aRoom.start()
+                    this.aRoom = new ARoom(this.io)
+                }
             }
         }
     }
@@ -163,24 +198,35 @@ class SocketManager {
     #removeClient(clientId) {
         let room = this.clientRooms.get(clientId)
         if (room) {
-            let player1 = room.player1
-            let player2 = room.player2
-    
-            room.playerLeft(clientId)
-            if (player1) {
-                console.log(`Client ${player1.clientId} removed, room nb ${room.roomId}`)
-                this.clients.splice(this.clients.indexOf(player1.clientId), 1);
-                this.clientRooms.delete(player1.clientId)
-                if (room === this.aRoom) {
-                    this.aRoom.player1 = undefined
+            if (room.botMode === true) {
+                let player1 = room.player1
+
+                if (player1) {
+                    room.playerLeft(clientId)
+                    console.log(`Client ${player1.clientId} removed, bot room nb ${room.roomId}`)
+                    this.clients.splice(this.clients.indexOf(player1.clientId), 1);
+                    this.clientRooms.delete(player1.clientId)
                 }
-            }
-            if (player2) {
-                console.log(`Client ${player2.clientId} removed, room nb ${room.roomId}`)
-                this.clients.splice(this.clients.indexOf(player2.clientId), 1);
-                this.clientRooms.delete(player2.clientId)
-                if (room === this.aRoom) {
-                    this.aRoom.player2 = undefined
+            } else {
+                let player1 = room.player1
+                let player2 = room.player2
+        
+                room.playerLeft(clientId)
+                if (player1) {
+                    console.log(`Client ${player1.clientId} removed, room nb ${room.roomId}`)
+                    this.clients.splice(this.clients.indexOf(player1.clientId), 1);
+                    this.clientRooms.delete(player1.clientId)
+                    if (room === this.aRoom) {
+                        this.aRoom.player1 = undefined
+                    }
+                }
+                if (player2) {
+                    console.log(`Client ${player2.clientId} removed, room nb ${room.roomId}`)
+                    this.clients.splice(this.clients.indexOf(player2.clientId), 1);
+                    this.clientRooms.delete(player2.clientId)
+                    if (room === this.aRoom) {
+                        this.aRoom.player2 = undefined
+                    }
                 }
             }
         }

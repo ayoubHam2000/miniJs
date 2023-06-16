@@ -15,74 +15,33 @@ export class Game {
 
         this.gameInfo = {
             turn: 0, //the player that will shot the ball
-            initTurn: 0,
             scorePlayer1: 0,
             scorePlayer2: 0,
-            start: false,
-            isBot: false
+            start: false
         }
 
         this.guiParams = new GuiParams()
         this.#helpers()
         this.#events(this)
-        //this.gameSetUp(this)
-        
+
     }
 
     start(data) {
-        //botSocket
         console.log("Game is started ...")
-        if (this.gameInfo.isBot)
-            return
         this.gameInfo.turn = data.turn
-        this.gameInfo.initTurn = data.turn
         this.gameInfo.start = true
-    }
-
-
-
-    getTurnInit() {
-        //0->player1 1->player2
-        let a = (this.gameInfo.initTurn) + parseInt((this.gameInfo.scorePlayer1 + this.gameInfo.scorePlayer2) / 2)
-        return (a % 2)
     }
 
     getTurn() {
         return this.gameInfo.turn
     }
 
-    changeTurn(to = undefined) {
-        // console.trace(`=>${to} myFunction called from:`);
-        if (to === undefined) {
-            this.gameInfo.turn = (this.gameInfo.turn + 1) % 2
-        } else {
-            this.gameInfo.turn = to    
-        }
-    }
 
+    //===========================================
+    //===========================================
 
-    
-
-
-
-/*
-##############################################
-################# Private ####################
-##############################################
-*/
-
-
-//#region Other 
     #helpers() {
-        //const axesHelper = new THREE.AxesHelper(10)
-        //this.scene.add(axesHelper)
-        
-        //const gridHelper = new THREE.GridHelper(30, 30)
-        //this.scene.add(gridHelper)
-        
         this.orbit = new OrbitControls(this.camera, this.renderer.domElement)
-        
-        
     }
 
     #setUpRenderer() {
@@ -134,10 +93,6 @@ export class Game {
             //console.log("onmouseup", params.mouseClickPos)
         })
     }
-//#endregion
-
-
-
 
 }
 

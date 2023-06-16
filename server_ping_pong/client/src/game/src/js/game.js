@@ -11,7 +11,9 @@ function getSocket(game) {
         console.log("Client is connected")
     
         //after connecting
-        socket.emit("join")
+        socket.emit("join", ({
+            botMode : params.botSocket
+        }))
     
         // socket.on('disconnected', () => {
         //     socket.emit('leave', "aaa");
@@ -36,7 +38,7 @@ function getSocket(game) {
 
     socket.on("moveRacket", (data) => {
         //data.position
-        //console.log(data)
+        console.log(data)
         game.scene.player2.socketMoveRacket(data)
     })
 

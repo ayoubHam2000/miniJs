@@ -6,7 +6,6 @@ export class Player2 extends THREE.Object3D {
     constructor (game) {
         super()
 
-        //common
         this.game = game
         this.scene = game.scene
         this.camera = game.camera

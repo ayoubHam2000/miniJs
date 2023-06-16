@@ -1,6 +1,7 @@
 const params = require('./Params')
 const THREE = require('three')
 const Ball = require('./Ball')
+const Bot = require('./Bot')
 
 module.exports = class Game {
     constructor() {
@@ -16,8 +17,10 @@ module.exports = class Game {
         }
     }
 
-    init() {
+    init(botMode = false) {
         this.ballObj = new Ball(this)
+        if (botMode)
+            this.botObj = new Bot(this)
         // if (game.gameInfo.isBot) {
         //     this.player2 = new Bot(game)
         // } else {
@@ -59,6 +62,7 @@ module.exports = class Game {
         // if (!this.gameInfo.start)
         //     return
         this.ballObj.update()
+        this?.botObj?.update()
         params.frame++
     }
 

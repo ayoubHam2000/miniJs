@@ -1,17 +1,27 @@
-import * as THREE from 'three'
-import { params } from '../Utils/Params'
-import { Player2 } from './Player2'
+const params = require('./Params')
+const THREE = require('three')
 
-export class Bot extends Player2 {
+module.exports = class Bot {
 
- 
     constructor (game) {
-        super(game)
+        this.game = game
+      
         
+        this.ballObj = this.game.ballObj
+        this.timeStep = params.timeStep
         this.gravityForce = params.gravityForce
-        this.target = new THREE.Vector3(0, 0, 0)
+        
         this.step = 0
         this.performInit = false
+        this.moveToInfo = {
+            status : 0,
+            lose : false
+        }
+        
+        this.velocity = new THREE.Vector3()
+        this.position = new THREE.Vector3()
+        this.botTarget = new THREE.Vector3(0, 0, 0)
+        this.target = new THREE.Vector3(0, 0, 0)
         this.limit = {
             x: {
                 a : - params.planeDim.x * 0.8,
@@ -52,6 +62,13 @@ export class Bot extends Player2 {
         }
     }
 
+    #socketSendPosition() {
+        this.game.room.sendBotRacketInfo(
+            {
+            position: this.position
+        })
+    }
+
     moveTo(time) {
         if (this.moveToInfo.status === 1) {
             this.botTarget.y += -2
@@ -66,17 +83,19 @@ export class Bot extends Player2 {
             } else {
                 this.position.add(d)
             }
-            this.rotateObj()
         }
+        this.#socketSendPosition()
     }
 
+
+    
     hitTheBall() {
         let diff = new THREE.Vector3().copy(this.target).sub(this.ballObj.position)
         let dist = diff.length()
         if (dist < 0.6) {
             if (this.moveToInfo.lose === false) {
                 const newPos = this.ballObj.randomPos()
-                this.ballObj.setVelocity(newPos.x, newPos.y, newPos.speed)
+                this.ballObj.botSetVelocity(newPos.x, newPos.y, newPos.speed)
             } else {
                 setTimeout((obj) => {
                     obj.moveToInfo.lose = false
@@ -91,7 +110,7 @@ export class Bot extends Player2 {
     randomLose() {
         let r = Math.random()
         if (r > 1) {
-            //console.log("Lose")
+            console.log("Lose")
             let z = (Math.random() * 2 - 1) * 2
             let y = (Math.random() * 2 - 1) * 2
             z += 1 * Math.sign(z)
@@ -123,10 +142,10 @@ export class Bot extends Player2 {
     }
 
     update() {
-        if (this.ballObj.initialize && this.game.getTurnInit() === 1) {
-            this.ballInit()
-        }
-        else if (this.ballObj.lose === false && this.game.getTurn() === 1){
+        // if (this.ballObj.initialize && this.game.getTurnInit() === 1) {
+        //     this.ballInit()
+        // }
+        //else if (this.ballObj.lose === false && this.game.getTurn() === 1){
             if (this.ballObj.groundInfo.v.x < 0 && this.step === 0 && this.ballObj.bounce === 1) {
                 let r = this.randomLose()
                 this.target = this.determineMaxPossibleHeight()
@@ -141,7 +160,7 @@ export class Bot extends Player2 {
             if (this.ballObj.groundInfo.v.x > 0 && this.step === 0) {
                 this.hitTheBall()
             }
-        }
+        //}
     }
 
 }

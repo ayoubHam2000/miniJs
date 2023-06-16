@@ -8,7 +8,7 @@ export const params = {
 
 //Not used
     //params
-    botSocket: false,
+    botSocket: true,
     loadTex : false,
     netCollision : true,
     timeStep: 1/40,

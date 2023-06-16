@@ -156,6 +156,22 @@ module.exports = class Ball {
         this.#ballIsHit()
     }
 
+    randomPos() {
+        //this.position.y += 1
+        let x = Math.random() * (this.limit.botX.b - this.limit.botX.a) + this.limit.botX.a
+        let y = Math.random() * (this.limit.botY.b - this.limit.botY.a) + this.limit.botY.a
+        let speed = this.#getDiscreteSpeed(x)
+        // console.log(x, y, "=> ", speed)
+        // let speed = 0.5 + Math.random()
+        return {
+            x, y, speed
+        }
+    }
+
+    botSetVelocity(posX, posZ, speed) {
+        this.#setVelocity(posX, posZ, speed)
+    }
+
     #setVelocity(posX, posZ, speed) {
         if (this.lose === true)
             return
@@ -277,8 +293,6 @@ module.exports = class Ball {
             this.#ballPhy()
             this.#reset()
             this.#socketSendBallInfo()
-            if (params.frame % 120 === 0)
-                console.log(this.position)
             
         //}
     }
