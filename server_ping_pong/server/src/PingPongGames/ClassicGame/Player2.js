@@ -11,5 +11,6 @@ module.exports = class Player2 extends Paddle {
 
     update() {
         this.sendPos(2)
+        this.resetAddedSpeed()
     }
 }

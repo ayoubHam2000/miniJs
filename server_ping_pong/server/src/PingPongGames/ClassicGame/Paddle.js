@@ -10,6 +10,8 @@ module.exports = class Paddle {
         this.dir = 0
         this.timeStep = params.timeStep
         this.position = new THREE.Vector3(0, 0)
+        this.oldY = 0
+        this.counter = 0
     }
 
 
@@ -19,23 +21,27 @@ module.exports = class Paddle {
         return (false)
     }
 
-    #addSpeed(e) {
-        if (e === 0) {
-            if (this.addedSpeed >= 1)
-                this.addedSpeed -= 1
-            else
-                this.addedSpeed = 0
-        } else {
-            if (this.addedSpeed < this.maxAdd)
-                this.addedSpeed += 0.5
-            else
-                this.addedSpeed = this.maxAdd
+    resetAddedSpeed() {
+        let maxIter = 4
+        if (Math.abs(this.position.y - this.oldY) < 0.2 && this.counter < maxIter) {
+            this.counter++
         }
+        this.oldY = this.position.y
+        if (this.counter >= maxIter)
+            this.addedSpeed = 0
+    }
+
+    #addSpeed() {
+        if (this.addedSpeed < this.maxAdd)
+            this.addedSpeed += 0.5
+        else
+            this.addedSpeed = this.maxAdd
+        this.counter = 0
     }
 
     setPos(pos, e = 0)
     {
-        this.#addSpeed(e)
+        this.#addSpeed()
         this.position.y += (this.speed + this.addedSpeed) * this.timeStep * e
         this.cx = pos.x
         this.x1 = pos.x - params.paddleDim.x / 2

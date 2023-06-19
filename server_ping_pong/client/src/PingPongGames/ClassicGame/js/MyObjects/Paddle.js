@@ -33,14 +33,6 @@ export class Paddle extends THREE.Object3D {
     }
 
 
-    //====================================
-
-    isIn(pos) {
-        if (pos.y <= this.y1 && pos.y >= this.y2)
-            return (true)
-        return (false)
-    }
-
     setPosHelper(pos) {
         this.cx = pos.x
         this.x1 = pos.x - params.paddleDim.x / 2
@@ -54,12 +46,6 @@ export class Paddle extends THREE.Object3D {
     receivePos(data) {
         this.position.y = data.y
         this.setPosHelper(this.position)
-    }
-
-    setPos(e, id)
-    {
-        if (e)
-            this.game.socketMgr.racketMove({e, id})
     }
 
 

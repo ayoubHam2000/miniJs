@@ -9,7 +9,9 @@ module.exports = class Player1 extends Paddle {
         this.setPos(this.position)
     }
 
+
     update() {
         this.sendPos(1)
+        this.resetAddedSpeed()
     }
 }

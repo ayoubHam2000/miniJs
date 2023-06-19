@@ -18,9 +18,10 @@ export class Game {
         }
 
         this.#events(this)
-        this.start({
-            turn: 0
-        })
+    }
+
+    isStarted() {
+        return this.gameInfo.start === true
     }
 
     start(data) {
@@ -63,19 +64,13 @@ export class Game {
         window.addEventListener('keydown', function(e) {
             if (e.key === "ArrowDown" || e.key === "s")
                 params.event.x = -1
-            else if (e.key === "ArrowUp" || e.key === "w")
+            if (e.key === "ArrowUp" || e.key === "w")
                 params.event.x = 1
-            if (e.key === "d")
-                params.event.y = -1
-            else if (e.key === "e")
-                params.event.y = 1
         })
 
         window.addEventListener('keyup', function(e) {
             if (e.key === "ArrowDown" || e.key === "s" || e.key === "ArrowUp" || e.key === "w")
                 params.event.x = 0
-            if (e.key === "d" || e.key === "e")
-                params.event.y = 0
         })
 
     }

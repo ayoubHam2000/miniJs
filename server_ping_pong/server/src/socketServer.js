@@ -184,9 +184,9 @@ class ARoom {
     //!!========
 
     receivePaddleMove(data) {
-        if (data?.id === 1)
+        if (data.clientId === this.player1.clientId)
             this.game.player1.receivePos(data)
-        else if (data?.id === 2)
+        else if (data.clientId === this.player2.clientId)
             this.game.player2.receivePos(data)
     }
 }

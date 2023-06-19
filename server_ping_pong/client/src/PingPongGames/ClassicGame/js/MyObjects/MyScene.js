@@ -75,12 +75,19 @@ export class MyScene extends THREE.Scene {
         this.player2 = new Player2(game)
     } 
 
+
+    updatePaddle() {
+        //send event to the server
+        if (params.event.x)
+            this.game.socketMgr.racketMove({e: params.event.x})
+    }
+
     update() {
         if (!this.game.gameInfo.start)
            return
         this.ballObj.update()
-        this.player1.update()
-        this.player2.update()
+        this.updatePaddle()
+       
     }
 
 }

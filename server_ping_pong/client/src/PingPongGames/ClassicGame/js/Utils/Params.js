@@ -2,7 +2,7 @@ import { Vector3 } from "three"
 
 export const params = {
 
-    botSocket: true,
+    botSocket: false,
     winWidth : window.innerWidth,
     winHeight : window.innerHeight,
     aspect : window.innerWidth /  window.innerHeight,
@@ -13,8 +13,7 @@ export const params = {
 
     //event
     event: {
-        x : 0,
-        y : 0,
+        x : 0
     },
     timeStep : 1 / 60,
     ballDim: 0.1,

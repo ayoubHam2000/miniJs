@@ -58,7 +58,7 @@ export class ScoreNbr extends THREE.Object3D {
         let nbr3 = [
             [1, 1, 1, 0, 0],
             [0, 0, 1, 0, 0],
-            [0, 1, 1, 0, 0],
+            [1, 1, 1, 0, 0],
             [0, 0, 1, 0, 0],
             [1, 1, 1, 0, 0],
         ]

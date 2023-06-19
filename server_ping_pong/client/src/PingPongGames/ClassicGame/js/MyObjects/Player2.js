@@ -9,7 +9,4 @@ export class Player2 extends Paddle {
         this.setPosHelper(this.position)
     }
 
-    update() {
-        this.setPos(params.event.y, 2)
-    }
 }
