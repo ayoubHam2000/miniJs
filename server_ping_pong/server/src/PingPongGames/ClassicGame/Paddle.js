@@ -56,9 +56,11 @@ module.exports = class Paddle {
         }
     }
 
+    sendPos(id) {
+        this.game.room.sendPaddleMove({id : id, y: this.position.y})
+    }
+
     receivePos(data) {
-        console.log(data, this.position)
-        this.game.room.sendPaddleMove({...data, y: this.position.y})
         this.setPos(this.position, data.e)
     } 
 }

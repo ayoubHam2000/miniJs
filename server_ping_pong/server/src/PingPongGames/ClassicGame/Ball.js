@@ -25,8 +25,9 @@ module.exports = class Ball {
         if (Math.abs(this.position.x) > params.sceneDim.x / 2) {
             if (this.position.x < 0)
                 this.game.changeScore([0, 1])
-            else
+            else if (this.position.x > 0)
                 this.game.changeScore([1, 0])
+            
             this.init(this)
         }
     }

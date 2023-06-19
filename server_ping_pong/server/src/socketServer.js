@@ -166,6 +166,12 @@ class ARoom {
         this.#broadCast("paddleMove", data, data)
     }
 
+    sendGameScoreClassic(data) {
+        if (this.closed === false)
+            return
+        this.#broadCast("gameScore", data, data)
+    }
+
     //===============
 
     receiveHitBall(data) {

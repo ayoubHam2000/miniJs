@@ -10,6 +10,6 @@ module.exports = class Player1 extends Paddle {
     }
 
     update() {
-        //!update Pos
+        this.sendPos(1)
     }
 }

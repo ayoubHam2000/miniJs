@@ -43,10 +43,9 @@ module.exports = class Game {
     changeScore(p) {
         this.gameInfo.scorePlayer1 += p[0]
         this.gameInfo.scorePlayer2 += p[1]
-        let s = (p[2] === 0 ? "Player1 " : "Player2 ")
-        console.log(p[3], s, " Score1: ", this.gameInfo.scorePlayer1, " Score2: ", this.gameInfo.scorePlayer2)
+        console.log(" Score1: ", this.gameInfo.scorePlayer1, " Score2: ", this.gameInfo.scorePlayer2)
         this.changeTurn(this.getTurnInit())
-        this.room.sendGameScore({
+        this.room.sendGameScoreClassic({
             score: [this.gameInfo.scorePlayer1, this.gameInfo.scorePlayer2]
         })
     }
@@ -71,6 +70,8 @@ module.exports = class Game {
     update() {
         let t = performance.now()
         this.ballObj.update()
+        this.player1.update()
+        this.player2.update()
         this?.botObj?.update()
         params.frame++
         t = performance.now() - t

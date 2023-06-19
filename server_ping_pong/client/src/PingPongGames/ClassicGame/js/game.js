@@ -44,11 +44,10 @@ function getSocket(game) {
             game.scene.player2.receivePos(data)
     })
 
-    // socket.on("gameScore", (data) => {
-    //     console.log("game score", game.gameInfo)
-    //     game.gameInfo.scorePlayer1 = data.score[0]
-    //     game.gameInfo.scorePlayer2 = data.score[1]
-    // })
+    socket.on("gameScore", (data) => {
+        console.log("game score", game.gameInfo)
+        game.changeScore(data)
+    })
 
     // socket.on("turn", (data) => {
     //     game.gameInfo.turn = data.turn

@@ -41,46 +41,19 @@ export class Paddle extends THREE.Object3D {
         return (false)
     }
 
-    #addSpeed(e) {
-        if (e === 0) {
-            if (this.addedSpeed >= 1)
-                this.addedSpeed -= 1
-            else
-                this.addedSpeed = 0
-        } else {
-            if (this.addedSpeed < this.maxAdd)
-                this.addedSpeed += 0.5
-            else
-                this.addedSpeed = this.maxAdd
-        }
-    }
-
-    setPosHelper(pos, e = 0) {
-        this.#addSpeed(e)
-        this.position.y += (this.speed + this.addedSpeed) * this.timeStep * e
+    setPosHelper(pos) {
         this.cx = pos.x
         this.x1 = pos.x - params.paddleDim.x / 2
         this.x2 = pos.x + params.paddleDim.x / 2
-
-        const cy = pos.y
-        const y1 = pos.y + params.paddleDim.y / 2
-        const y2 = pos.y - params.paddleDim.y / 2
-
-        if (y1 < params.sceneDim.y * 0.5 && y2 > params.sceneDim.y * -0.5) {
-            this.cy = cy
-            this.y1 = y1
-            this.y2 = y2
-        } else if (y1 >= params.sceneDim.y * 0.5) {
-            this.position.y = params.sceneDim.y * 0.5 - params.paddleDim.y * 0.5
-        } else {
-            this.position.y = params.sceneDim.y * -0.5 + params.paddleDim.y * 0.5
-        }
+        this.cy = pos.y
+        this.y1 = pos.y + params.paddleDim.y / 2
+        this.y2 = pos.y - params.paddleDim.y / 2
     }
 
 
     receivePos(data) {
         this.position.y = data.y
-        this.setPosHelper(this.position, data.e)
+        this.setPosHelper(this.position)
     }
 
     setPos(e, id)

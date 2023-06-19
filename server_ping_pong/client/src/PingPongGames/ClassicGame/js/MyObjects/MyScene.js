@@ -60,7 +60,7 @@ export class MyScene extends THREE.Scene {
     #scoreNumber() {
         this.scoreP1 = new ScoreNbr(-4, + params.sceneDim.y / 2 - 0.1)
         this.scoreP2 = new ScoreNbr(2.5, + params.sceneDim.y / 2 - 0.1)
-        this.scoreP1.set(99)
+        this.scoreP1.set(0)
         this.scoreP2.set(0)
         this.add(this.scoreP1)
         this.add(this.scoreP2)

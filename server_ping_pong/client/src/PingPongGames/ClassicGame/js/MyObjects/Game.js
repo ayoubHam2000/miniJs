@@ -29,9 +29,12 @@ export class Game {
         this.gameInfo.start = true
     }
 
-    changeScore(p) {
-        this.gameInfo.scorePlayer1 += p[0]
-        this.gameInfo.scorePlayer2 += p[1]
+    changeScore(data) {
+        let p = data.score
+        this.gameInfo.scorePlayer1 = p[0]
+        this.gameInfo.scorePlayer2 = p[1]
+        this.scene.scoreP1.set(this.gameInfo.scorePlayer1)
+        this.scene.scoreP2.set(this.gameInfo.scorePlayer2)
     }
 
 
