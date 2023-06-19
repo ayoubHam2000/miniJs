@@ -153,6 +153,19 @@ class ARoom {
         this.#broadCast("turn", data, data)
     }
 
+
+    //!!========
+
+    sendBallInfoClassic(data) {
+        //data.position
+        //data.velocity
+        this.#broadCast("ballInfo", data, data)
+    }
+
+    sendPaddleMove(data) {
+        this.#broadCast("paddleMove", data, data)
+    }
+
     //===============
 
     receiveHitBall(data) {
@@ -160,6 +173,15 @@ class ARoom {
         data.playerType = playerType
         this.game.ballObj.socketReceiveHit(data)
 
+    }
+
+    //!!========
+
+    receivePaddleMove(data) {
+        if (data?.id === 1)
+            this.game.player1.receivePos(data)
+        else if (data?.id === 2)
+            this.game.player2.receivePos(data)
     }
 }
     
@@ -198,6 +220,14 @@ class SocketManager {
             socket.on("hitBall", (data) => {
                 data.clientId = socketId
                 this.#hitBall(data)
+            })
+
+
+            //====================
+
+            socket.on("movePaddle", (data) => {
+                data.clientId = socketId
+                this.#paddleMove(data)
             })
 
         })
@@ -269,6 +299,11 @@ class SocketManager {
 
 
     //======================================================================
+
+    #paddleMove(data) {
+        let room = this.clientRooms.get(data.clientId)
+        room?.receivePaddleMove(data)
+    }
 
     #racketMove(data) {
         let room = this.clientRooms.get(data.clientId)

@@ -55,8 +55,7 @@ export class Paddle extends THREE.Object3D {
         }
     }
 
-    setPos(pos, e = 0)
-    {
+    setPosHelper(pos, e = 0) {
         this.#addSpeed(e)
         this.position.y += (this.speed + this.addedSpeed) * this.timeStep * e
         this.cx = pos.x
@@ -76,6 +75,18 @@ export class Paddle extends THREE.Object3D {
         } else {
             this.position.y = params.sceneDim.y * -0.5 + params.paddleDim.y * 0.5
         }
+    }
+
+
+    receivePos(data) {
+        this.position.y = data.y
+        this.setPosHelper(this.position, data.e)
+    }
+
+    setPos(e, id)
+    {
+        if (e)
+            this.game.socketMgr.racketMove({e, id})
     }
 
 

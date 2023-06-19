@@ -12,6 +12,7 @@ module.exports = class Game {
         this.paddleP1 = undefined
         this.paddleP2 = undefined
 
+        this.totalTime = 0
         this.gameInfo = {
             turn: 0, //the player that will shot the ball
             initTurn: 0,
@@ -25,8 +26,8 @@ module.exports = class Game {
 
     init(room, botMode = false) {
         this.room = room
-        this.player1 = new Player1()
-        this.player2 = new Player2()
+        this.player1 = new Player1(this)
+        this.player2 = new Player2(this)
         this.ballObj = new Ball(this)
         if (botMode)
             this.botObj = new Bot(this)
@@ -68,9 +69,13 @@ module.exports = class Game {
     }
 
     update() {
+        let t = performance.now()
         this.ballObj.update()
         this?.botObj?.update()
         params.frame++
+        t = performance.now() - t
+        this.totalTime += t 
+        //console.log(t, this.totalTime / params.frame)
     }
 
     gameLoop() {

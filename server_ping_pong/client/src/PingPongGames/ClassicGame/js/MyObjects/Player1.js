@@ -6,10 +6,10 @@ export class Player1 extends Paddle {
         super(game)
 
         this.position.set(-params.sceneDim.x / 2 + params.paddleDim.x / 2, 0, 0)
-        this.setPos(this.position)
+        this.setPosHelper(this.position)
     }
 
     update() {
-        this.setPos(this.position, params.event.x)
+        this.setPos(params.event.x, 1)
     }
 }

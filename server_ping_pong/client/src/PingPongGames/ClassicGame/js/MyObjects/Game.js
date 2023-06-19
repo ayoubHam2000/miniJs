@@ -12,7 +12,6 @@ export class Game {
 
 
         this.gameInfo = {
-            turn: 0, //the player that will shot the ball
             scorePlayer1: 0,
             scorePlayer2: 0,
             start: false
@@ -30,8 +29,9 @@ export class Game {
         this.gameInfo.start = true
     }
 
-    getTurn() {
-        return this.gameInfo.turn
+    changeScore(p) {
+        this.gameInfo.scorePlayer1 += p[0]
+        this.gameInfo.scorePlayer2 += p[1]
     }
 
 

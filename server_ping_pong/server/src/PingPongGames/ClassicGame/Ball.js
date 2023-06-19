@@ -9,27 +9,36 @@ module.exports = class Ball {
 
         this.position = new THREE.Vector2()
         this.velocity = new THREE.Vector2()
-        this.speed = 2
-
-        this.init()
+        this.speed = 10
 
         this.info = {
             lose : false,
             init: true
         }
+
+        this.init(this)
     }
 
     //=================================
 
     reset() {
         if (Math.abs(this.position.x) > params.sceneDim.x / 2) {
-            this.init()
+            if (this.position.x < 0)
+                this.game.changeScore([0, 1])
+            else
+                this.game.changeScore([1, 0])
+            this.init(this)
         }
     }
 
-    init() {
-        this.position.set(0, 0, 0)
-        this.velocity.set(-1, 0, 0)
+    init(ball) {
+        function perform() {
+            ball.velocity.set(-1, 0, 0)
+            ball.info.lose = false
+        }
+        ball.position.set(0, 0, 0)
+        ball.info.lose = true
+        setTimeout(perform, 1000)
     }
 
     newYVector() {
@@ -72,15 +81,28 @@ module.exports = class Ball {
             nextX = x
         }
 
-        this.trailObj[0].position.set(this.position.x, this.position.y)
         this.velocity.x *= rfx
         this.velocity.y *= rfy
         this.position.x = nextX
         this.position.y = nextY
     }
 
+    #socketSendBallInfo() {
+        // if (params.frame % 3 !== 0)
+        //     return
+        let data = {
+            position: this.position,
+            velocity: this.velocity,
+            speed: this.speed
+        }
+        this.game.room.sendBallInfoClassic(data)
+    }
+
     update() {
-        this.move()
-        this.reset()
+        if (this.info.lose === false) {
+            this.move()
+            this.reset()
+        }
+        this.#socketSendBallInfo()
     }
 }

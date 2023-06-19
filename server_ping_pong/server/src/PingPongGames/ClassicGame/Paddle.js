@@ -1,12 +1,15 @@
 const params = require("./Params")
+const THREE = require("three")
 
 module.exports = class Paddle {
-    constructor() {
+    constructor(game) {
+        this.game = game
         this.speed = 4
         this.addedSpeed = 0
         this.maxAdd = 12
         this.dir = 0
         this.timeStep = params.timeStep
+        this.position = new THREE.Vector3(0, 0)
     }
 
 
@@ -52,4 +55,10 @@ module.exports = class Paddle {
             this.position.y = params.sceneDim.y * -0.5 + params.paddleDim.y * 0.5
         }
     }
+
+    receivePos(data) {
+        console.log(data, this.position)
+        this.game.room.sendPaddleMove({...data, y: this.position.y})
+        this.setPos(this.position, data.e)
+    } 
 }

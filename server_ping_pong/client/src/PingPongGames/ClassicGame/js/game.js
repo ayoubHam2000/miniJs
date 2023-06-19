@@ -1,7 +1,7 @@
 import { params } from './Utils/Params'
 import { io } from 'socket.io-client'
 import { Game } from './MyObjects/Game'
-
+import * as THREE from 'three'
 
 function getSocket(game) {
     const socket = io("http://10.12.5.9:3000")
@@ -25,9 +25,9 @@ function getSocket(game) {
         game.start(data)
     })
 
-    // socket.on("ballInfo", (data) => {
-    //     game.scene.ballObj.socketGetBallInfo(data)
-    // })
+    socket.on("ballInfo", (data) => {
+        game.scene.ballObj.socketGetBallInfo(data)
+    })
 
     // socket.on("player2Event", (data) => {
     //     //data.ballPosition
@@ -35,11 +35,14 @@ function getSocket(game) {
     //     game.scene.player2.socketReceive(data)
     // })
 
-    // socket.on("moveRacket", (data) => {
-    //     //data.position
-    //     //console.log(data)
-    //     game.scene.player2.socketMoveRacket(data)
-    // })
+    socket.on("paddleMove", (data) => {
+        //data.e
+        //data.id
+        if (data?.id === 1)
+            game.scene.player1.receivePos(data)
+        else if (data?.id === 2)
+            game.scene.player2.receivePos(data)
+    })
 
     // socket.on("gameScore", (data) => {
     //     console.log("game score", game.gameInfo)
@@ -86,12 +89,9 @@ class SocketManager {
     racketMove(data) {
         if (!this.socket)
             return
-        //data.position
-        
-        data.position = data.position.clone()
-        data.position.z *= -1
-        data.position.x *= -1
-        this.socket.emit("moveRacket", data)
+        //data.e
+        //data.id
+        this.socket.emit("movePaddle", data)
     }
 }
 
@@ -117,7 +117,28 @@ async function startGame() {
     }
 
 
-    game.renderer.setAnimationLoop(gameLoop)
+    function frame() {
+        game.scene.update()
+        params.frame++
+        game.renderer.render(game.scene, game.camera)
+    }
+
+    let clock = new THREE.Clock();
+    let delta = 0;
+    let interval = 1 / 60;
+
+    function update() {
+        requestAnimationFrame(update);
+        delta += clock.getDelta();
+
+        if (delta  > interval) {
+            frame()
+            delta = delta % interval;
+        }
+    }
+
+    update()
+    //game.renderer.setAnimationLoop(update)
 }
 
 export default startGame
