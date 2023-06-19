@@ -1,7 +1,6 @@
 const clc = require('cli-color');
 const socketIo = require('socket.io')
-//const Game = require('./PingPongGames/3dGame/Game')
-const Game = require('./PingPongGames/ClassicGame/Game')
+const Game = require('./PingPongGames/3dGame/Game')
 
 class AClient {
     constructor (clientId) {

@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef} from 'react'
-import startGame from './game/src/js/game'
+import { useEffect, useRef} from 'react'
+import startGame from './PingPongGames/ClassicGame/js/game'
+//import startGame from './PingPongGames/3dGame/js/game'
 import './gameStyple.css'
 
 function App() {
