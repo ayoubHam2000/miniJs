@@ -12,6 +12,7 @@ export class GuiParams {
 
     setUp() {
         this.gui.add(params, 'enableOrbit');
+        this.gui.addColor(params, 'color');
     }
 
 

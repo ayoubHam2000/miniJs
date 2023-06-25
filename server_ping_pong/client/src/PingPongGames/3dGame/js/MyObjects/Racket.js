@@ -63,15 +63,15 @@ export class Racket extends THREE.Object3D {
 
     getRacketObj() {
         const racketModel = this.scene.racketModel
-        racketModel.scale.set(0.15, 0.15, 0.15)
-        racketModel.rotation.y = Math.PI / 2
-
+        //racketModel.scale.set(0.9, 0.9, 0.9)
+        //racketModel.rotation.set(Math.PI, 0, Math.PI / 2)
+        //racketModel.position.y = 0
         
         const racketParent = new THREE.Group()
         racketParent.add(racketModel)
 
      
-        racketModel.position.y = -1.5
+        
         this.position.set(0, 2.5, 0)
         return {
             racketModel,

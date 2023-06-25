@@ -28,13 +28,13 @@ export class Player2 extends THREE.Object3D {
 
     getObject() {
         const racketModel = this.scene.racketModel.clone()
-        racketModel.scale.set(0.15, 0.15, 0.3)
-        racketModel.rotation.y = - Math.PI / 2
+        //racketModel.scale.set(0.15, 0.15, 0.3)
+        racketModel.rotation.y = Math.PI
 
         const racketParent = new THREE.Group()
         racketParent.add(racketModel)
 
-        racketModel.position.y = -1.5
+        //racketModel.position.y = -1.5
         racketParent.position.set(0, 2.5, 0)
 
        

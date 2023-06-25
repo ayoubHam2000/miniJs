@@ -77,6 +77,8 @@ export class Ball extends THREE.Object3D{
 
 
     socketGetBallInfo(data) {
+        if (!this.game.isStarted())
+            return
         const position = data.position
         const velocity = data.velocity
         this.trailObj[0].position.set(this.position.x, this.position.y, 0)

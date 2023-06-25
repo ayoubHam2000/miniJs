@@ -2,13 +2,14 @@ import { Vector2, Vector3 } from "three"
 
 export const params = {
 //Used with gui
-    enableOrbit : false,
-
+    enableOrbit : true,
+    color: 0x2f1528,
 
 
 //Not used
     //params
     botSocket: false,
+    
     loadTex : true,
     netCollision : true,
     timeStep: 1/45,
@@ -79,6 +80,10 @@ export const params = {
 
     //utils
     frame: 0,
+    changeable: { // -1 -> 1
+        value : -1,
+        speed : 0.02
+    }
 }
 
 

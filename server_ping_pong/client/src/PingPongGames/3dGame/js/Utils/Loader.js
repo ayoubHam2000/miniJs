@@ -5,6 +5,14 @@ import wallsTextures from '../../assets/DTTC/TX_ENV_RGB_dttc_walls/TX_ENV_RGB_dt
 import wallsNormalMap from '../../assets/DTTC/TX_ENV_RGB_dttc_walls/NormalMap2.png'
 import floorTexture from '../../assets/DTTC/TX_ENV_RGB_dttc_floor/TX_ENV_RGB_dttc_floor_UL.jpg'
 import floorNormalMap from '../../assets/DTTC/TX_ENV_RGB_dttc_floor/NormalMap2.png'
+
+import testImage1 from '../../assets/Test/2.jpg'
+import normalMapTestImage1 from '../../assets/Test/NormalMap.png'
+import DisplacementMapTestImage1 from '../../assets/Test/DisplacementMap.png'
+
+import testImage2 from '../../assets/Test/4.jpg'
+import nTestImage2 from '../../assets/Test/NormalMap_floor.png'
+
 import { params } from './Params';
 
 const loaderResult = {}
@@ -44,7 +52,7 @@ async function load3dObjects() {
     const assetLoader = new GLTFLoader()
     
     const tableUrl = new URL('../../assets/table_tennis_table.glb', import.meta.url)
-    const racketUrl = new URL('../../assets/raqueta_de_ping_pong.glb', import.meta.url)
+    const racketUrl = new URL('../../assets/pong5.glb', import.meta.url)
 
     loaderResult.models = {
         table : await assetLoader.loadAsync(tableUrl.href),
@@ -70,33 +78,49 @@ async function loadTextures() {
 
     //const textures = await Promise.all(texturePromises);
     const textureUrls = [
-        wallsTextures,
-        wallsNormalMap,
-        floorTexture,
-        floorNormalMap
+        testImage1,
+        testImage2,
+        //normalMapTestImage1,
+        //DisplacementMapTestImage1,
+        //nTestImage2
+        //testImage1,
+        //testImage1,
+        //wallsTextures,
+        //wallsNormalMap,
+        //floorTexture,
+        //floorNormalMap
     ];
     const textures = await Promise.all(textureUrls.map((url) => loadTexture(url)))
 
     loaderResult.tex = {
         backWall : {
+            //tex :  floorText(textures[0])
             tex :  tex(textures[0].clone(), 0),
-            normalMap : tex(textures[1].clone(), 0),
+            //normalMap : tex(textures[1].clone(), 0),
+            //normalMap : tex(textures[2].clone(), 0),
         },
         frontWall : {
+            //tex : floorText(textures[0])
             tex : tex(textures[0].clone(), 2),
-            normalMap : tex(textures[1].clone(), 2),
+            //normalMap : tex(textures[1].clone(), 2),
+            //normalMap : tex(textures[2].clone(), 2),
+            //displacementMap : tex(textures[3].clone(), 2),
         },
         leftWall : {
+            //tex: floorText(textures[0])
             tex: tex(textures[0].clone(), 3),
-            normalMap : tex(textures[1].clone(), 3),
+            //normalMap : tex(textures[1].clone(), 3),
+            //normalMap : tex(textures[2].clone(), 3),
         },
         rightWall : {
+            //tex: floorText(textures[0])
             tex: tex(textures[0].clone(), 1),
-            normalMap : tex(textures[1].clone(), 1),
+            //normalMap : tex(textures[1].clone(), 1),
+            //normalMap : tex(textures[2].clone(), 1),
         },
         floor : {
-            tex: floorText(textures[2]),
-            normalMap : floorText(textures[3]),
+            tex: floorText(textures[1]),
+            //normalMap : floorText(textures[4]),
         }
     }
 }

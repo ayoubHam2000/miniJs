@@ -28,6 +28,8 @@ export class Game {
         console.log("Game is started ...")
         this.gameInfo.turn = data.turn
         this.gameInfo.start = true
+        this.scene.scoreP1.set(0)
+        this.scene.scoreP2.set(0)
     }
 
     changeScore(data) {
@@ -56,7 +58,7 @@ export class Game {
    
     #events(obj) {
         window.addEventListener('resize', function() {
-            obj.camera.aspect = window.innerWidth / window.innerHeight;
+            obj.camera.aspect = params.sceneDim.x / params.sceneDim.y;
             obj.camera.updateProjectionMatrix();
             obj.renderer.setSize(window.innerWidth, window.innerHeight);
         });

@@ -4,6 +4,9 @@ import { MyScene } from "./MyScene";
 import { MyCamera } from './MyCamera'
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import {params} from '../Utils/Params'
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 
 export class Game {
     constructor() {
@@ -11,6 +14,10 @@ export class Game {
         this.renderer = this.#setUpRenderer()
         this.scene = new MyScene()
         this.camera = new MyCamera()
+        
+        const bloom = this.#setUpBloomRenderer()
+        this.bloomComposer = bloom.bloomComposer
+        this.bloomPass = bloom.bloomPass
 
 
         this.gameInfo = {
@@ -46,7 +53,12 @@ export class Game {
 
     #setUpRenderer() {
         //THREE.ColorManagement.enabled = true;
-        const renderer = new THREE.WebGLRenderer()
+        const renderer = new THREE.WebGLRenderer({
+            //canvas: canvas,
+            alpha : true,
+            antialias: true,
+        })
+        //renderer.sortObjects = true
         // renderer.setPixelRatio(window.devicePixelRatio * 1);
         //renderer.outputColorSpace = THREE.SRGBColorSpace;
         // THREE.SRGBColorSpace = "srgb"
@@ -60,6 +72,27 @@ export class Game {
         return renderer
     }
 
+
+    #setUpBloomRenderer() {
+        const renderScene = new RenderPass(this.scene, this.camera);
+        const bloomPass = new UnrealBloomPass(
+          new THREE.Vector2(window.innerWidth, window.innerHeight)
+        );
+        bloomPass.threshold = 0;
+        bloomPass.strength = 2;
+        bloomPass.radius = 0;
+
+        const bloomComposer = new EffectComposer(this.renderer);
+        bloomComposer.setSize(window.innerWidth, window.innerHeight);
+        bloomComposer.renderToScreen = true;
+        bloomComposer.addPass(renderScene);
+        bloomComposer.addPass(bloomPass);
+        return ({
+            bloomPass,
+            bloomComposer
+        })
+    }
+
     async load3dObjects() {
         await this.scene.load3dObjects()
     }
@@ -70,6 +103,7 @@ export class Game {
             obj.camera.aspect = window.innerWidth / window.innerHeight;
             obj.camera.updateProjectionMatrix();
             obj.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.bloomComposer.setSize(window.innerWidth, window.innerHeight);
         });
 
         window.addEventListener('mousemove', function(e) {

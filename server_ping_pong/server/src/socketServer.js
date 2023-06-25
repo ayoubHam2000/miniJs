@@ -82,7 +82,7 @@ class ARoom {
             return
         this.game.stop()
         if (this.botMode === false) {
-            this.#sendToOther("", clientId, clientId)
+            this.#sendToOther("end_game", clientId, clientId)
         }
     }
 
@@ -193,10 +193,12 @@ class ARoom {
     
 class SocketManager {
     constructor() {
-        this.io = socketIo(3000, {
+
+        this.io = socketIo(3001, {
             cors: {
-                origin : ["http://10.12.5.9:5173"]
-            }
+                origin : ["http://10.12.5.9:5173",]
+            },
+            
         })
 
         this.clients = []
@@ -261,6 +263,7 @@ class SocketManager {
                     console.log(m)
                     this.aRoom.start()
                     this.aRoom = new ARoom(this.io)
+                    
                 }
             }
         }

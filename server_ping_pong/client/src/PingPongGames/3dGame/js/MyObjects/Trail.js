@@ -40,9 +40,11 @@ export class TrailRenderer {
             newItem = this.stack[this.stack.length - 1]
             this.stack.pop()
         } else {
-            let material = new THREE.MeshBasicMaterial({
+            let material = new THREE.MeshStandardMaterial({
                 color: 0x0000ff,
                 side: THREE.DoubleSide,
+                emissive: 0x0000ff,
+                emissiveIntensity: 4
             })
             let geometry = new THREE.CircleGeometry(this.dim)
             newItem = new THREE.Mesh(geometry, material)
@@ -93,7 +95,9 @@ export class TrailRenderer {
                     item.scale.x = 0
                 if (item.scale.y < 0)
                     item.scale.y = 0
-                item.material.color.set(this.getHexColor(this.interpolateColors(item.scale.x)))
+                const newColor = this.getHexColor(this.interpolateColors(item.scale.x))
+                item.material.color.set(newColor)
+                item.material.emissive.set(newColor)
             } else if (item.visible) {
                 item.visible = false
                 this.stack.push(item)

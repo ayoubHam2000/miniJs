@@ -4,14 +4,28 @@ import { Game } from './MyObjects/Game'
 import * as THREE from 'three'
 
 function getSocket(game) {
-    const socket = io("http://10.12.5.9:3000")
+    let token = ""
+    
+    //localStorage.setItem("lastname", "Smith");
+    let a = localStorage.getItem("token");
+    if (a) {
+        console.log(a)
+        token = a
+    }
+    const socket = io("http://10.12.5.9:3001", {
+        extraHeaders: {
+            Authorization: `Bearer ${token}`
+        }
+    })
     
     socket.on("connect", () => {
         console.log("Client is connected")
     
         //after connecting
-        socket.emit("join", ({
-            botMode : params.botSocket
+        socket.emit("join_game", ({
+            isBotMode : params.botSocket,
+            isClassic : true,
+            //! token
         }))
     
         // socket.on('disconnected', () => {
@@ -23,6 +37,13 @@ function getSocket(game) {
         // data.turn
         console.log(data)
         game.start(data)
+    })
+
+
+    socket.on("end_game", () => {
+        console.log("end-game")
+        game.gameInfo.start = false
+        //!end game
     })
 
     socket.on("ballInfo", (data) => {
@@ -38,6 +59,7 @@ function getSocket(game) {
     socket.on("paddleMove", (data) => {
         //data.e
         //data.id
+        //console.log("paddleMove")
         if (data?.id === 1)
             game.scene.player1.receivePos(data)
         else if (data?.id === 2)

@@ -47,6 +47,8 @@ export class Ball extends THREE.Object3D{
         const sphereMat = new THREE.MeshStandardMaterial({ 
             color: 0xff0000, 
             wireframe: false,
+            emissive: 0xff0000,
+            emissiveIntensity: 4
         });
         const sphereObj = new THREE.Mesh(sphereGeo, sphereMat);
         sphereObj.castShadow = true

@@ -6,7 +6,7 @@ export class MyCamera extends THREE.PerspectiveCamera {
     
     constructor() {
         super(45,
-            window.innerWidth / window.innerHeight,
+            params.sceneDim.x / params.sceneDim.y,
             0.01,
             1000)
 

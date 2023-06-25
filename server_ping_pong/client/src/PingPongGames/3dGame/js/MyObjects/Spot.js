@@ -9,11 +9,13 @@ export class Spot extends THREE.Object3D {
         const circleGeometry = new THREE.CircleGeometry(radius, segments);
 
 
-        const material = new THREE.MeshBasicMaterial({ 
-            color: 0xffffffff,
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff,
             side: THREE.BackSide,
             blending: THREE.MultiplyBlending,
-            opacity: 0.7
+            opacity: 0.7,
+            emissive: 0xffffff,
+            emissiveIntensity: 6
         });
 
 
